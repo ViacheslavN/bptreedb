@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="storage">
+      <UniqueIdentifier>{cf89ebed-8732-4078-814d-f6a3d7752c54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{99abb2fb-7877-4f41-84f8-1e1222df1472}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Crypto">
+      <UniqueIdentifier>{2e04df7d-b111-4bb9-8f7e-54383c8a102d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils\streams">
+      <UniqueIdentifier>{7146afb4-c953-4b30-a061-fc54776b03a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BPTrees">
+      <UniqueIdentifier>{ffe3fe19-5766-4a84-bc9d-dfe6913b79d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BPTrees\BPTreeSet">
+      <UniqueIdentifier>{d938580b-e8ed-47c8-a306-071dcea6e590}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BPTrees\BPTreeMap">
+      <UniqueIdentifier>{f02fd860-9cae-4e52-b95c-cbf1c848e40a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BPTrees\Compressor">
+      <UniqueIdentifier>{4891cc76-503b-40f5-a966-c877579a5778}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="storage\storage.h">
+      <Filter>storage</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\List.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\CacheLRU_2Q.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="storage\FileStorage.h">
+      <Filter>storage</Filter>
+    </ClInclude>
+    <ClInclude Include="crypto\PageCipher.h">
+      <Filter>Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="storage\FilePage.h">
+      <Filter>storage</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\CRC.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\ReadStreamPage.h">
+      <Filter>utils\streams</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\WriteStreamPage.h">
+      <Filter>utils\streams</Filter>
+    </ClInclude>
+    <ClInclude Include="bptreedb_lib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="storage\CacheStorage.h">
+      <Filter>storage</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BPTreeLeafNodeSet.h">
+      <Filter>BPTrees\BPTreeSet</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BPBaseTreeNode.h">
+      <Filter>BPTrees</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\EmptyEncoder.h">
+      <Filter>BPTrees</Filter>
+    </ClInclude>
+    <ClInclude Include="bptreedb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\Compressor\CompressorParams.h">
+      <Filter>BPTrees\Compressor</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BaseEncoder.h">
+      <Filter>BPTrees</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\Compressor\CompressUtils.h">
+      <Filter>BPTrees\Compressor</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BaseDIffEncoder.h">
+      <Filter>BPTrees</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BaseNodeCompressor.h">
+      <Filter>BPTrees</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="storage\FileStorage.cpp">
+      <Filter>storage</Filter>
+    </ClCompile>
+    <ClCompile Include="storage\FilePage.cpp">
+      <Filter>storage</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\CRC.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

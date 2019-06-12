@@ -1,0 +1,80 @@
+#pragma once
+
+#include "../../commonlib/CommonLib.h"
+
+namespace bptreedb
+{
+
+	enum ePageFlags
+	{
+		eFP_NEW = 1,
+		eFP_CHANGE = 2,
+		eFP_REMOVE = 4,
+		eFP_FROM_FREE = 8
+
+	};
+
+	class IFilePage
+	{
+	public:
+		IFilePage() {}
+		virtual ~IFilePage() {}
+
+		virtual int64_t GetPageAddr() const = 0;
+		virtual byte_t* GetData() = 0;
+		virtual const byte_t* GetData() const = 0;
+		virtual uint32_t GetPageSize() const = 0;
+		virtual const byte_t* GetFullData() const = 0;
+		virtual byte_t* GetFullData()  = 0;
+		virtual uint32_t GetFullPageSize() const = 0;
+		virtual uint32_t GetFlags() const = 0;
+		virtual void SetFlag(ePageFlags nFlag, bool bSet) = 0;
+		virtual bool IsNeedEncrypt() const = 0;
+		virtual void SetNeedEncrypt(bool bEncrypt) = 0;
+		virtual bool CheckCRC() const = 0;
+		virtual void WriteCRC() = 0;
+	};
+
+
+	typedef std::shared_ptr<IFilePage> FilePagePtr;
+	
+
+
+	class IFreePageHolder
+	{
+	public:
+		IFreePageHolder() {}
+		virtual ~IFreePageHolder() {}
+
+		virtual FilePagePtr GetPage(uint64_t nPageSize) = 0;
+		virtual void AddPage(FilePagePtr& pPage) = 0;
+		virtual void AddPage(int64_t nAddr, uint32_t nSize) = 0;
+
+	};
+
+
+	class IStorage
+	{
+	public:
+		IStorage() {}
+		virtual ~IStorage() {}
+
+		virtual void Open(const wchar_t* pszName, bool bCreate, uint32_t nMinPageSize = 8192) = 0;
+		virtual void Close() = 0;
+
+		virtual void ReadData(int64_t nAddr, byte_t* pData, uint32_t nSize, bool decrypt) = 0;
+		virtual void WriteData(int64_t nAddr, const byte_t* pData, uint32_t nSize, bool decrypt) = 0;
+		virtual FilePagePtr GetFilePage(int64_t nAddr, uint32_t nSize, bool decrypt) = 0;
+		virtual void GetFilePage(FilePagePtr& pPage, int64_t nAddr, uint32_t nSize, bool decrypt) = 0;
+		virtual void SaveFilePage(FilePagePtr& pPage) = 0;
+		virtual void DropFilePage(int64_t nAddr) = 0;
+		virtual FilePagePtr GetNewFilePage(uint32_t nSize = 0) = 0;
+		virtual int64_t GetNewFilePageAddr(uint32_t nSize = 0) = 0;
+		virtual void SetOffset(uint64_t offset) = 0;
+		virtual FilePagePtr GetEmptyFilePage(int64_t nAddr, uint32_t nSize) = 0;
+
+		virtual void Flush() = 0;
+	};
+
+	typedef std::shared_ptr<IStorage> TStoragePtr;
+}
