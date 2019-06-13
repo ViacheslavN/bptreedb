@@ -71,7 +71,7 @@ namespace bptreedb
 		}
 
 		template<class TComp>
-		bool insertImp(TComp& comp, const TKey& key, int32_t& nIndex, int nInsertLeafIndex = -1)
+		void insertImp(TComp& comp, const TKey& key, int32_t& nIndex, int nInsertLeafIndex = -1)
 		{
 			nIndex = -1;
 			if (m_KeyMemSet.empty())
