@@ -28,10 +28,9 @@ namespace bptreedb
 		}
 
 		template<typename _Transactions  >
-		bool  init(_TCompressorParams *pParams, _Transactions *pTran)
+		void  Init(_TCompressorParams *pParams, _Transactions *pTran)
 		{
 
-			return true;
 		}
 
 		void AddSymbol(uint32_t nSize, int nIndex, const TValue& value, const TValueMemSet& vecValues)
@@ -65,7 +64,7 @@ namespace bptreedb
 
 			for (uint32_t i = 0, sz = (uint32_t)vecValues.size(); i < sz; ++i)
 			{
-				pStream->write(vecValues[i]);
+				pStream->Write(vecValues[i]);
 			}
 
 			return 0;
@@ -76,7 +75,7 @@ namespace bptreedb
 			TValue value;
 			for (uint32_t i = 0, sz = nSize; i < sz; ++i)
 			{
-				pStream->read(value);
+				pStream->Read(value);
 				vecValues.push_back(value);
 			}
 

@@ -23,7 +23,7 @@ namespace bptreedb
 		typedef /*typename TDefSign<TValue>::TSignType*/_TSignValue TSignValue;
 
 
-		TBaseValueDiffEncoder(uint32 nPageSize, CommonLib::alloc_t *pAlloc, CompressorParamsBaseImp *pParams) :
+		TBaseValueDiffEncoder(uint32 nPageSize, CommonLib::IAllocPtr pAlloc, CompressorParamsBaseImp *pParams) :
 			m_encoder(nPageSize, pAlloc, pParams)
 		{}
 
@@ -41,7 +41,7 @@ namespace bptreedb
 		virtual uint32_t GetValueSize() const = 0;
 
 
-		void AddSymbol(uint32_t nSize, int nIndex, const TValue& nValue, const TValueMemSet& vecValues)
+		void AddSymbol(uint32_t nSize, uint32_t nIndex, const TValue& nValue, const TValueMemSet& vecValues)
 		{
 			if (nSize > 1)
 			{

@@ -7,7 +7,7 @@ void TestWritePageStream(bptreedb::TStoragePtr pStorage, int64_t nPageAddr, uint
 	stream.Open(nPageAddr, nPageSize, false, bCreate);
 
 
-	for (uint64_t i = 0; i < nCount; ++i)
+	for (int64_t i = 0; i < nCount; ++i)
 	{
 		stream.Write(i);
 	}
@@ -20,7 +20,7 @@ void TestReadPageStream(bptreedb::TStoragePtr pStorage, int64_t nPageAddr, uint3
 	stream.Open(nPageAddr, nPageSize, false);
 
 
-	for (uint64_t i = 0; i < nCount; ++i)
+	for (int64_t i = 0; i < nCount; ++i)
 	{
 		int64_t  dd = stream.ReadInt64();
 

@@ -81,9 +81,6 @@
     <ClInclude Include="storage\CacheStorage.h">
       <Filter>storage</Filter>
     </ClInclude>
-    <ClInclude Include="BPTrees\BPTreeLeafNodeSet.h">
-      <Filter>BPTrees\BPTreeSet</Filter>
-    </ClInclude>
     <ClInclude Include="BPTrees\BPBaseTreeNode.h">
       <Filter>BPTrees</Filter>
     </ClInclude>
@@ -108,6 +105,21 @@
     <ClInclude Include="BPTrees\BaseNodeCompressor.h">
       <Filter>BPTrees</Filter>
     </ClInclude>
+    <ClInclude Include="BPTrees\BPTreeInnerNode.h">
+      <Filter>BPTrees\BPTreeSet</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BPTreeLeafNode.h">
+      <Filter>BPTrees\BPTreeSet</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BPBaseTreeSet.h">
+      <Filter>BPTrees\BPTreeSet</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BaseLeafNodeSetCompressor.h">
+      <Filter>BPTrees</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BPBaseTreeSetCommon.h">
+      <Filter>BPTrees\BPTreeSet</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -121,6 +133,9 @@
     </ClCompile>
     <ClCompile Include="utils\CRC.cpp">
       <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="BPTrees\BPBaseTreeNode.cpp">
+      <Filter>BPTrees</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../../CommonLib/stream/MemoryStream.h"
-#include "../../CommonLib/stream/FixedMemoryStream.h"
 
 namespace bptreedb
 {
@@ -14,37 +13,45 @@ namespace bptreedb
 		CHECK_REM_NODE = 16
 	};
 
-	class BPBaseTreeNode;
-	typedef std::shared_ptr<BPBaseTreeNode> TBPBaseTreeNodePtr;
+	class IBPTreeNode;
+	typedef std::shared_ptr<IBPTreeNode> IBPTreeNodePtr;
+	typedef std::weak_ptr<IBPTreeNode> TParentNodePtr;
 
-	class BPBaseTreeNode
+	class IBPTreeNode
 	{
 	public:
-		BPBaseTreeNode() : m_nFlag(0) {}
-		virtual ~BPBaseTreeNode(){}
+		IBPTreeNode();
+		virtual ~IBPTreeNode();
 
 		virtual bool IsLeaf() const = 0;
-		virtual  void Load(CommonLib::CReadMemoryStream& stream) = 0;
-		virtual  uint32_t Save(CommonLib::CFxMemoryWriteStream& stream) = 0;
+		virtual void Load(CommonLib::IReadStream* pStream) = 0;
+		virtual uint32_t Save(CommonLib::IWriteStream* pStream) = 0;
 
 		virtual uint32_t Size() const = 0;
 		virtual uint32_t HeadSize() const = 0;
 		virtual uint32_t RowSize() const = 0;
 		virtual	uint32_t TupleSize() const = 0;
 		virtual bool IsNeedSplit() const = 0;
-		virtual uint32_t GetFlags() const
-		{
-			return m_nFlag;
-		}
-		virtual void SetFlags(int nFlag, bool bSet)
-		{
-			if (bSet)
-				m_nFlag |= nFlag;
-			else
-				m_nFlag &= ~nFlag;
-		}
-		virtual void clear() = 0;
-	public:
-		uint32_t m_nFlag;
+
+		virtual uint32_t GetFlags() const;
+		virtual uint64_t GetAddr() const;
+
+		virtual void SetFlags(int nFlag, bool bSet);
+		virtual void Clear() = 0;
+
+		void SetParent(IBPTreeNodePtr pNode, int32_t nFoundIndex = -1);
+
+		int64_t GetParentAddr() const;
+		int64_t GetFoundIndex() const;
+		void SetFoundIndex(int32_t nFoundIndex);
+		TParentNodePtr GetParentNodePtr();
+
+	protected:
+		int64_t m_nAddr;
+		uint32_t m_nFlag;	
+		TParentNodePtr m_pParent;
+		int32_t m_nFoundIndex;
+		int64_t m_nParent;
+		bool m_bMinSplit;
 	};
 }

@@ -46,7 +46,7 @@ namespace bptreedb
 
 	private:
 
-		CommonLib::CFile m_file;
+		CommonLib::file::CFile m_file;
 		std::shared_ptr<IPageCipher> m_pageCipher;
 		CommonLib::IAllocPtr m_pAlloc;
 
@@ -57,8 +57,7 @@ namespace bptreedb
 		struct TPageFreeChecker
 		{
 			bool IsFree(FilePagePtr& pObj)
-			{
-				
+			{				
 				return  pObj.use_count() == 1;
 			}
 		};

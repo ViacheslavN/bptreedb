@@ -118,7 +118,7 @@ namespace bptreedb
 	void CFilePage::WriteCRC()
 	{
 		if (!m_bCheckCRC)
-			throw CommonLib::CExcBase(L"Filed to write crc, page isn't support crc");
+			throw CommonLib::CExcBase(L"Filed to write crc, page dosn't support crc");
 
 		//uint32_t calcCrc = utils::Crc32(GetData(), GetPageSize());
 		//memcpy(m_pData, &calcCrc, sizeof(uint32_t));	

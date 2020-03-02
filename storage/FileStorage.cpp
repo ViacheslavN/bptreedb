@@ -18,11 +18,11 @@ namespace bptreedb
 	{
 		try
 		{
-			CommonLib::enOpenFileMode nOpenMode = bCreate ? CommonLib::ofmCreateAlways : CommonLib::ofmOpenExisting;
-			CommonLib::enAccesRights nReadWrite = CommonLib::aeReadWrite;
+			CommonLib::file::enOpenFileMode nOpenMode = bCreate ? CommonLib::file::ofmCreateAlways : CommonLib::file::ofmOpenExisting;
+			CommonLib::file::enAccesRights nReadWrite = CommonLib::file::aeReadWrite;
 
 			m_minPageSize = nMinPageSize;
-			m_file.OpenFile(pszName, nOpenMode, nReadWrite, CommonLib::smNoMode, CommonLib::oftBinary);
+			m_file.OpenFile(pszName, nOpenMode, nReadWrite, CommonLib::file::smNoMode, CommonLib::file::oftBinary);
 
 			uint64_t nSize = m_file.GetFileSize();
 			m_lastAddr = nSize / m_minPageSize;
@@ -178,7 +178,7 @@ namespace bptreedb
 		try
 		{
 			m_file.SetFilePos64(m_offset + (nAddr * m_minPageSize), CommonLib::soFromBegin);
-			uint32_t nWCnt = m_file.ReadFile((void*)pData, nSize);
+			uint32_t nWCnt = m_file.Read(pData, nSize);
 			if (nWCnt != nSize)
 				throw CommonLib::CExcBase("can't read the requested size, page size: %1, returned size: %2", nSize, nWCnt);
 
@@ -208,11 +208,11 @@ namespace bptreedb
 					m_bufForChiper.resize(nSize);
 
 				m_pageCipher->encryptBuf(pData, &m_bufForChiper[0], nSize);
-				nCnt = m_file.WriteFile((void*)&m_bufForChiper[0], nSize);
+				nCnt = m_file.Write(&m_bufForChiper[0], nSize);
 			}
 			else
 			{
-				nCnt = m_file.WriteFile((void*)pData, nSize);
+				nCnt = m_file.Write(pData, nSize);
 			}
 
 			if (nCnt != nSize)

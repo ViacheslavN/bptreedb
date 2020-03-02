@@ -294,9 +294,13 @@
     <ClInclude Include="bptreedb_lib.h" />
     <ClInclude Include="BPTrees\BaseDIffEncoder.h" />
     <ClInclude Include="BPTrees\BaseEncoder.h" />
+    <ClInclude Include="BPTrees\BaseLeafNodeSetCompressor.h" />
     <ClInclude Include="BPTrees\BaseNodeCompressor.h" />
     <ClInclude Include="BPTrees\BPBaseTreeNode.h" />
-    <ClInclude Include="BPTrees\BPTreeLeafNodeSet.h" />
+    <ClInclude Include="BPTrees\BPBaseTreeSetCommon.h" />
+    <ClInclude Include="BPTrees\BPTreeInnerNode.h" />
+    <ClInclude Include="BPTrees\BPTreeLeafNode.h" />
+    <ClInclude Include="BPTrees\BPBaseTreeSet.h" />
     <ClInclude Include="BPTrees\Compressor\CompressorParams.h" />
     <ClInclude Include="BPTrees\Compressor\CompressUtils.h" />
     <ClInclude Include="BPTrees\EmptyEncoder.h" />
@@ -314,6 +318,7 @@
     <ClInclude Include="utils\WriteStreamPage.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BPTrees\BPBaseTreeNode.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">Create</PrecompiledHeader>

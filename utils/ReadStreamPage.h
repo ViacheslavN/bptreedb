@@ -39,12 +39,12 @@ public:
 
 			}
 
-	virtual void ReadBytes(byte_t* dst, uint32_t size)
+	virtual void ReadBytes(byte_t* dst, size_t size)
 	{
 		read_bytes_impl(dst, size, false);
 	}
 
-	virtual void ReadInverse(byte_t* dst, uint32_t size)
+	virtual void ReadInverse(byte_t* dst, size_t size)
 	{
 		read_bytes_impl(dst, size, true);
 	}
@@ -54,7 +54,7 @@ public:
 		throw CommonLib::CExcBase("ReadStreamPage: ReadStream not implement");
 	}
 
-	virtual bool ReadBytesSafe(byte_t* dst, uint32_t size)
+	virtual bool ReadBytesSafe(byte_t* dst, size_t size)
 	{
 		try
 		{
@@ -68,7 +68,7 @@ public:
 		return false;
 	}
 
-	virtual bool ReadInverseSafe(byte_t* dst, uint32_t size)
+	virtual bool ReadInverseSafe(byte_t* dst, size_t size)
 	{
 		try
 		{
@@ -90,14 +90,14 @@ public:
 
 private:
 
-	void read_bytes_impl(byte_t* buffer, uint32_t size, bool bInvers)
+	void read_bytes_impl(byte_t* buffer, size_t size, bool bInvers)
 	{
 		try
 		{
-			uint32_t nPos = 0;
+			size_t nPos = 0;
 			while (size)
 			{
-				uint32_t nFreeSize = m_stream.Size() - m_stream.Pos();
+				size_t nFreeSize = m_stream.Size() - m_stream.Pos();
 				if (nFreeSize >= size)
 				{
 					if (bInvers)
@@ -109,7 +109,7 @@ private:
 				}
 				else
 				{
-					uint32_t nReadSize = nFreeSize;
+					size_t nReadSize = nFreeSize;
 					if (nReadSize)
 					{
 						if (bInvers)

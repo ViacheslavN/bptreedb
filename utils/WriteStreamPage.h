@@ -28,7 +28,7 @@ namespace bptreedb
 					try
 					{
 						m_nPageSize = nPageSize;
-							m_NeedDecrypt = bNeedDecrypt;
+						m_NeedDecrypt = bNeedDecrypt;
 
 						OpenNextPage(nPageAddr, bCreate);
 
@@ -40,32 +40,29 @@ namespace bptreedb
 					}
 
 				}
-
-
 	
-				virtual void WriteStream(IStream *pStream, int32_t nPos, int32_t nSize)
+				virtual void WriteStream(IStream *pStream, int64_t nPos, int64_t nSize)
 				{
 					IMemoryStream *pMemStream = dynamic_cast<IMemoryStream *>(pStream);
 					if (pMemStream)
 					{
-						uint32_t _nPos = (nPos != -1 ? nPos : 0);
-						uint32_t _nSize = (nSize != -1 ? nSize : pStream->Size());
+						int64_t _nPos = (nPos != -1 ? nPos : 0);
+						int64_t _nSize = (nSize != -1 ? nSize : pStream->Size());
 
 						Write(_nSize);
 						Write(pMemStream->Buffer() + _nPos, _nSize);
 					}
 				}
 
-				virtual void WriteBytes(const byte_t* buffer, uint32_t size)
+				virtual void WriteBytes(const byte_t* buffer, size_t size)
 				{
 					write_bytes_impl(buffer, size, false);
 				}
 
-				virtual void WriteInverse(const byte_t* buffer, uint32_t size)
+				virtual void WriteInverse(const byte_t* buffer, size_t size)
 				{
 					write_bytes_impl(buffer, size, true);
 				}
-
 
 				virtual void Close()
 				{
@@ -78,15 +75,15 @@ namespace bptreedb
 				}
 
 		private:
-				void write_bytes_impl(const byte_t* buffer, uint32_t size, bool bInvers)
+				void write_bytes_impl(const byte_t* buffer, size_t size, bool bInvers)
 				{
 					try
 					{
-						uint32_t nPos = 0;
+						size_t nPos = 0;
 						while (size)
 						{
-							int32_t nFreeSize = m_stream.Size() - m_stream.Pos();
-							if ((int32_t)size <= nFreeSize)
+							size_t nFreeSize = m_stream.Size() - m_stream.Pos();
+							if (size <= nFreeSize)
 							{
 								if (bInvers)
 									m_stream.WriteInverse(buffer + nPos, size);
@@ -97,7 +94,7 @@ namespace bptreedb
 							else
 							{
 
-								uint32_t nWriteSize = nFreeSize;
+								size_t nWriteSize = nFreeSize;
 								if (bInvers)
 									m_stream.WriteInverse(buffer + nPos, nWriteSize);
 								else

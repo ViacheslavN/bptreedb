@@ -53,10 +53,10 @@ namespace bptreedb
 
 		virtual void Save(CommonLib::IWriteStream *pStream)
 		{
-			pStream->write(uint16_t(m_compressType));
-			pStream->write(m_bCalcOnlineSize);
-			pStream->write(m_nErrorCalcMiliproñ);
-			pStream->write(m_nMaxRowCoeff);
+			pStream->Write(uint16_t(m_compressType));
+			pStream->Write(m_bCalcOnlineSize);
+			pStream->Write(m_nErrorCalcMiliproñ);
+			pStream->Write(m_nMaxRowCoeff);
 		 
 		}
 
