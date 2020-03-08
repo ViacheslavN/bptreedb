@@ -14,32 +14,13 @@ namespace bptreedb
 		eComposeIndexCompID = 2
 	};
 
-	class ICompressorParams
-	{
-	public:
-		virtual ~ICompressorParams() {}
-		virtual eCompressorParamsID GetCompressorParmasID() const = 0;
-	};
 
-	template <class _Transaction>
-	class CompressorParamsBase : public ICompressorParams
+	class CompressorParamsBase
 	{
 	public:
-		CompressorParamsBase()
+		CompressorParamsBase() : m_compressType(ACCoding), m_bCalcOnlineSize(false), m_nErrorCalcMiliproñ(100), m_nMaxRowCoeff(1)
 		{}
 		virtual ~CompressorParamsBase() {}
-
-		virtual void Load(_Transaction *pTran) = 0;
-		virtual void Save(_Transaction *pTran) = 0;
-	};
-	
-
-	class CompressorParamsBaseImp
-	{
-	public:
-		CompressorParamsBaseImp() : m_compressType(ACCoding), m_bCalcOnlineSize(false), m_nErrorCalcMiliproñ(100), m_nMaxRowCoeff(1)
-		{}
-		virtual ~CompressorParamsBaseImp() {}
 
 
 
@@ -60,17 +41,13 @@ namespace bptreedb
 		 
 		}
 
-		template<class _Transaction>
-		void SaveState(_Transaction * pTransaction)
-		{
-
-		}
-
 		EncoderType m_compressType;
 		bool m_bCalcOnlineSize;
 		uint32_t m_nErrorCalcMiliproñ;
 		uint32_t m_nMaxRowCoeff;
 	};
+
+	typedef std::shared_ptr<CompressorParamsBase> TCompressorParamsBasePtr;
 }
 
  

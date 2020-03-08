@@ -10,20 +10,19 @@
 
 namespace bptreedb
 {
-	template<typename _TKey,
-		class _Transaction, class _TCompressor>
+	template<typename _TKey, class _TCompressor>
 		class BPTreeLeafNodeSetBase : public  IBPTreeNode
 	{
 	public:
 
 		typedef int64_t TLink;
 		typedef _TKey TKey;
-		typedef _Transaction Transaction;
 		typedef _TCompressor TCompressor;
 		typedef CommonLib::STLAllocator<TKey> TAlloc;
 		typedef std::vector<TKey, TAlloc> TKeyMemSet;
 
 		typedef typename _TCompressor::TCompressorParams TLeafCompressorParams;
+		typedef std::shared_ptr<TLeafCompressorParams> TLeafCompressorParamsPtr;
 
 		BPTreeLeafNodeSetBase(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize) :
 			m_KeyMemSet(TAlloc(pAlloc)), m_Compressor(nPageSize - 2 * sizeof(TLink), pAlloc), m_nNext(-1), m_nPrev(-1), m_bMulti(bMulti),
@@ -32,14 +31,15 @@ namespace bptreedb
 		{
 
 		}
+
 		~BPTreeLeafNodeSetBase()
 		{
 
 		}
 
-		virtual bool Init(TLeafCompressorParams *pParams = NULL, Transaction* pTransaction = NULL)
+		virtual bool Init(TLeafCompressorParamsPtr& pParams)
 		{
-			return m_Compressor.init(pParams, pTransaction);
+			return m_Compressor.init(pParams);
 		}
 
 		virtual bool IsLeaf() const { return true; }
@@ -107,7 +107,7 @@ namespace bptreedb
 		}
 
 		template<class TComp>
-		int32_t insert(TComp& comp, const TKey& key, int nInsertLeafIndex = -1)
+		void insert(TComp& comp, const TKey& key, int nInsertLeafIndex = -1)
 		{
 			int32_t nIndex = 0;
 			insertImp(comp, key, nIndex, nInsertLeafIndex);
@@ -141,9 +141,9 @@ namespace bptreedb
 			return -1;
 		}
 
-		bool Update(const TKey& key)
+		void Update(const TKey& key)
 		{
-			return true;
+
 		}
 
 		template<class TComp>
@@ -220,48 +220,63 @@ namespace bptreedb
 
 		}
 
-		int  SplitIn(BPTreeLeafNodeSetBase *pNode, TKey* pSplitKey)
+		int32_t  SplitIn(BPTreeLeafNodeSetBase *pNode, TKey* pSplitKey)
 		{
-			TKeyMemSet& newNodeMemSet = pNode->m_KeyMemSet;
-			TCompressor& NewNodeComp = pNode->m_Compressor;
-
-			if (m_bMinSplit)
+			try
 			{
-				m_Compressor.remove((uint32_t)m_KeyMemSet.size() - 1, m_KeyMemSet.back(), m_KeyMemSet);
-				uint32_t nSplitIndex = SplitOne(m_KeyMemSet, newNodeMemSet, pSplitKey);
+				TKeyMemSet& newNodeMemSet = pNode->m_KeyMemSet;
+				TCompressor& NewNodeComp = pNode->m_Compressor;
 
-				NewNodeComp.insert(0, newNodeMemSet[0], newNodeMemSet);
-				return nSplitIndex;
+				if (m_bMinSplit)
+				{
+					m_Compressor.remove((uint32_t)m_KeyMemSet.size() - 1, m_KeyMemSet.back(), m_KeyMemSet);
+					uint32_t nSplitIndex = SplitOne(m_KeyMemSet, newNodeMemSet, pSplitKey);
+
+					NewNodeComp.insert(0, newNodeMemSet[0], newNodeMemSet);
+					return nSplitIndex;
+				}
+				else
+				{
+					int32_t nSplitIndex = SplitInVec(m_KeyMemSet, newNodeMemSet, pSplitKey);
+					m_Compressor.recalc(m_KeyMemSet);
+					NewNodeComp.recalc(newNodeMemSet);
+					return nSplitIndex;
+				}
 			}
-			else
+			catch (std::exception exc)
 			{
-				int nSplitIndex = SplitInVec(m_KeyMemSet, newNodeMemSet, pSplitKey);
-				m_Compressor.recalc(m_KeyMemSet);
-				NewNodeComp.recalc(newNodeMemSet);
-				return nSplitIndex;
+				CommonLib::CExcBase::RegenExcT("BPTreeLeafNode failed to SplitIn", exc);
 			}
+			
 		}
-		int  SplitIn(BPTreeLeafNodeSetBase *pLeftNode, BPTreeLeafNodeSetBase *pRightNode, TKey* pSplitKey)
+
+		int32_t  SplitIn(BPTreeLeafNodeSetBase *pLeftNode, BPTreeLeafNodeSetBase *pRightNode, TKey* pSplitKey)
 		{
+			try
+			{
+				TKeyMemSet& leftNodeMemSet = pLeftNode->m_KeyMemSet;
+				TCompressor& pleftNodeComp = pLeftNode->m_Compressor;
 
-			TKeyMemSet& leftNodeMemSet = pLeftNode->m_KeyMemSet;
-			TCompressor& pleftNodeComp = pLeftNode->m_Compressor;
-
-			TKeyMemSet& rightNodeMemSet = pRightNode->m_KeyMemSet;
-			TCompressor& pRightNodeComp = pRightNode->m_Compressor;
+				TKeyMemSet& rightNodeMemSet = pRightNode->m_KeyMemSet;
+				TCompressor& pRightNodeComp = pRightNode->m_Compressor;
 
 
-			uint32_t nSize = (uint32_t)m_KeyMemSet.size() / 2;
+				uint32_t nSize = (uint32_t)m_KeyMemSet.size() / 2;
 
-			if (pSplitKey)
-				*pSplitKey = m_KeyMemSet[nSize];
+				if (pSplitKey)
+					*pSplitKey = m_KeyMemSet[nSize];
 
-			SplitInVec(m_KeyMemSet, leftNodeMemSet, 0, nSize);
-			SplitInVec(m_KeyMemSet, rightNodeMemSet, nSize, (uint32_t)m_KeyMemSet.size() - nSize);
+				SplitInVec(m_KeyMemSet, leftNodeMemSet, 0, nSize);
+				SplitInVec(m_KeyMemSet, rightNodeMemSet, nSize, (uint32_t)m_KeyMemSet.size() - nSize);
 
-			pleftNodeComp.recalc(leftNodeMemSet);
-			pRightNodeComp.recalc(rightNodeMemSet);
-			return nSize;
+				pleftNodeComp.recalc(leftNodeMemSet);
+				pRightNodeComp.recalc(rightNodeMemSet);
+				return nSize;
+			}
+			catch (std::exception exc)
+			{
+				CommonLib::CExcBase::RegenExcT("BPTreeLeafNode failed to SplitIn", exc);
+			}
 
 		}
 
@@ -277,12 +292,18 @@ namespace bptreedb
 
 		const TKey& Key(uint32_t nIndex) const
 		{
-			return m_KeyMemSet[nIndex];
+			if(nIndex < m_KeyMemSet.size())
+				return m_KeyMemSet[nIndex];
+
+			throw CExcBase("out of range for Leaf Node get key  count %1, index %2", m_KeyMemSet.size(), nIndex);
 		}
 
 		TKey& Key(uint32_t nIndex)
 		{
-			return m_KeyMemSet[nIndex];
+			if (nIndex < m_KeyMemSet.size())
+				return m_KeyMemSet[nIndex];
+
+			throw CExcBase("out of range for Leaf Node get key  count %1, index %2", m_KeyMemSet.size(), nIndex);
 		}
 
 		template<class TVector>
@@ -359,7 +380,7 @@ namespace bptreedb
 			return true;
 		}
 		template<class TComp>
-		bool IsKey(TComp& comp, const TKey& key, uint32 nIndex)
+		bool IsKey(TComp& comp, const TKey& key, uint32_t nIndex)
 		{
 			return comp.EQ(key, m_KeyMemSet[nIndex]);
 		}
@@ -423,7 +444,7 @@ namespace bptreedb
 		typedef typename TBase::TKeyMemSet TLeafMemSet;
 		typedef typename TBase::TLeafCompressorParams TLeafCompressorParams;
 
-		BPTreeLeafNode(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32 nPageSize) :
+		BPTreeLeafNode(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize) :
 			TBase(pAlloc, bMulti, nPageSize)
 		{}
 
@@ -432,18 +453,33 @@ namespace bptreedb
 			this->m_Compressor.Init(pParams, pTransaction);
 		}
 
-		virtual  void Save(CommonLib::CFxMemoryWriteStream stream, TBPBaseTreeNodePtr& nextNode)
+		virtual  void Save(CommonLib::IWriteStream* stream)
 		{
-			stream.Write(this->m_nNext);
-			stream.Write(this->m_nPrev);
-			this->m_Compressor.Write(this->m_KeyMemSet, stream);
+			try
+			{
+				stream.Write(this->m_nNext);
+				stream.Write(this->m_nPrev);
+				this->m_Compressor.Write(this->m_KeyMemSet, stream);
+			}
+			catch (std:;exception& exc)
+			{
+				CommonLib::CExcBase::RegenExcT("Leaf node  failed to save", exc);
+			}
+
 		}
 
-		virtual void Load(CommonLib::CReadMemoryStream& stream)
+		virtual void Load(CommonLib::IReadStream* stream)
 		{
-			stream.Read(this->m_nNext);
-			stream.Read(this->m_nPrev);
-			this->m_Compressor.Load(this->m_KeyMemSet, stream);
+			try
+			{
+				stream.Read(this->m_nNext);
+				stream.Read(this->m_nPrev);
+				this->m_Compressor.Load(this->m_KeyMemSet, stream);
+			}
+			catch (std:; exception& exc)
+			{
+				CommonLib::CExcBase::RegenExcT("Leaf node  failed to load", exc);
+			}
 		}
 
 		bool IsUnion(BPTreeLeafNode *pNode) {

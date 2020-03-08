@@ -298,6 +298,9 @@
     <ClInclude Include="BPTrees\BaseNodeCompressor.h" />
     <ClInclude Include="BPTrees\BPBaseTreeNode.h" />
     <ClInclude Include="BPTrees\BPBaseTreeSetCommon.h" />
+    <ClInclude Include="BPTrees\BPBaseTreeSetInsert.h" />
+    <ClInclude Include="BPTrees\BPIteratorSet.h" />
+    <ClInclude Include="BPTrees\BPSet.h" />
     <ClInclude Include="BPTrees\BPTreeInnerNode.h" />
     <ClInclude Include="BPTrees\BPTreeLeafNode.h" />
     <ClInclude Include="BPTrees\BPBaseTreeSet.h" />
@@ -319,6 +322,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BPTrees\BPBaseTreeNode.cpp" />
+    <ClInclude Include="BPTrees\BPTreeNodeHolder.h" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">Create</PrecompiledHeader>

@@ -10,7 +10,7 @@
 namespace bptreedb
 {
 
-	template<class _TValue, class _TEncoder, class _TCompressorParams = CompressorParamsBaseImp>
+	template<class _TValue, class _TEncoder, class _TCompressorParams = CompressorParamsBase>
 	class TBaseValueEncoder
 	{
 	public:
@@ -23,15 +23,15 @@ namespace bptreedb
 		typedef std::shared_ptr<TCompressorParams> TCompressorParamsPtr;
 
 
-		TBaseValueEncoder(uint32_t nPageSize, CommonLib::IAllocPtr& pAlloc, TCompressorParamsPtr& pParams) :
+		TBaseValueEncoder(uint32_t nPageSize, CommonLib::IAllocPtr& pAlloc, TCompressorParamsPtr pParams) :
 			m_encoder(nPageSize, pAlloc, pParams)
 		{}
 
 		~TBaseValueEncoder()
 		{}
 
-		template<typename _Transactions  >
-		void  Init(TCompressorParamsPtr& pParams, _Transactions *pTran)
+	
+		void  Init(TCompressorParamsPtr pParams)
 		{
 
 		}

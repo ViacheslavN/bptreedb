@@ -120,6 +120,18 @@
     <ClInclude Include="BPTrees\BPBaseTreeSetCommon.h">
       <Filter>BPTrees\BPTreeSet</Filter>
     </ClInclude>
+    <ClInclude Include="BPTrees\BPSet.h">
+      <Filter>BPTrees\BPTreeSet</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BPIteratorSet.h">
+      <Filter>BPTrees\BPTreeSet</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BPTreeNodeHolder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BPBaseTreeSetInsert.h">
+      <Filter>BPTrees\BPTreeSet</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

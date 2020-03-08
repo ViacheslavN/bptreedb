@@ -11,7 +11,7 @@
 namespace bptreedb
 {
 	template<class _TKey, class _TKeyEncoder = TEmptyValueEncoder<_TKey>,
-		 class _TCompressorParams = CompressorParamsBaseImp>
+		 class _TCompressorParams = CompressorParamsBase>
 			class TBaseLeafNodeSetCompressor
 		{
 		public:
@@ -20,24 +20,33 @@ namespace bptreedb
 			typedef _TCompressorParams TCompressorParams;
 			typedef STLAllocator<TKey> TKeyAlloc;
 			typedef std::vector<TKey, TKeyAlloc> TKeyMemSet;
+			typedef std::shared_ptr<TCompressorParams> TCompressorParamsPtr
 
 
-			TBaseLeafNodeSetCompressor(uint32 nPageSize, CommonLib::IAllocPtr& pAlloc, TCompressorParams *pParams = nullptr) : m_nCount(0),
+			TBaseLeafNodeSetCompressor(uint32_t nPageSize, CommonLib::IAllocPtr& pAlloc, TCompressorParams *pParams = nullptr) : m_nCount(0),
 				m_nPageSize(nPageSize), m_KeyEncoder(nPageSize, pAlloc, pParams)
 			{}
 
-			template<typename _Transactions  >
-			static TCompressorParams *LoadCompressorParams(_Transactions *pTran)
+			static TCompressorParamsPtr LoadCompressorParams(CommonLib::IReadStream *pStream)
 			{
-				return new TCompressorParams();
+				try
+				{
+					TCompressorParamsPtr pParam(new TCompressorParams());
+
+					pParam->Load(pStream);
+
+					return pParam;
+				}
+				catch (std::exception& exc_src)
+				{
+					CommonLib::CExcBase::RegenExcT("BaseLeafNodeSetCompressor failed to load compressor params", exc_src);
+				}
 			}
 
-			template<typename _Transactions  >
-			void  Init(TCompressorParams *pParams, _Transactions *pTran)
-			{
 
-				m_KeyEncoder.Init(pParams, pTran);
-				m_ValueEncoder.Init(pParams, pTran);
+			void  Init(TCompressorParamsPtr pParams)
+			{
+				m_KeyEncoder.Init(pParams);
 			}
 
 			virtual ~TBaseNodeCompressor() {}
@@ -66,14 +75,14 @@ namespace bptreedb
 				}
 			}
 
-			virtual void Write(TKeyMemSet& vecKeys, TValueMemSet& vecValues, CommonLib::IWriteStream* pStream)
+			virtual uint32_t Write(TKeyMemSet& vecKeys, TValueMemSet& vecValues, CommonLib::IWriteStream* pStream)
 			{
 				try
 				{
 					if (pStream == nullptr)
 						throw CommonLib::CExcBase("BaseNodeCompressor  write stream is zero");
 
-					uint32_t nSize = (uint32)vecKeys.size();
+					uint32_t nSize = (uint32_t)vecKeys.size();
 					if (m_nCount != nSize)
 						throw CommonLib::CExcBase("BaseNodeCompressor  wrong size, count: %1, values size: %2", m_nCount, vecValues.size());
 
@@ -94,6 +103,8 @@ namespace bptreedb
 					pStream->Seek(pStream->Pos() + nKeySize, CommonLib::soFromBegin);
 
 					m_KeyEncoder.Encode(vecKeys, &KeyStream);
+
+					return m_nCount;
 				}
 				catch (std::exception& exc_src)
 				{
@@ -160,7 +171,7 @@ namespace bptreedb
 
 			uint32_t HeadSize() const
 			{
-				return  sizeof(uint32) + sizeof(uint32) + sizeof(uint32);
+				return  sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint32_t);
 			}
 
 			uint32_t RowSize() const

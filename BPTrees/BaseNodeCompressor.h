@@ -12,7 +12,7 @@ namespace bptreedb
 {
 
 	template<class _TKey, class _TValue,  class _TKeyEncoder = TEmptyValueEncoder<_TKey>, class _TValueEncoder = TEmptyValueEncoder<_TValue>
-		, class _TCompressorParams = CompressorParamsBaseImp>
+		, class _TCompressorParams = CompressorParamsBase>
 			class TBaseNodeCompressor
 		{
 		public:
@@ -22,29 +22,39 @@ namespace bptreedb
 			typedef _TValueEncoder TValueEncoder;
 
 			typedef _TCompressorParams TCompressorParams;
-			typedef _TCompressorParams TInnerCompressorParams; //TO DO temporary
 			typedef STLAllocator<TKey> TKeyAlloc;
 			typedef STLAllocator<TValue> TValueAlloc;
 			typedef std::vector<TKey, TKeyAlloc> TKeyMemSet;
 			typedef std::vector<TValue, TValueAlloc> TValueMemSet;
 
+			typedef std::shared_ptr<TCompressorParams> TCompressorParamsBasePtr;
 
-			TBaseNodeCompressor(uint32 nPageSize, CommonLib::IAllocPtr& pAlloc, TCompressorParams *pParams = nullptr) : m_nCount(0),
+
+			TBaseNodeCompressor(uint32_t nPageSize, CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr pParams) : m_nCount(0),
 				m_nPageSize(nPageSize), m_KeyEncoder(nPageSize, pAlloc, pParams), m_ValueEncoder(nPageSize, pAlloc, pParams)
 			{}
 
-			template<typename _Transactions  >
-			static TCompressorParams *LoadCompressorParams(_Transactions *pTran)
+			static TCompressorParamsBasePtr LoadCompressorParams(CommonLib::IReadStream *pStream)
 			{
-				return new TCompressorParams();
+				try
+				{
+					TCompressorParamsBasePtr pParam(new CompressorParamsBase());
+
+					pParam->Load(pStream);
+
+					return pParam;
+				}
+				catch (std::exception& exc_src)
+				{
+					CommonLib::CExcBase::RegenExcT("BaseNodeCompressor failed to load compressor params", exc_src);
+				}
 			}
 
-			template<typename _Transactions  >
-			void  Init(TCompressorParams *pParams, _Transactions *pTran)
+			void Init(TCompressorParamsBasePtr pParams)
 			{
 
-				m_KeyEncoder.Init(pParams, pTran);
-				m_ValueEncoder.Init(pParams, pTran);
+				m_KeyEncoder.Init(pParams);
+				m_ValueEncoder.Init(pParams);
 			}
 
 			virtual ~TBaseNodeCompressor() {}
@@ -82,14 +92,14 @@ namespace bptreedb
 				}
 			}
 
-			virtual void Write(TKeyMemSet& vecKeys, TValueMemSet& vecValues, CommonLib::IWriteStream* pStream)
+			virtual uint32_t Write(TKeyMemSet& vecKeys, TValueMemSet& vecValues, CommonLib::IWriteStream* pStream)
 			{
 				try
 				{
 					if (pStream == nullptr)
 						throw CommonLib::CExcBase("BaseNodeCompressor  write stream is zero");
 
-					uint32_t nSize = (uint32)vecKeys.size();
+					uint32_t nSize = (uint32_t)vecKeys.size();
 					if (m_nCount != nSize)
 						throw CommonLib::CExcBase("BaseNodeCompressor  wrong size, count: %1, values size: %2", m_nCount, vecValues.size());
 
@@ -117,6 +127,8 @@ namespace bptreedb
 
 					m_KeyEncoder.Encode(vecKeys, &KeyStream);
 					m_ValueEncoder.Encode(vecValues, &ValueStream);
+
+					return m_nCount;
 				}
 				catch (std::exception& exc_src)
 				{
@@ -200,7 +212,7 @@ namespace bptreedb
 
 			uint32_t HeadSize() const
 			{
-				return  sizeof(uint32) + sizeof(uint32) + sizeof(uint32);
+				return  sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint32_t);
 			}
 
 			uint32_t RowSize() const

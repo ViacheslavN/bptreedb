@@ -38,7 +38,7 @@ private:
 	uint32_t m_nSize{ 0 };
 	bool m_bCheckCRC{ false };
 	std::shared_ptr<CommonLib::IAlloc> m_pAlloc;
-	bool m_bIsNeedEncrypt{ false };
+	bool m_bIsNeedEncrypt{ true };
 };
  
 

@@ -15,7 +15,7 @@ namespace bptreedb
 	{
 		ectByte = 0,
 		ectUInt16 = 1,
-		ectUInt32 = 2,
+		ectUint32_t = 2,
 		ectUInt64 = 3
 	};
 
@@ -28,7 +28,7 @@ namespace bptreedb
 			return 1;
 		case ectUInt16:
 			return 2;
-		case ectUInt32:
+		case ectUint32_t:
 			return 4;
 		case ectUInt64:
 			return 8;

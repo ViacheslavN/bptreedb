@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include "../../commonlib/CommonLib.h"
 #include "../../commonlib/stream/MemoryStream.h"
 #include "../../commonlib/stream/StreamBaseEmpty.h"
@@ -22,22 +24,22 @@ public:
 	}
 
 	void Open(int64_t nPageAddr, uint32_t nPageSize, bool bNeedDecrypt)
-			{
-				try
-				{
-					m_nPageSize = nPageSize;
-					m_NeedDecrypt = bNeedDecrypt;
+	{
+		try
+		{
+			m_nPageSize = nPageSize;
+			m_NeedDecrypt = bNeedDecrypt;
 
-					OpenNextPage(nPageAddr);
+			OpenNextPage(nPageAddr);
 
-				}
-				catch (CommonLib::CExcBase& excSrc)
-				{
-					excSrc.AddMsgT("Failed open WriteStreamPage addr: %1, pagesize: %2", nPageAddr, m_nPageSize);
-					throw;
-				}
+		}
+		catch (CommonLib::CExcBase& excSrc)
+		{
+			excSrc.AddMsgT("Failed open WriteStreamPage addr: %1, pagesize: %2", nPageAddr, m_nPageSize);
+			throw;
+		}
 
-			}
+	}
 
 	virtual void ReadBytes(byte_t* dst, size_t size)
 	{

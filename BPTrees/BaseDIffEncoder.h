@@ -10,7 +10,7 @@
 namespace bptreedb
 {
 	   
-	template<class _TValue, class _TSignValue, class _TEncoder, class _TCompressorParams = CompressorParamsBaseImp>
+	template<class _TValue, class _TSignValue, class _TEncoder, class _TCompressorParams = CompressorParamsBase>
 	class TBaseValueDiffEncoder
 	{
 	public:
@@ -22,16 +22,17 @@ namespace bptreedb
 		typedef _TEncoder TEncoder;
 		typedef /*typename TDefSign<TValue>::TSignType*/_TSignValue TSignValue;
 
+		typedef std::shared_ptr<TCompressorParams> TCompressorParamsPtr;
 
-		TBaseValueDiffEncoder(uint32 nPageSize, CommonLib::IAllocPtr pAlloc, CompressorParamsBaseImp *pParams) :
+
+		TBaseValueDiffEncoder(uint32_t nPageSize, CommonLib::IAllocPtr pAlloc, TCompressorParamsPtr pParams) :
 			m_encoder(nPageSize, pAlloc, pParams)
 		{}
 
 		~TBaseValueDiffEncoder()
-		{}
-		
-		template<typename _Transactions  >
-		void  Init(TCompressorParamsPtr& pParams, _Transactions *pTran)
+		{}		
+
+		void  Init(TCompressorParamsPtr pParams)
 		{
 
 		}
@@ -179,13 +180,15 @@ namespace bptreedb
 	};
 
 
-	template<class _TValue, class _TSignValue, class _TEncoder, class _TCompressorParams = CompressorParamsBaseImp>
+	template<class _TValue, class _TSignValue, class _TEncoder, class _TCompressorParams = CompressorParamsBase>
 	class TValueDiffEncoder : public TBaseValueDiffEncoder<_TValue, _TSignValue, _TEncoder, _TCompressorParams>
 	{
 	public:
 		typedef TBaseValueDiffEncoder<_TValue, _TSignValue, _TEncoder, _TCompressorParams> TBase;
 
-		TValueDiffEncoder(uint32 nPageSize, CommonLib::alloc_t *pAlloc, CompressorParamsBaseImp *pParams) : TBase(nPageSize, pAlloc, pParams)
+		typedef typename TBase::TCompressorParamsPtr TCompressorParamsPtr;
+
+		TValueDiffEncoder(uint32_t nPageSize, CommonLib::IAllocPtr pAlloc, TCompressorParamsPtr pParams) : TBase(nPageSize, pAlloc, pParams)
 		{}
 
 		virtual void Write(const TValue& value, CommonLib::IWriteStream *pStream)
@@ -197,7 +200,7 @@ namespace bptreedb
 		{
 			pStream->read(value);
 		}
-		virtual uint32 GetValueSize() const
+		virtual uint32_t GetValueSize() const
 		{
 			return sizeof(TValue);
 		}

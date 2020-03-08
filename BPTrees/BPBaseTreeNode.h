@@ -23,7 +23,7 @@ namespace bptreedb
 		IBPTreeNode();
 		virtual ~IBPTreeNode();
 
-		virtual bool IsLeaf() const = 0;
+
 		virtual void Load(CommonLib::IReadStream* pStream) = 0;
 		virtual uint32_t Save(CommonLib::IWriteStream* pStream) = 0;
 
@@ -36,22 +36,18 @@ namespace bptreedb
 		virtual uint32_t GetFlags() const;
 		virtual uint64_t GetAddr() const;
 
-		virtual void SetFlags(int nFlag, bool bSet);
+		virtual void SetFlags(uint32_t nFlag, bool bSet);
 		virtual void Clear() = 0;
 
-		void SetParent(IBPTreeNodePtr pNode, int32_t nFoundIndex = -1);
 
-		int64_t GetParentAddr() const;
-		int64_t GetFoundIndex() const;
-		void SetFoundIndex(int32_t nFoundIndex);
-		TParentNodePtr GetParentNodePtr();
 
 	protected:
 		int64_t m_nAddr;
-		uint32_t m_nFlag;	
+		uint32_t m_nFlag;
 		TParentNodePtr m_pParent;
 		int32_t m_nFoundIndex;
 		int64_t m_nParent;
 		bool m_bMinSplit;
 	};
+
 }

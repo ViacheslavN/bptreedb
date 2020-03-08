@@ -183,7 +183,7 @@ namespace utils
 			if (it == m_CacheMap.end())
 				return m_NullObj;
 
-			QList::TNode* pNode = it->second;
+			typename QList::TNode* pNode = it->second;
 			TCacheVal & cacheVal = pNode->m_val;
 			TObj pObj = cacheVal.m_obj;
 
@@ -209,11 +209,11 @@ namespace utils
 
 		TObj& GetElem(const TKey& key, bool bNotMove = false)
 		{
-			TCacheMap::iterator it = m_CacheMap.find(key);
+			typename TCacheMap::iterator it = m_CacheMap.find(key);
 			if (it == m_CacheMap.end())
 				return m_NullObj;
 
-			QList::TNode* pNode = it->second;
+			typename QList::TNode* pNode = it->second;
 			TCacheVal & cacheVal = pNode->m_val;
 
 			if (bNotMove)
@@ -253,7 +253,7 @@ namespace utils
 
 		void MoveFromTop()
 		{
-			QList::iterator listIt = m_TopList.Back();
+			auto listIt = m_TopList.Back();
 			if (!listIt.IsNull())
 			{
 				m_TopList.Remove(listIt, false);
@@ -265,7 +265,7 @@ namespace utils
 
 		TObj RemoveBack(QList& list)
 		{
-			QList::iterator listIt = list.Back();
+			auto listIt = list.Back();
 			if (listIt.IsNull())
 				return m_NullObj;
 			
