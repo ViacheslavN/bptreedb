@@ -22,8 +22,8 @@ namespace bptreedb
 			typedef _TValueEncoder TValueEncoder;
 
 			typedef _TCompressorParams TCompressorParams;
-			typedef STLAllocator<TKey> TKeyAlloc;
-			typedef STLAllocator<TValue> TValueAlloc;
+			typedef CommonLib::STLAllocator<TKey> TKeyAlloc;
+			typedef CommonLib::STLAllocator<TValue> TValueAlloc;
 			typedef std::vector<TKey, TKeyAlloc> TKeyMemSet;
 			typedef std::vector<TValue, TValueAlloc> TValueMemSet;
 
@@ -66,8 +66,8 @@ namespace bptreedb
 					if (pStream == nullptr)
 						throw CommonLib::CExcBase("BaseNodeCompressor  read stream is zero");
 
-					CommonLib::CFxMemoryWriteStream KeyStream;
-					CommonLib::CFxMemoryWriteStream ValueStream;
+					CommonLib::CReadMemoryStream KeyStream;
+					CommonLib::CReadMemoryStream ValueStream;
 
 					m_nCount = pStream->ReadIntu32();
 					if (!m_nCount)
@@ -79,8 +79,12 @@ namespace bptreedb
 					uint32_t nKeySize = pStream->ReadIntu32();
 					uint32_t nValueSize = pStream->ReadIntu32();
 
-					KeyStream.AttachBuffer(pStream->Buffer() + pStream->Pos(), nKeySize);
-					ValueStream.AttachBuffer(pStream->Buffer() + pStream->Pos() + nKeySize, nValueSize);
+					CommonLib::IMemoryStream *pMemStream = dynamic_cast<CommonLib::IMemoryStream *>(pStream); // TO DO fix
+					if (!pMemStream)
+						throw CommonLib::CExcBase(L"IStream isn't memstream");
+
+					KeyStream.AttachBuffer(pMemStream->Buffer(), pStream->Pos(), nKeySize);
+					ValueStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos() + nKeySize, nValueSize);
 
 					m_KeyEncoder.Decode(m_nCount, vecKeys, &KeyStream);
 					m_ValueEncoder.Decode(m_nCount, vecValues, &ValueStream);
@@ -106,7 +110,7 @@ namespace bptreedb
 					pStream->Write(nSize);
 
 					if (!nSize)
-						return;
+						return 0;
 
 					CommonLib::CFxMemoryWriteStream ValueStream;
 					CommonLib::CFxMemoryWriteStream KeyStream;
@@ -120,15 +124,19 @@ namespace bptreedb
 					pStream->Write(nKeySize);
 					pStream->Write(nValueSize);
 
-					KeyStream.AttachBuffer(pStream->Buffer() + pStream->Pos(), nKeySize);
-					ValueStream.AttachBuffer(pStream->Buffer() + pStream->Pos() + nKeySize, nValueSize);
+					CommonLib::IMemoryStream *pMemStream = dynamic_cast<CommonLib::IMemoryStream *>(pStream); // TO DO fix
+					if (!pMemStream)
+						throw CommonLib::CExcBase(L"IStream isn't memstream");
+
+					KeyStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos(), nKeySize);
+					ValueStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos() + nKeySize, nValueSize);
 
 					pStream->Seek(pStream->Pos() + nKeySize + nValueSize, CommonLib::soFromBegin);
 
-					m_KeyEncoder.Encode(vecKeys, &KeyStream);
-					m_ValueEncoder.Encode(vecValues, &ValueStream);
+					uint32_t keys = m_KeyEncoder.Encode(vecKeys, &KeyStream);
+					uint32_t values = m_ValueEncoder.Encode(vecValues, &ValueStream);
 
-					return m_nCount;
+					return keys < values ? values : keys;
 				}
 				catch (std::exception& exc_src)
 				{
@@ -259,8 +267,8 @@ namespace bptreedb
 			void Clear()
 			{
 				m_nCount = 0;
-				m_KeyEncoder.clear();
-				m_ValueEncoder.clear();
+				m_KeyEncoder.Clear();
+				m_ValueEncoder.Clear();
 			}
 
 		protected:

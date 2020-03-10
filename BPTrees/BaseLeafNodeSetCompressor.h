@@ -18,12 +18,12 @@ namespace bptreedb
 			typedef _TKey TKey;
 			typedef _TKeyEncoder TKeyEncoder;
 			typedef _TCompressorParams TCompressorParams;
-			typedef STLAllocator<TKey> TKeyAlloc;
+			typedef CommonLib::STLAllocator<TKey> TKeyAlloc;
 			typedef std::vector<TKey, TKeyAlloc> TKeyMemSet;
-			typedef std::shared_ptr<TCompressorParams> TCompressorParamsPtr
+			typedef std::shared_ptr<TCompressorParams> TCompressorParamsPtr;
 
 
-			TBaseLeafNodeSetCompressor(uint32_t nPageSize, CommonLib::IAllocPtr& pAlloc, TCompressorParams *pParams = nullptr) : m_nCount(0),
+			TBaseLeafNodeSetCompressor(uint32_t nPageSize, CommonLib::IAllocPtr& pAlloc, TCompressorParamsPtr  pParams ) : m_nCount(0),
 				m_nPageSize(nPageSize), m_KeyEncoder(nPageSize, pAlloc, pParams)
 			{}
 
@@ -49,7 +49,7 @@ namespace bptreedb
 				m_KeyEncoder.Init(pParams);
 			}
 
-			virtual ~TBaseNodeCompressor() {}
+			virtual ~TBaseLeafNodeSetCompressor() {}
 
 			virtual void Load(TKeyMemSet& vecKeys, CommonLib::IReadStream* pStream)
 			{
@@ -58,15 +58,19 @@ namespace bptreedb
 					if (pStream == nullptr)
 						throw CommonLib::CExcBase("BaseNodeCompressor  read stream is zero");
 
-					CommonLib::CFxMemoryWriteStream KeyStream;
+					CommonLib::CReadMemoryStream KeyStream;
 					m_nCount = pStream->ReadIntu32();
 					if (!m_nCount)
 						return;
 
 					vecKeys.reserve(m_nCount);
 					uint32_t nKeySize = pStream->ReadIntu32();
+
+					CommonLib::IMemoryStream *pMemStream = dynamic_cast<CommonLib::IMemoryStream *>(pStream);
+					if (!pMemStream)
+						throw CommonLib::CExcBase(L"IStream isn't memstream");
 					
-					KeyStream.AttachBuffer(pStream->Buffer() + pStream->Pos(), nKeySize);
+					KeyStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos(), nKeySize);
 					m_KeyEncoder.Decode(m_nCount, vecKeys, &KeyStream);
 				}
 				catch (std::exception& exc_src)
@@ -75,7 +79,7 @@ namespace bptreedb
 				}
 			}
 
-			virtual uint32_t Write(TKeyMemSet& vecKeys, TValueMemSet& vecValues, CommonLib::IWriteStream* pStream)
+			virtual uint32_t Write(TKeyMemSet& vecKeys,  CommonLib::IWriteStream* pStream)
 			{
 				try
 				{
@@ -84,12 +88,12 @@ namespace bptreedb
 
 					uint32_t nSize = (uint32_t)vecKeys.size();
 					if (m_nCount != nSize)
-						throw CommonLib::CExcBase("BaseNodeCompressor  wrong size, count: %1, values size: %2", m_nCount, vecValues.size());
+						throw CommonLib::CExcBase("BaseNodeCompressor  wrong size, count: %1, values size: %2", m_nCount, vecKeys.size());
 
 					pStream->Write(nSize);
 
 					if (!nSize)
-						return;
+						return 0;
 
 					CommonLib::CFxMemoryWriteStream KeyStream;
 
@@ -99,12 +103,16 @@ namespace bptreedb
 
 					pStream->Write(nKeySize);
 
-					KeyStream.AttachBuffer(pStream->Buffer() + pStream->Pos(), nKeySize);
+					CommonLib::IMemoryStream *pMemStream = dynamic_cast<CommonLib::IMemoryStream *>(pStream);
+					if (!pMemStream)
+						throw CommonLib::CExcBase(L"IStream isn't memstream");
+
+					KeyStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos(), nKeySize);
 					pStream->Seek(pStream->Pos() + nKeySize, CommonLib::soFromBegin);
 
 					m_KeyEncoder.Encode(vecKeys, &KeyStream);
 
-					return m_nCount;
+					return 0;
 				}
 				catch (std::exception& exc_src)
 				{
@@ -145,7 +153,7 @@ namespace bptreedb
 				m_KeyEncoder.AddSymbol(m_nCount, nIndex, NewKey, vecKeys);
 			}
 
-			virtual void Remove(uint32_t nIndex, const TKey& key, const TValue& value, const TKeyMemSet& vecKeys)
+			virtual void Remove(uint32_t nIndex, const TKey& key, const TKeyMemSet& vecKeys)
 			{
 				m_nCount--;
 				m_KeyEncoder.RemoveSymbol(m_nCount, nIndex, key, vecKeys);
@@ -171,17 +179,17 @@ namespace bptreedb
 
 			uint32_t HeadSize() const
 			{
-				return  sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint32_t);
+				return  sizeof(uint32_t) + sizeof(uint32_t);
 			}
 
 			uint32_t RowSize() const
 			{
-				return  m_ValueEncoder.GetCompressSize() + m_KeyEncoder.GetCompressSize();
+				return m_KeyEncoder.GetCompressSize();
 			}
 
 			uint32_t TupleSize() const
 			{
-				return  (sizeof(TKey) + sizeof(TValue));
+				return  sizeof(TKey);
 			}
 
 			virtual void RecalcKey(const TKeyMemSet& vecKeys)
@@ -195,7 +203,7 @@ namespace bptreedb
 				}
 			}
 
-			bool IsHaveUnion(TBaseNodeCompressor& pCompressor) const
+			bool IsHaveUnion(TBaseLeafNodeSetCompressor& pCompressor) const
 			{
 				if ((m_nCount + pCompressor.m_nCount) > m_nPageSize * 8) //max bits for elem
 					return false;
@@ -203,23 +211,22 @@ namespace bptreedb
 				return (RowSize() + pCompressor.RowSize()) < (m_nPageSize - HeadSize());
 			}
 
-			bool IsHaveAlignment(TBaseNodeCompressor& pCompressor) const
+			bool IsHaveAlignment(TBaseLeafNodeSetCompressor& pCompressor) const
 			{
-				uint32_t nNoCompSize = m_nCount * (sizeof(TKey) + sizeof(TValue));
+				uint32_t nNoCompSize = m_nCount * sizeof(TKey);
 				return nNoCompSize < (m_nPageSize - HeadSize());
 			}
 
 			bool IsHalfEmpty() const
 			{
-				uint32_t nNoCompSize = m_nCount * (sizeof(TKey) + sizeof(TValue));
+				uint32_t nNoCompSize = m_nCount * sizeof(TKey);
 				return nNoCompSize < (m_nPageSize - HeadSize()) / 2;
 			}
 
 			void Clear()
 			{
 				m_nCount = 0;
-				m_KeyEncoder.clear();
-				m_ValueEncoder.clear();
+				m_KeyEncoder.Clear();
 			}
 
 		protected:

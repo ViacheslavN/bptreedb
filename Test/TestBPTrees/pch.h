@@ -1,5 +1,5 @@
 #pragma once
-
+#include <iostream>
 #include "../../../commonlib/CommonLib.h"
 #include "../../../commonlib/CommonLib_lib.h"
 #include "../../../commonlib/exception/exc_base.h"
@@ -9,3 +9,7 @@
 #include "../../utils/WriteStreamPage.h"
 #include "../../bptreedb_lib.h"
 #include "../../BPTrees/BPSet.h"
+#include "../../BPTrees/BPTreeInnerNode.h"
+#include "../../BPTrees/BPTreeLeafNode.h"
+#include "../../BPTrees/BaseNodeCompressor.h"
+#include "../../BPTrees/BaseLeafNodeSetCompressor.h"

@@ -2,6 +2,18 @@
 
 
 BPSETBASE_TEMPLATE_PARAMS
+void BPSETBASE_DECLARATION::AddToCache(TBPTreeNodePtr& pNode)
+{
+	if (m_NodeCache.Size() > m_nChacheSize && !m_bLockRemoveItemFromCache)
+	{
+		TBPTreeNodePtr pRemNode = m_NodeCache.RemoveBack();
+		DropNode(pRemNode);
+	}
+
+	m_NodeCache.AddElem(pNode->GetAddr(), pNode);
+}
+
+BPSETBASE_TEMPLATE_PARAMS
 BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetNode(int64_t nAddr)
 {
 	 try
@@ -10,14 +22,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetNode(in
 		 if (pNode.get() != nullptr)
 		 {
 			 pNode = LoadNodeFromStorage(nAddr);
-
-			 if (m_NodeCache.Size() > m_nChacheSize)
-			 {
-				 TBPTreeNodePtr pRemNode = m_NodeCache.RemoveBack();
-				 DropNode(pRemNode);
-			 }
-
-			 m_NodeCache.AddElem(nAddr, pNode);
+			 AddToCache(pNode);
 		 }
 
 		 return pNode;
@@ -194,7 +199,13 @@ void BPSETBASE_DECLARATION::DropNode(TBPTreeNodePtr& pNode)
 		}
 
 		if (nFlags & CHANGE_NODE)
+		{
+			m_bLockRemoveItemFromCache = true; // TO DO use RAII
+
 			SaveNode(pNode);
+
+			m_bLockRemoveItemFromCache = false; // TO DO use RAII
+		}
 
 	}
 	catch (std::exception& exc)
@@ -312,7 +323,15 @@ void BPSETBASE_DECLARATION::SaveNode(TBPTreeNodePtr& pNode)
 		CommonLib::CFxMemoryWriteStream stream;
 		stream.AttachBuffer(pPage->GetData(), pPage->GetPageSize());
 
-		pNode->Save(&stream);
+		uint32_t nCount = pNode->Save(&stream);
+		while (nCount != 0)
+		{
+
+			//TO DO split
+
+			stream.Seek(0, CommonLib::soFromBegin);
+			nCount = pNode->Save(&stream);
+		}
 
 		m_pStorage->SaveFilePage(pPage);
 
@@ -338,13 +357,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::CreateNode
 		pNode->InitCopmressor(m_InnerCompressParams, m_LeafCompressParams);
 		if (addToChache)
 		{
-			if (m_NodeCache.Size() > m_nChacheSize)
-			{
-				TBPTreeNodePtr pRemNode = m_NodeCache.RemoveBack();
-				DropNode(pRemNode);
-			}
-
-			m_NodeCache.AddElem(nAddr, pNode);
+			AddToCache(pNode);
 		}
 
 		return pNode;
@@ -359,4 +372,29 @@ BPSETBASE_TEMPLATE_PARAMS
 BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::NewNode(bool isLeaf, bool addToChache)
 {
 	return CreateNode(-1, isLeaf, addToChache);
+}
+
+BPSETBASE_TEMPLATE_PARAMS
+void BPSETBASE_DECLARATION::Flush()
+{
+	try
+	{
+		m_bLockRemoveItemFromCache = true; // TO DO use RAII
+
+		while (m_NodeCache.Size())
+		{
+			
+			TBPTreeNodePtr pBNode = m_NodeCache.RemoveBack();
+			if (!pBNode->GetFlags() & CHANGE_NODE)
+				continue;
+
+			SaveNode(pBNode);
+		}
+
+		m_bLockRemoveItemFromCache = false;
+	}
+	catch (std::exception& exc)
+	{
+		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed to flash", exc);
+	}
 }

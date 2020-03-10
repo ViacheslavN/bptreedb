@@ -14,7 +14,7 @@ namespace bptreedb
 	public:
 
 		typedef _TValue TValue;
-		typedef STLAllocator<TValue> TAlloc;
+		typedef CommonLib::STLAllocator<TValue> TAlloc;
 		typedef std::vector<TValue, TAlloc> TValueMemSet;
 		typedef _TCompressorParams TCompressorParams;
 		typedef std::shared_ptr< TCompressorParams> TCompressorParamsPtr;

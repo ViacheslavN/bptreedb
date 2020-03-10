@@ -19,14 +19,15 @@ class BPTreeInnerNode : public  IBPTreeNode
 	typedef int64_t TLink;
 	typedef _TCompressor TCompressor;
 
-	typedef STLAllocator<TKey> TKeyAlloc;
-	typedef STLAllocator<TLink> TLinkAlloc;
+	typedef CommonLib::STLAllocator<TKey> TKeyAlloc;
+	typedef CommonLib::STLAllocator<TLink> TLinkAlloc;
 	typedef std::vector<TKey, TKeyAlloc> TKeyMemSet;
 	typedef std::vector<TLink, TLinkAlloc> TLinkMemSet;
 
 public:
 
 	typedef typename _TCompressor::TCompressorParams TInnerCompressorParams;
+	typedef std::shared_ptr<TInnerCompressorParams> TInnerCompressorParamsPtr;
 
 	BPTreeInnerNode(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize) :
 		m_nLess(-1), m_innerKeyMemSet(TKeyAlloc(pAlloc)), m_innerLinkMemSet(TLinkAlloc(pAlloc)), m_bMulti(bMulti),
@@ -35,9 +36,9 @@ public:
 
 	}
 
-	virtual bool init(TInnerCompressorParams *pParams = NULL, IReadStream* pStream = NULL)
+	virtual void init(TInnerCompressorParamsPtr pParams)
 	{
-		return m_Compressor.init(pParams, pStream);
+		m_Compressor.Init(pParams);
 	}
 
 	~BPTreeInnerNode()
@@ -50,7 +51,7 @@ public:
 	virtual uint32_t Size() const
 	{
 
-		return sizeof(TLink) + m_Compressor.size();
+		return sizeof(TLink) + m_Compressor.Size();
 	}
 
 	virtual bool IsNeedSplit() const
@@ -75,7 +76,7 @@ public:
 			stream->Write(m_nLess);
 			return m_Compressor.Write(m_innerKeyMemSet, m_innerLinkMemSet, stream);
 		}
-		catch (std:; exception& exc)
+		catch (std::exception& exc)
 		{
 			CommonLib::CExcBase::RegenExcT("Inner node failed to save", exc);
 		}
@@ -85,10 +86,10 @@ public:
 	{
 		try
 		{
-			stream.Read(m_nLess);
+			stream->Read(m_nLess);
 			return m_Compressor.Load(m_innerKeyMemSet, m_innerLinkMemSet, stream);
 		}
-		catch (std:; exception& exc)
+		catch (std::exception& exc)
 		{
 			CommonLib::CExcBase::RegenExcT("Inner node failed to load", exc);
 		}
@@ -245,7 +246,7 @@ public:
 		}
 		else
 		{
-			nIndex = m_innerKeyMemSet.lower_bound(key, nType, comp);
+			nIndex = m_innerKeyMemSet.lower_bound(key, comp);
 		}
 
 		if (!bFind)
@@ -412,7 +413,7 @@ public:
 		if (nIndex < m_innerLinkMemSet.size())
 			return m_innerLinkMemSet[nIndex];
 
-		throw CExcBase("out of range for Inner Node get link count %1, index %2", m_KeyMemSet.size(), nIndex);
+		throw CommonLib::CExcBase("out of range for Inner Node get link count %1, index %2", m_innerLinkMemSet.size(), nIndex);
 	}
 
 	const TKey& Key(int32_t nIndex) const
@@ -420,7 +421,7 @@ public:
 		if (nIndex < m_innerKeyMemSet.size())
 			return m_innerKeyMemSet[nIndex];
 
-		throw CExcBase("out of range for Inner Node get key count %1, index %2", m_KeyMemSet.size(), nIndex);
+		throw CommonLib::CExcBase("out of range for Inner Node get key count %1, index %2", m_innerKeyMemSet.size(), nIndex);
  
 	}
 
@@ -429,7 +430,7 @@ public:
 		if (nIndex < m_innerKeyMemSet.size())
 			return m_innerKeyMemSet[nIndex];
 
-		throw CExcBase("out of range for Inner Node get key count %1, index %2", m_KeyMemSet.size(), nIndex);
+		throw CExcBase("out of range for Inner Node get key count %1, index %2", m_innerKeyMemSet.size(), nIndex);
 	}
 
 	void UpdateLink(int32_t nIndex, TLink nLink)
@@ -578,7 +579,7 @@ public:
 	{
 		m_innerKeyMemSet.clear();
 		m_innerLinkMemSet.clear();
-		m_Compressor.clear();
+		m_Compressor.Clear();
 	}
 
 	bool IsHaveUnion(BPTreeInnerNode *pNode)

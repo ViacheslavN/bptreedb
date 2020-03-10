@@ -3,8 +3,13 @@
 
 #include <iostream>
 
+
+void TestBPTreeSet();
+
 int main()
 {
-    std::cout << "Hello World!\n";
+	TestBPTreeSet();
+
+	return 0;
 }
  

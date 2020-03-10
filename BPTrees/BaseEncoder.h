@@ -69,7 +69,7 @@ namespace bptreedb
 				for (size_t i = 0; i < vecValues.size(); ++i)
 				{
 					if(!m_encoder.EncodeSymbol(vecValues[i], pStream))
-						break;
+						return vecValues.size() - 1;
 				}
 
 				return m_encoder.FinishEncoding(pStream);

@@ -42,6 +42,7 @@ namespace bptreedb
 			, m_nPageLeafPageCompInfo(-1)
 			, m_bMinSplit(false)
 			, m_nNodePageSize(nNodesPageSize)
+			, m_bLockRemoveItemFromCache(false)
 		{
 
 		}
@@ -60,12 +61,13 @@ namespace bptreedb
 
 		void LoadTree();
 
-
+		//common
 		TBPTreeNodePtr GetNode(int64_t nAddr);
 		TBPTreeNodePtr GetNodeAndCheckParent(int64_t nAddr);
 		TBPTreeNodePtr LoadNodeFromStorage(int64_t nAddr);
 		TBPTreeNodePtr CreateNode(int64_t nAddr, bool isLeaf, bool addToChache);
 		TBPTreeNodePtr NewNode(bool isLeaf, bool addToChache);
+		void AddToCache(TBPTreeNodePtr& node);
 	
 		void SetParentForNextNode(TBPTreeNodePtr& pNode, TBPTreeNodePtr& pNextNode);
 		void SetParentForPrevNode(TBPTreeNodePtr& pNode, TBPTreeNodePtr& pPrevNode);
@@ -73,11 +75,17 @@ namespace bptreedb
 		TBPTreeNodePtr FindAndSetParent(TBPTreeNodePtr& pNode);
 		void DropNode(TBPTreeNodePtr& pNode);
 		void SaveNode(TBPTreeNodePtr& pNode);
+		void Flush();
 
+		//insert
 		TBPTreeNodePtr findLeafNodeForInsert(const TKey& key);
 		void insert(TKey& key);
 		void CheckLeafNode(TBPTreeNodePtr &pNode);
 		void TransformRootToInner();
+		void SplitLeafNode(TBPTreeNodePtr &pNode, TBPTreeNodePtr &pNewNode, TBPTreeNodePtr &pParentNode);
+		void SplitRootInnerNode();
+		void SetParentInChildCacheOnly(TBPTreeNodePtr& pNode);
+		void SplitInnerNode(TBPTreeNodePtr&pNode, TBPTreeNodePtr& pParentNode);
 
 	protected:
 		
@@ -93,6 +101,7 @@ namespace bptreedb
 		uint64_t m_nPageLeafPageCompInfo;
 		bool m_bMulti;
 		bool m_bMinSplit;
+		bool m_bLockRemoveItemFromCache;
 
 
 		TInnerCompressorParamsPtr m_InnerCompressParams;
@@ -102,7 +111,7 @@ namespace bptreedb
 		{
 			bool IsFree(TBPTreeNodePtr& pObj)
 			{
-				return  pObj.use_count() == 1;
+				return  true;//pObj.use_count() == 1;
 			}
 		};
 

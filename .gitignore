@@ -97,3 +97,5 @@ src/CommonLibrary/CommonLibrary.VC.db
 src/CommonLibrary/CommonLibrary.VC.VC.opendb
 *.db
 *.opendb
+*.db-wal
+*.db-shm

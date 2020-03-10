@@ -37,9 +37,9 @@ namespace bptreedb
 
 		}
 
-		virtual bool Init(TLeafCompressorParamsPtr& pParams)
+		virtual void Init(TLeafCompressorParamsPtr& pParams)
 		{
-			return m_Compressor.init(pParams);
+			 m_Compressor.Init(pParams);
 		}
 
 		virtual bool IsLeaf() const { return true; }
@@ -47,7 +47,7 @@ namespace bptreedb
 		virtual uint32_t Size() const
 		{
 
-			return  2 * sizeof(TLink) + m_Compressor.size();
+			return  2 * sizeof(TLink) + m_Compressor.Size();
 		}
 
 		virtual bool IsNeedSplit() const
@@ -393,7 +393,7 @@ namespace bptreedb
 		virtual void clear()
 		{
 			m_KeyMemSet.clear();
-			m_Compressor.clear();
+			m_Compressor.Clear();
 		}
 
 		bool IsHaveUnion(BPTreeLeafNodeSetBase *pNode)
@@ -428,40 +428,39 @@ namespace bptreedb
 		uint32_t m_nPageSize;
 	};
 
-	template<typename _TKey,
-		class _Transaction, class _TCompressor>
-		class BPTreeLeafNode : public  BPTreeLeafNodeSetBase <_TKey, _Transaction, _TCompressor>
+	template<typename _TKey, class _TCompressor>
+		class BPTreeLeafNode : public  BPTreeLeafNodeSetBase <_TKey, _TCompressor>
 	{
 	public:
 
-		typedef BPTreeLeafNodeSetBase <_TKey, _Transaction, _TCompressor> TBase;
+		typedef BPTreeLeafNodeSetBase <_TKey,_TCompressor> TBase;
 		typedef typename TBase::TLink TLink;
 		typedef typename TBase::TKey TKey;
-		typedef typename TBase::Transaction Transaction;
 
 
 		typedef typename TBase::TCompressor TCompressor;
 		typedef typename TBase::TKeyMemSet TLeafMemSet;
 		typedef typename TBase::TLeafCompressorParams TLeafCompressorParams;
+		typedef std::shared_ptr< TLeafCompressorParams> TLeafCompressorParamsPtr;
 
 		BPTreeLeafNode(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize) :
 			TBase(pAlloc, bMulti, nPageSize)
 		{}
 
-		void Init(TLeafCompressorParams *pParams = NULL, Transaction* pTransaction = NULL)
+		void Init(TLeafCompressorParamsPtr pParams)
 		{
-			this->m_Compressor.Init(pParams, pTransaction);
+			this->m_Compressor.Init(pParams);
 		}
 
-		virtual  void Save(CommonLib::IWriteStream* stream)
+		virtual  uint32_t Save(CommonLib::IWriteStream* stream)
 		{
 			try
 			{
 				stream.Write(this->m_nNext);
 				stream.Write(this->m_nPrev);
-				this->m_Compressor.Write(this->m_KeyMemSet, stream);
+				return this->m_Compressor.Write(this->m_KeyMemSet, stream);
 			}
-			catch (std:;exception& exc)
+			catch (std::exception& exc)
 			{
 				CommonLib::CExcBase::RegenExcT("Leaf node  failed to save", exc);
 			}
@@ -476,7 +475,7 @@ namespace bptreedb
 				stream.Read(this->m_nPrev);
 				this->m_Compressor.Load(this->m_KeyMemSet, stream);
 			}
-			catch (std:; exception& exc)
+			catch (std::exception& exc)
 			{
 				CommonLib::CExcBase::RegenExcT("Leaf node  failed to load", exc);
 			}
