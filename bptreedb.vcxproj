@@ -258,6 +258,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -276,6 +277,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -297,6 +299,7 @@
     <ClInclude Include="BPTrees\BaseLeafNodeSetCompressor.h" />
     <ClInclude Include="BPTrees\BaseNodeCompressor.h" />
     <ClInclude Include="BPTrees\BPBaseTreeNode.h" />
+    <ClInclude Include="BPTrees\BPBaseTreeSearch.h" />
     <ClInclude Include="BPTrees\BPBaseTreeSetCommon.h" />
     <ClInclude Include="BPTrees\BPBaseTreeSetInsert.h" />
     <ClInclude Include="BPTrees\BPIteratorSet.h" />

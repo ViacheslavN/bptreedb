@@ -15,6 +15,7 @@ namespace bptreedb
 template<typename _TKey, class _TCompressor>
 class BPTreeInnerNode : public  IBPTreeNode
 {
+public:
 	typedef _TKey TKey;
 	typedef int64_t TLink;
 	typedef _TCompressor TCompressor;
@@ -24,24 +25,24 @@ class BPTreeInnerNode : public  IBPTreeNode
 	typedef std::vector<TKey, TKeyAlloc> TKeyMemSet;
 	typedef std::vector<TLink, TLinkAlloc> TLinkMemSet;
 
-public:
+
 
 	typedef typename _TCompressor::TCompressorParams TInnerCompressorParams;
 	typedef std::shared_ptr<TInnerCompressorParams> TInnerCompressorParamsPtr;
 
 	BPTreeInnerNode(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize) :
 		m_nLess(-1), m_innerKeyMemSet(TKeyAlloc(pAlloc)), m_innerLinkMemSet(TLinkAlloc(pAlloc)), m_bMulti(bMulti),
-		m_pAlloc(pAlloc), m_bMinSplit(false), m_nPageSize(nPageSize), m_Compressor(nPageSize - sizeof(TLink), pAlloc)
+		m_pAlloc(pAlloc), m_bMinSplit(false), m_nPageSize(nPageSize), m_Compressor(nPageSize - sizeof(TLink), pAlloc, TInnerCompressorParamsPtr())
 	{
 
 	}
 
-	virtual void init(TInnerCompressorParamsPtr pParams)
+	virtual void Init(TInnerCompressorParamsPtr pParams)
 	{
 		m_Compressor.Init(pParams);
 	}
 
-	~BPTreeInnerNode()
+	virtual ~BPTreeInnerNode()
 	{
 
 	}
@@ -69,7 +70,7 @@ public:
 		return m_Compressor.RowSize();
 	}
 
-	virtual  uint32_t  Save(CommonLib::IWriteStream *stream)
+	virtual uint32_t Save(CommonLib::IWriteStream *stream)
 	{
 		try
 		{
@@ -79,6 +80,7 @@ public:
 		catch (std::exception& exc)
 		{
 			CommonLib::CExcBase::RegenExcT("Inner node failed to save", exc);
+			throw;
 		}
 	}
 
@@ -225,7 +227,7 @@ public:
 			m_innerLinkMemSet.insert(m_innerLinkMemSet.begin() + nIndex, nLink);
 
 		}
-		bool bRet = m_Compressor.insert(nIndex, key, nLink, m_innerKeyMemSet, m_innerLinkMemSet);
+		bool bRet = m_Compressor.Insert(nIndex, key, nLink, m_innerKeyMemSet, m_innerLinkMemSet);
 		return bRet ? nIndex : -1;
 	}
 
@@ -288,8 +290,8 @@ public:
 
 
 
-				m_Compressor.remove(nSplitIndex, m_innerKeyMemSet[nSplitIndex], m_innerLinkMemSet[nSplitIndex], m_innerKeyMemSet, m_innerLinkMemSet);
-				pNewNodeComp.insert(0, newNodeKeySet[0], newNodeLinkSet[0], newNodeKeySet, newNodeLinkSet);
+				m_Compressor.Remove(nSplitIndex, m_innerKeyMemSet[nSplitIndex], m_innerLinkMemSet[nSplitIndex], m_innerKeyMemSet, m_innerLinkMemSet);
+				pNewNodeComp.Insert(0, newNodeKeySet[0], newNodeLinkSet[0], newNodeKeySet, newNodeLinkSet);
 
 				m_innerKeyMemSet.resize(nSplitIndex);
 				m_innerLinkMemSet.resize(nSplitIndex);
@@ -300,7 +302,7 @@ public:
 					if (!this->IsNeedSplit())
 						break;
 
-					m_Compressor.remove(nLessIndex, m_innerKeyMemSet[nLessIndex], m_innerLinkMemSet[nLessIndex], m_innerKeyMemSet, m_innerLinkMemSet);
+					m_Compressor.Remove(nLessIndex, m_innerKeyMemSet[nLessIndex], m_innerLinkMemSet[nLessIndex], m_innerKeyMemSet, m_innerLinkMemSet);
 
 
 					newNodeKeySet.insert(newNodeKeySet.begin(), m_innerKeyMemSet[nLessIndex]);
@@ -310,13 +312,13 @@ public:
 					m_innerKeyMemSet.resize(nLessIndex);
 					m_innerLinkMemSet.resize(nLessIndex);
 
-					pNewNodeComp.insert((uint32_t)newNodeKeySet.size() - 1, newNodeKeySet.back(), newNodeLinkSet.back(), newNodeKeySet, newNodeLinkSet);
+					pNewNodeComp.Insert((uint32_t)newNodeKeySet.size() - 1, newNodeKeySet.back(), newNodeLinkSet.back(), newNodeKeySet, newNodeLinkSet);
 
 					--nLessIndex;
 				}
-				assert(nLessIndex > 0);
+			//	assert(nLessIndex > 0);
 
-				m_Compressor.remove(nLessIndex, m_innerKeyMemSet[nLessIndex], m_innerLinkMemSet[nLessIndex], m_innerKeyMemSet, m_innerLinkMemSet);
+				m_Compressor.Remove(nLessIndex, m_innerKeyMemSet[nLessIndex], m_innerLinkMemSet[nLessIndex], m_innerKeyMemSet, m_innerLinkMemSet);
 
 				*pSplitKey = m_innerKeyMemSet[nLessIndex];
 				pNode->m_nLess = m_innerLinkMemSet[nLessIndex];
@@ -342,17 +344,17 @@ public:
 				pNode->m_nLess = m_innerLinkMemSet[nNewSize];
 
 
-				assert(pNode->m_nLess != -1);
+//				assert(pNode->m_nLess != -1);
 
 				m_innerKeyMemSet.resize(nNewSize);
 				m_innerLinkMemSet.resize(nNewSize);
 
-				m_Compressor.recalc(m_innerKeyMemSet, m_innerLinkMemSet);
-				pNewNodeComp.recalc(newNodeKeySet, newNodeLinkSet);
+				m_Compressor.Recalc(m_innerKeyMemSet, m_innerLinkMemSet);
+				pNewNodeComp.Recalc(newNodeKeySet, newNodeLinkSet);
 
 			}
 		}
-		catch (std::exception exc)
+		catch (std::exception& exc)
 		{
 			CommonLib::CExcBase::RegenExcT("InnerNod failed to SplitIn", exc);
 		}
@@ -381,7 +383,7 @@ public:
 
 			pLeftNode->m_nLess = m_nLess;
 
-			pLeftNodeComp.recalc(LeftKeySet, LeftLinkSet);
+			pLeftNodeComp.Recalc(LeftKeySet, LeftLinkSet);
 
 			*pSplitKey = m_innerKeyMemSet[nSize];
 			pRightNode->m_nLess = m_innerLinkMemSet[nSize];
@@ -390,20 +392,20 @@ public:
 			std::move(m_innerLinkMemSet.begin() + nSize + 1, m_innerLinkMemSet.end(), std::inserter(RightLinkSet, RightLinkSet.begin()));
 
 
-			pRightNodeComp.recalc(RightKeySet, RightLinkSet);
+			pRightNodeComp.Recalc(RightKeySet, RightLinkSet);
 
 
 			m_innerKeyMemSet.clear();
 			m_innerLinkMemSet.clear();
-			m_Compressor.clear();
+			m_Compressor.Clear();
 		}
-		catch (std::exception exc)
+		catch (std::exception& exc)
 		{
 			CommonLib::CExcBase::RegenExcT("InnerNod failed to SplitIn", exc);
 		}
 	}
 
-	uint32_t Count() const
+	virtual uint32_t Count() const
 	{
 		return (int32_t)m_innerLinkMemSet.size();
 	}
@@ -430,7 +432,7 @@ public:
 		if (nIndex < m_innerKeyMemSet.size())
 			return m_innerKeyMemSet[nIndex];
 
-		throw CExcBase("out of range for Inner Node get key count %1, index %2", m_innerKeyMemSet.size(), nIndex);
+		throw CommonLib::CExcBase("out of range for Inner Node get key count %1, index %2", m_innerKeyMemSet.size(), nIndex);
 	}
 
 	void UpdateLink(int32_t nIndex, TLink nLink)

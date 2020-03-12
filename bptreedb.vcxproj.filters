@@ -126,10 +126,13 @@
     <ClInclude Include="BPTrees\BPIteratorSet.h">
       <Filter>BPTrees\BPTreeSet</Filter>
     </ClInclude>
-    <ClInclude Include="BPTrees\BPTreeNodeHolder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="BPTrees\BPBaseTreeSetInsert.h">
+      <Filter>BPTrees\BPTreeSet</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BPTreeNodeHolder.h">
+      <Filter>BPTrees\BPTreeSet</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BPBaseTreeSearch.h">
       <Filter>BPTrees\BPTreeSet</Filter>
     </ClInclude>
   </ItemGroup>

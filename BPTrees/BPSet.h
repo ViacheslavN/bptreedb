@@ -30,7 +30,7 @@ namespace bptreedb
 		template <class _TKey, class _TBTreeNode, class _TBTree>
 		friend class TBPSetIterator;
 
-		typedef TBPSetIterator<TKey, TBPTreeNode, TBPSet> iterator;
+		typedef TBPSetIterator<TKey, TBPTreeNode, TBase> iterator;
 
 
 
@@ -40,5 +40,36 @@ namespace bptreedb
 
 		}
 
+		iterator find(const TKey& key, iterator *pFromIterator = NULL, bool bFindNext = true)
+		{
+			return TBase::template find<iterator, TComp>(this->m_comp, key, pFromIterator, bFindNext);
+		}
+
+		template<class _TCustComp>
+		iterator find(_TCustComp& comp, const TKey& key, iterator *pFromIterator = NULL, bool bFindNext = true)
+		{
+			return TBase::template find<iterator, _TCustComp>(comp, key, pFromIterator, bFindNext);
+		}
+
+		iterator upper_bound(const TKey& key, iterator *pFromIterator = NULL, bool bFindNext = true)
+		{
+			return TBase::template upper_bound<iterator>(this->m_comp, key, pFromIterator, bFindNext);
+		}
+		iterator lower_bound(const TKey& key, iterator *pFromIterator = NULL, bool bFindNext = true)
+		{
+			return TBase::template lower_bound<iterator>(this->m_comp, key, pFromIterator, bFindNext);
+		}
+
+		template<class _Comp>
+		iterator upper_bound(const _Comp& comp, const TKey& key, iterator *pFromIterator = NULL, bool bFindNext = true)
+		{
+			return TBase::template upper_bound<iterator, _Comp>(comp, key, pFromIterator, bFindNext);
+		}
+
+		template<class _Comp>
+		iterator lower_bound(const _Comp& comp, const TKey& key, iterator *pFromIterator = NULL, bool bFindNext = true)
+		{
+			return TBase::template lower_bound<iterator, _Comp>(comp, key, pFromIterator, bFindNext);
+		}
 	};
 }

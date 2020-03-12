@@ -61,7 +61,7 @@ namespace bptreedb
 
 		uint32_t Encode(const TValueMemSet& vecValues, CommonLib::IWriteStream *pStream)
 		{
-			if (m_nCount == vecValues.size())
+			if (m_nCount != vecValues.size())
 				throw CommonLib::CExcBase("Empty encoder wrong size, count: %1, values size: %2", m_nCount, vecValues.size());
 
 			for (uint32_t i = 0, sz = (uint32_t)vecValues.size(); i < sz; ++i)

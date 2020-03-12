@@ -27,16 +27,22 @@ namespace bptreedb
 
 	private:
 		TBPNodeHolder(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, bool bLeaf, int64_t nAddr) :
-			m_IsLeaf(m_IsLeaf),
+			m_IsLeaf(bLeaf),
 			m_nAddr(nAddr),
 			m_nParentAddr(-1),
 			m_nFoundIndex(-1)
 		{
 
 			if (m_IsLeaf)
-				m_pLeafNode.reset(new TLeafNode(pAlloc,  bMulti,  nPageSize));
+			{
+				m_pLeafNode.reset(new TLeafNode(pAlloc, bMulti, nPageSize));
+				m_pCurNode = m_pLeafNode.get();
+			}
 			else
+			{
 				m_pInnerNode.reset(new TInnerNode(pAlloc, bMulti, nPageSize));
+				m_pCurNode = m_pInnerNode.get();
+			}
 
 		}
 	public:
@@ -48,12 +54,7 @@ namespace bptreedb
 				bool isLeaf = pStream->ReadBool();
 
 				std::shared_ptr<TBPNodeHolder> pNode(new TBPNodeHolder(pAlloc, bMulti, nPageSize, isLeaf, nAddr));
-
-				if (isLeaf)
-					pNode->m_pLeafNode.Load(pStream);
-				else
-
-					pNode->m_pInnerNode.Load(pStream);
+				pNode->m_pCurNode->Load(pStream);
 
 				return pNode;
 
@@ -61,6 +62,7 @@ namespace bptreedb
 			catch (std::exception& exc)
 			{
 				CommonLib::CExcBase::RegenExcT("TBPNodeHolder failed to load ",exc);
+				throw;
 			}
 			
 		}
@@ -76,6 +78,7 @@ namespace bptreedb
 			catch (std::exception& exc)
 			{
 				CommonLib::CExcBase::RegenExcT("TBPNodeHolder failed to load ", exc);
+				throw;
 			}
 
 		}
@@ -93,15 +96,12 @@ namespace bptreedb
 			try
 			{
 				pStream->Write(m_IsLeaf);
-
-				if (IsLeaf())
-					return m_pLeafNode.Save(pStream);
-				else
-					return m_pInnerNode.Save(pStream);
+				return m_pCurNode->Save(pStream);
 			}
 			catch (std::exception& exc)
 			{
 				CommonLib::CExcBase::RegenExcT("TBPNodeHolder failed to save addr %1 leaf: %2", m_nAddr, m_IsLeaf, exc);
+				throw;
 			}
 		}
 
@@ -130,7 +130,7 @@ namespace bptreedb
 			return m_nParentAddr;
 		}
 
-		int64_t GetFoundIndex() const
+		int32_t GetFoundIndex() const
 		{
 			return m_nFoundIndex;
 		}
@@ -145,20 +145,19 @@ namespace bptreedb
 			return m_nAddr;
 		}
 
+		void SetFlags(uint32_t flag, bool bSet)
+		{
+			m_pCurNode->SetFlags(flag, bSet);
+		}
+
 		uint32_t GetFlags() const
 		{
-			if (IsLeaf())
-				return m_pLeafNode->GetFlags();
-			else
-				return m_pInnerNode->GetFlags();
+			return m_pCurNode->GetFlags();
 		}
 
 		uint32_t Count() const
 		{
-			if (IsLeaf())
-				return m_pLeafNode->Count();
-			else
-				return m_pInnerNode->Count();
+			return m_pCurNode->Count();
 		}
 
 		const TKey& Key(uint32_t nIndex) const
@@ -201,7 +200,7 @@ namespace bptreedb
 			return m_pInnerNode->Link(nIndex);
 		}
 
-		TLink Next() const
+		TLink GetNext() const
 		{
 			if (IsLeaf())
 				return m_pLeafNode->m_nNext;
@@ -209,7 +208,7 @@ namespace bptreedb
 			throw CommonLib::CExcBase("BTNode holder Next()  Node addr %1 isn't a leaf node", m_nAddr);
 		}
 
-		TLink Prev() const
+		TLink GetPrev() const
 		{
 			if (IsLeaf())
 				return m_pLeafNode->m_nPrev;
@@ -221,16 +220,16 @@ namespace bptreedb
 		{
 			if (IsLeaf())
 				 m_pLeafNode->m_nNext = next;
-
-			throw CommonLib::CExcBase("BTNode holder SetNext()  Node addr %1 isn't a leaf node", m_nAddr);
+			else
+				throw CommonLib::CExcBase("BTNode holder SetNext()  Node addr %1 isn't a leaf node", m_nAddr);
 		}
 
 		void SetPrev(TLink prev)
 		{
 			if (IsLeaf())
 				m_pLeafNode->m_nPrev = prev;
-
-			throw CommonLib::CExcBase("BTNode holder SetPrev()  Node addr %1 isn't a leaf node", m_nAddr);
+			else
+				throw CommonLib::CExcBase("BTNode holder SetPrev()  Node addr %1 isn't a leaf node", m_nAddr);
 		}
 		
 		template<class TComp>
@@ -305,12 +304,12 @@ namespace bptreedb
 
 
 		template<class TComp>
-		int InsertInLeaf(TComp& comp, const TKey& key, int nInsertLeafIndex = -1)
+		void InsertInLeaf(TComp& comp, const TKey& key, int nInsertLeafIndex = -1)
 		{
 			if (!IsLeaf())
 				throw CommonLib::CExcBase("BTNode holder insertInLeaf()  Node addr %1 isn't a leaf node", m_nAddr);
 
-			return m_pLeafNode->insert(comp, key, nInsertLeafIndex);
+			m_pLeafNode->insert(comp, key, nInsertLeafIndex);
 		}
 
 		template<class TComp>
@@ -319,25 +318,25 @@ namespace bptreedb
 			if (IsLeaf())
 				throw CommonLib::CExcBase("BTNode holder InsertInInnerNode()  Node addr %1 isn't an inner node", m_nAddr);
 
-			return m_pInnerNode->insert(comp, key, nLink);
+			return m_pInnerNode->Insert(comp, key, nLink);
 		}
 		
 
 		uint32_t SplitIn(std::shared_ptr<TBPNodeHolder>&  pNewNode, TKey* pSplitKey)
 		{
 			if (IsLeaf())
-				return m_pLeafNode.SplitIn(&pNewNode->m_pLeafNode, pSplitKey);
+				return m_pLeafNode->SplitIn(pNewNode->m_pLeafNode.get(), pSplitKey);
 
-			m_pInnerNode.SplitIn(&pNewNode->m_pInnerNode, pSplitKey);
+			m_pInnerNode->SplitIn(pNewNode->m_pInnerNode.get(), pSplitKey);
 			return 0;
 		}
 
 		uint32_t SplitIn(std::shared_ptr<TBPNodeHolder>& pLeftNode, std::shared_ptr<TBPNodeHolder>& pRightNode, TKey* pSplitKey)
 		{
 			if (IsLeaf())
-				return m_pLeafNode.SplitIn(&pLeftNode->m_pLeafNode, &pRightNode->m_pLeafNode, pSplitKey);
+				return m_pLeafNode->SplitIn(pLeftNode->m_pLeafNode.get(), pRightNode->m_pLeafNode.get(), pSplitKey);
 
-			m_pInnerNode.SplitIn(&pLeftNode->m_pInnerNode, &pRightNode->m_pInnerNode, pSplitKey);
+			m_pInnerNode->SplitIn(pLeftNode->m_pInnerNode.get(), pRightNode->m_pInnerNode.get(), pSplitKey);
 			return 0;
 		}
 
@@ -350,14 +349,27 @@ namespace bptreedb
 
 				m_pInnerNode.reset(new TInnerNode(pAlloc, bMulti, nPageSize));
 				m_pInnerNode->Init(innerComp);
-				m_IsLeaf = true;
+				m_IsLeaf = false;
 				m_pLeafNode.reset();
+
+				m_pCurNode = m_pInnerNode.get();
 			}
-			catch (std::exception exc)
+			catch (std::exception& exc)
 			{
 				CommonLib::CExcBase::RegenExcT("BTNode holder transformToInner failed", exc);
 			}
 		}
+		
+		bool IsNeedSplit() const
+		{
+			return m_pCurNode->IsNeedSplit();
+		}
+
+		void Clear()
+		{
+			m_pCurNode->Clear();
+		}
+
 
 	private:
 		bool m_IsLeaf;
@@ -368,6 +380,8 @@ namespace bptreedb
 
 		TInnerNodePtr m_pInnerNode;
 		TLeafNodePtr m_pLeafNode;
+
+		IBPTreeNode *m_pCurNode;
 
 	};
 }

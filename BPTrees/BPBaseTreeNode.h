@@ -34,7 +34,8 @@ namespace bptreedb
 		virtual bool IsNeedSplit() const = 0;
 
 		virtual uint32_t GetFlags() const;
-		virtual uint64_t GetAddr() const;
+		virtual uint32_t Count() const = 0;
+		//virtual uint64_t GetAddr() const;
 
 		virtual void SetFlags(uint32_t nFlag, bool bSet);
 		virtual void Clear() = 0;

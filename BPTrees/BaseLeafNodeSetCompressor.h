@@ -117,6 +117,7 @@ namespace bptreedb
 				catch (std::exception& exc_src)
 				{
 					CommonLib::CExcBase::RegenExcT("BaseNodeCompressor failed to write leaf node", exc_src);
+					throw;
 				}
 			}
 

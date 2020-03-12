@@ -52,9 +52,33 @@ namespace bptreedb
 
 		}
 
-
+		/*common*/
 		void InnitTree(TInnerCompressorParamsPtr innerParams, TLeafCompressorParamsPtr leafParams);
 		bool IsTreeInit();
+		void Flush();
+		TLink GetPageBTreeInfo() const
+		{
+			return m_nPageBTreeInfo;
+		}
+
+		/*insert*/
+		void insert(TKey& key);
+
+		/*search*/
+		template<class TIterator, class TComparator>
+		TIterator find(const TComparator& comp, const TKey& key, TIterator *pFromIterator = NULL, bool bFindNext = true);
+
+		template<class TIterator>
+		TIterator begin();
+
+		template<class TIterator>
+		TIterator last();
+
+		template<class TIterator, class TComparator>
+		TIterator upper_bound(const TComparator& comp, const TKey& key, TIterator *pFromIterator = NULL, bool bFindNext = true);
+
+		template<class TIterator, class TComparator>
+		TIterator lower_bound(const TComparator& comp, const TKey& key, TIterator *pFromIterator = NULL, bool bFindNext = true);
 
 
 	protected:
@@ -75,11 +99,10 @@ namespace bptreedb
 		TBPTreeNodePtr FindAndSetParent(TBPTreeNodePtr& pNode);
 		void DropNode(TBPTreeNodePtr& pNode);
 		void SaveNode(TBPTreeNodePtr& pNode);
-		void Flush();
+	
 
 		//insert
 		TBPTreeNodePtr findLeafNodeForInsert(const TKey& key);
-		void insert(TKey& key);
 		void CheckLeafNode(TBPTreeNodePtr &pNode);
 		void TransformRootToInner();
 		void SplitLeafNode(TBPTreeNodePtr &pNode, TBPTreeNodePtr &pNewNode, TBPTreeNodePtr &pParentNode);
@@ -126,5 +149,6 @@ namespace bptreedb
 
 #include "BPBaseTreeSetCommon.h"
 #include "BPBaseTreeSetInsert.h"
+#include "BPBaseTreeSearch.h"
 
 }

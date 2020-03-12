@@ -11,12 +11,10 @@ void BPSETBASE_DECLARATION::insert(TKey& key)
 		pNode->SetFlags(CHANGE_NODE, true);
 
 		CheckLeafNode(pNode);
-
-		return true;
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed findLeafNodeForInsert", exc);
+		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed insert", exc);
 	}
 }
 
@@ -56,6 +54,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::findLeafNo
 	catch (std::exception& exc)
 	{
 		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed findLeafNodeForInsert", exc);
+		throw;
 	}
 }
  
@@ -110,18 +109,18 @@ void BPSETBASE_DECLARATION::TransformRootToInner()
 		TBPTreeNodePtr pRightNode = NewNode(true, true);
 
 		TKey splitKey;
-		int nSplitIndex = m_pRoot->SplitIn(pLeftNode.get(), pRightNode.get(), &splitKey);
+		int nSplitIndex = m_pRoot->SplitIn(pLeftNode, pRightNode, &splitKey);
 
 		m_pRoot->Clear();
 		m_pRoot->TransformToInner(m_pAlloc, m_bMulti, m_nNodePageSize, m_InnerCompressParams);
 
-		m_pRoot->SetLess(pLeftNode->addr());
+		m_pRoot->SetLess(pLeftNode->GetAddr());
 		int nInsertIndex = m_pRoot->InsertInInnerNode(m_comp, splitKey, pRightNode->GetAddr());
 
 		pRightNode->SetParent(m_pRoot, nInsertIndex);
 		pLeftNode->SetParent(m_pRoot, -1);
-		pLeftNode->SetNext(pRightNode->addr());
-		pRightNode->SetPrev(pLeftNode->addr());
+		pLeftNode->SetNext(pRightNode->GetAddr());
+		pRightNode->SetPrev(pLeftNode->GetAddr());
 
 		pLeftNode->SetFlags(CHANGE_NODE, true);
 		pRightNode->SetFlags(CHANGE_NODE, true);
@@ -139,7 +138,7 @@ void BPSETBASE_DECLARATION::SplitLeafNode(TBPTreeNodePtr &pNode, TBPTreeNodePtr 
 {
 	try
 	{
-		if (!pNode->IsLeaf() || pNewNode->IsLeaf())
+		if (!pNode->IsLeaf() || !pNewNode->IsLeaf())
 			throw CommonLib::CExcBase("Node isn't a leaf");
 
 		TKey splitKey;
@@ -167,7 +166,7 @@ void BPSETBASE_DECLARATION::SplitLeafNode(TBPTreeNodePtr &pNode, TBPTreeNodePtr 
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed TransformRootToInner", exc);
+		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed SplitLeafNode", exc);
 	}
 }
 
@@ -182,9 +181,9 @@ void BPSETBASE_DECLARATION::SplitRootInnerNode()
 		TBPTreeNodePtr pRightNode = NewNode(false, true);
 		TKey nMedianKey;
 
-		m_pRoot->SplitIn(pLeftNode.get(), pRightNode.get(), &nMedianKey);
-		int nIndex = m_pRoot->InsertInInnerNode(m_comp, nMedianKey, pRightNode->addr());
-		m_pRoot->SetLess(pLeftNode->addr());
+		m_pRoot->SplitIn(pLeftNode, pRightNode, &nMedianKey);
+		int nIndex = m_pRoot->InsertInInnerNode(m_comp, nMedianKey, pRightNode->GetAddr());
+		m_pRoot->SetLess(pLeftNode->GetAddr());
 
 		pLeftNode->SetParent(m_pRoot, -1);
 		pRightNode->SetParent(m_pRoot, nIndex);
@@ -242,8 +241,7 @@ void BPSETBASE_DECLARATION::SplitInnerNode(TBPTreeNodePtr&pNode, TBPTreeNodePtr&
 
 
 		TKey nMedianKey;
-		if (!pNode->SplitIn(pNodeNewRight.get(), &nMedianKey))
-			return;
+		pNode->SplitIn(pNodeNewRight, &nMedianKey);
 
 		SetParentInChildCacheOnly(pNodeNewRight);
 

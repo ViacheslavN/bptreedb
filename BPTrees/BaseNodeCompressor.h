@@ -83,7 +83,7 @@ namespace bptreedb
 					if (!pMemStream)
 						throw CommonLib::CExcBase(L"IStream isn't memstream");
 
-					KeyStream.AttachBuffer(pMemStream->Buffer(), pStream->Pos(), nKeySize);
+					KeyStream.AttachBuffer(pMemStream->Buffer()+ pStream->Pos(), nKeySize);
 					ValueStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos() + nKeySize, nValueSize);
 
 					m_KeyEncoder.Decode(m_nCount, vecKeys, &KeyStream);
@@ -141,6 +141,7 @@ namespace bptreedb
 				catch (std::exception& exc_src)
 				{
 					CommonLib::CExcBase::RegenExcT("BaseNodeCompressor failed to write leaf node", exc_src);
+					throw;
 				}
 			}
 

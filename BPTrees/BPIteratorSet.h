@@ -13,7 +13,7 @@ namespace bptreedb
 		typedef std::shared_ptr<TBTreeNode> TBPTreeNodePtr;
 		typedef _TBTree TBTree;
 
-		TBPSetIterator(TBTree *pTree, TBPTreeNodePtr& pCurNode, int32_t nIndex) :
+		TBPSetIterator(TBTree *pTree, TBPTreeNodePtr pCurNode, int32_t nIndex) :
 			m_pTree(pTree), m_pCurNode(pCurNode), m_nIndex(nIndex)
 		{
 		}

@@ -19,7 +19,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetNode(in
 	 try
 	 {
 		 TBPTreeNodePtr pNode = m_NodeCache.GetElem(nAddr);
-		 if (pNode.get() != nullptr)
+		 if (pNode.get() == nullptr)
 		 {
 			 pNode = LoadNodeFromStorage(nAddr);
 			 AddToCache(pNode);
@@ -30,6 +30,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetNode(in
 	 catch (std::exception& exc)
 	 {
 		 CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed to get node addr %1", nAddr, exc);
+		 throw;
 	 }
 }
 
@@ -65,6 +66,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::LoadNodeFr
 	catch (std::exception& exc)
 	{
 		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed to load node from storage addr %1", nAddr, exc);
+		throw;
 	}
 }
 
@@ -73,7 +75,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::FindAndSet
 {
 	try
 	{
-		const TKey& key = pCheckNode->key(0);
+		const TKey& key = pCheckNode->Key(0);
 		int32_t nIndex = -1;
 		int64_t nNextAddr = m_pRoot->inner_lower_bound(m_comp, key, nIndex);
 		TBPTreeNodePtr pParent = m_pRoot;
@@ -88,7 +90,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::FindAndSet
 			if (pCheckNode->GetAddr() == nNextAddr)
 			{
 				pCheckNode->SetParent(pParent, nIndex);
-				break;
+				return pParent;
 			}
 
 			TBPTreeNodePtr pNode = GetNode(nNextAddr);
@@ -101,10 +103,13 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::FindAndSet
 			nNextAddr = pNode->inner_lower_bound(m_comp, key, nIndex);
 			pParent = pNode;
 		}
+
+		throw CommonLib::CExcBase("FindParent failed to find parent for node addr %1", pCheckNode->GetAddr());
 	}
 	catch (std::exception& exc)
 	{
 		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase FindParent failed to find parent node", exc);
+		throw;
 	}
 }
 
@@ -113,6 +118,8 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetParentN
 {
 	try
 	{
+		if (pNode->GetAddr() == m_nRootAddr)
+			return TBPTreeNodePtr();
 
 		TBPTreeNodePtr pParent = std::static_pointer_cast<TBPTreeNode>(pNode->GetParentNodePtr());
 		if (!pParent.get())
@@ -121,7 +128,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetParentN
 			pNode->SetParent(pParent, pNode->GetFoundIndex());
 		}
 
-		if (!pParent.get() && pNode->GetAddr() != m_nRootAddr)
+		if (!pParent.get())
 		{
 			pParent = FindAndSetParent(pNode);
 			if (!pParent.get())
@@ -136,6 +143,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetParentN
 	catch (std::exception& exc)
 	{
 		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase GetParentNode failed to find parent node", exc);
+		throw;
 	}
 }
 
@@ -148,7 +156,7 @@ void BPSETBASE_DECLARATION::SetParentForNextNode(TBPTreeNodePtr& pNode, TBPTreeN
 		int32_t nFoundIndex = pNode->GetFoundIndex();
 		TBPTreeNodePtr pParent = GetParentNode(pNode);
 
-		if ((nFoundIndex + 1) < (int32_t)pParent->count() || nFoundIndex == -1)
+		if ((nFoundIndex + 1) < (int32_t)pParent->Count() || nFoundIndex == -1)
 		{
 			pNodeNext->SetParent(pParent, nFoundIndex + 1);
 			return;
@@ -229,6 +237,7 @@ bool BPSETBASE_DECLARATION::IsTreeInit()
 	}
 	catch (std::exception& exc)
 	{
+		exc;
 		 //TO DO log
 	}
 
@@ -262,10 +271,12 @@ void  BPSETBASE_DECLARATION::InnitTree(TInnerCompressorParamsPtr innerParams, TL
 		stream.Write(bLeafParams);
 
 		if (bInnerParams)
-			innerParams->Write(&stream);
+			innerParams->Save(&stream);
 	
 		if (bLeafParams)
-			leafParams->Write(&stream);
+			leafParams->Save(&stream);
+
+		stream.Close();
 
 		m_pRoot = CreateNode(m_nRootAddr, true, false); 
 		m_pRoot->SetFlags(ROOT_NODE, true);
@@ -365,6 +376,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::CreateNode
 	catch (std::exception& exc)
 	{
 		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase to CreateNode addr %1, isLeaf %2, addToCache %3", nAddr, isLeaf, addToChache, exc);
+		throw;
 	}
 }
 
@@ -385,11 +397,14 @@ void BPSETBASE_DECLARATION::Flush()
 		{
 			
 			TBPTreeNodePtr pBNode = m_NodeCache.RemoveBack();
-			if (!pBNode->GetFlags() & CHANGE_NODE)
+			if (!(pBNode->GetFlags() & CHANGE_NODE))
 				continue;
 
 			SaveNode(pBNode);
 		}
+
+		if (m_pRoot->GetFlags() & CHANGE_NODE)
+			SaveNode(m_pRoot);
 
 		m_bLockRemoveItemFromCache = false;
 	}

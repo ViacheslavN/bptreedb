@@ -25,14 +25,14 @@ namespace bptreedb
 		typedef std::shared_ptr<TLeafCompressorParams> TLeafCompressorParamsPtr;
 
 		BPTreeLeafNodeSetBase(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize) :
-			m_KeyMemSet(TAlloc(pAlloc)), m_Compressor(nPageSize - 2 * sizeof(TLink), pAlloc), m_nNext(-1), m_nPrev(-1), m_bMulti(bMulti),
+			m_KeyMemSet(TAlloc(pAlloc)), m_Compressor(nPageSize - 2 * sizeof(TLink), pAlloc, TLeafCompressorParamsPtr()), m_nNext(-1), m_nPrev(-1), m_bMulti(bMulti),
 			m_pAlloc(pAlloc), m_nPageSize(nPageSize)
 
 		{
 
 		}
 
-		~BPTreeLeafNodeSetBase()
+		virtual ~BPTreeLeafNodeSetBase()
 		{
 
 		}
@@ -111,7 +111,7 @@ namespace bptreedb
 		{
 			int32_t nIndex = 0;
 			insertImp(comp, key, nIndex, nInsertLeafIndex);
-			m_Compressor.insert(nIndex, m_KeyMemSet[nIndex], m_KeyMemSet);
+			m_Compressor.Insert(nIndex, m_KeyMemSet[nIndex], m_KeyMemSet);
 		}
 		
 		template<class TComp>
@@ -229,23 +229,24 @@ namespace bptreedb
 
 				if (m_bMinSplit)
 				{
-					m_Compressor.remove((uint32_t)m_KeyMemSet.size() - 1, m_KeyMemSet.back(), m_KeyMemSet);
+					m_Compressor.Remove((uint32_t)m_KeyMemSet.size() - 1, m_KeyMemSet.back(), m_KeyMemSet);
 					uint32_t nSplitIndex = SplitOne(m_KeyMemSet, newNodeMemSet, pSplitKey);
 
-					NewNodeComp.insert(0, newNodeMemSet[0], newNodeMemSet);
+					NewNodeComp.Insert(0, newNodeMemSet[0], newNodeMemSet);
 					return nSplitIndex;
 				}
 				else
 				{
 					int32_t nSplitIndex = SplitInVec(m_KeyMemSet, newNodeMemSet, pSplitKey);
-					m_Compressor.recalc(m_KeyMemSet);
-					NewNodeComp.recalc(newNodeMemSet);
+					m_Compressor.Recalc(m_KeyMemSet);
+					NewNodeComp.Recalc(newNodeMemSet);
 					return nSplitIndex;
 				}
 			}
-			catch (std::exception exc)
+			catch (std::exception& exc)
 			{
 				CommonLib::CExcBase::RegenExcT("BPTreeLeafNode failed to SplitIn", exc);
+				throw;
 			}
 			
 		}
@@ -269,18 +270,19 @@ namespace bptreedb
 				SplitInVec(m_KeyMemSet, leftNodeMemSet, 0, nSize);
 				SplitInVec(m_KeyMemSet, rightNodeMemSet, nSize, (uint32_t)m_KeyMemSet.size() - nSize);
 
-				pleftNodeComp.recalc(leftNodeMemSet);
-				pRightNodeComp.recalc(rightNodeMemSet);
+				pleftNodeComp.Recalc(leftNodeMemSet);
+				pRightNodeComp.Recalc(rightNodeMemSet);
 				return nSize;
 			}
-			catch (std::exception exc)
+			catch (std::exception& exc)
 			{
 				CommonLib::CExcBase::RegenExcT("BPTreeLeafNode failed to SplitIn", exc);
+				throw;
 			}
 
 		}
 
-		uint32_t Count() const
+		virtual uint32_t Count() const
 		{
 			return (uint32_t)m_KeyMemSet.size();
 		}
@@ -295,7 +297,7 @@ namespace bptreedb
 			if(nIndex < m_KeyMemSet.size())
 				return m_KeyMemSet[nIndex];
 
-			throw CExcBase("out of range for Leaf Node get key  count %1, index %2", m_KeyMemSet.size(), nIndex);
+			throw CommonLib::CExcBase("out of range for Leaf Node get key  count %1, index %2", m_KeyMemSet.size(), nIndex);
 		}
 
 		TKey& Key(uint32_t nIndex)
@@ -303,7 +305,7 @@ namespace bptreedb
 			if (nIndex < m_KeyMemSet.size())
 				return m_KeyMemSet[nIndex];
 
-			throw CExcBase("out of range for Leaf Node get key  count %1, index %2", m_KeyMemSet.size(), nIndex);
+			throw CommonLib::CExcBase("out of range for Leaf Node get key  count %1, index %2", m_KeyMemSet.size(), nIndex);
 		}
 
 		template<class TVector>
@@ -390,7 +392,7 @@ namespace bptreedb
 			m_bMinSplit = bMinSplit;
 		}
 
-		virtual void clear()
+		virtual void Clear()
 		{
 			m_KeyMemSet.clear();
 			m_Compressor.Clear();
@@ -447,6 +449,9 @@ namespace bptreedb
 			TBase(pAlloc, bMulti, nPageSize)
 		{}
 
+		virtual ~BPTreeLeafNode()
+		{}
+
 		void Init(TLeafCompressorParamsPtr pParams)
 		{
 			this->m_Compressor.Init(pParams);
@@ -456,13 +461,14 @@ namespace bptreedb
 		{
 			try
 			{
-				stream.Write(this->m_nNext);
-				stream.Write(this->m_nPrev);
+				stream->Write(this->m_nNext);
+				stream->Write(this->m_nPrev);
 				return this->m_Compressor.Write(this->m_KeyMemSet, stream);
 			}
 			catch (std::exception& exc)
 			{
 				CommonLib::CExcBase::RegenExcT("Leaf node  failed to save", exc);
+				throw;
 			}
 
 		}
@@ -471,8 +477,8 @@ namespace bptreedb
 		{
 			try
 			{
-				stream.Read(this->m_nNext);
-				stream.Read(this->m_nPrev);
+				stream->Read(this->m_nNext);
+				stream->Read(this->m_nPrev);
 				this->m_Compressor.Load(this->m_KeyMemSet, stream);
 			}
 			catch (std::exception& exc)
