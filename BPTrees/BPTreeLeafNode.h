@@ -220,14 +220,17 @@ namespace bptreedb
 
 		}
 
-		int32_t  SplitIn(BPTreeLeafNodeSetBase *pNode, TKey* pSplitKey)
+		int32_t  SplitIn(BPTreeLeafNodeSetBase *pNode, int32_t count, TKey* pSplitKey)
 		{
 			try
 			{
+				if (count > (m_KeyMemSet.size() - 1))
+					throw CommonLib::CExcBase("invalid count %1", count);
+
 				TKeyMemSet& newNodeMemSet = pNode->m_KeyMemSet;
 				TCompressor& NewNodeComp = pNode->m_Compressor;
 
-				if (m_bMinSplit)
+			/*	if (m_bMinSplit)
 				{
 					m_Compressor.Remove((uint32_t)m_KeyMemSet.size() - 1, m_KeyMemSet.back(), m_KeyMemSet);
 					uint32_t nSplitIndex = SplitOne(m_KeyMemSet, newNodeMemSet, pSplitKey);
@@ -236,12 +239,15 @@ namespace bptreedb
 					return nSplitIndex;
 				}
 				else
-				{
-					int32_t nSplitIndex = SplitInVec(m_KeyMemSet, newNodeMemSet, pSplitKey);
-					m_Compressor.Recalc(m_KeyMemSet);
-					NewNodeComp.Recalc(newNodeMemSet);
-					return nSplitIndex;
-				}
+				{*/
+
+				int32_t nBegin = (int32_t)m_KeyMemSet.size() - count;
+
+				int32_t nSplitIndex = SplitInVec(m_KeyMemSet, newNodeMemSet, pSplitKey, nBegin, (int32_t)m_KeyMemSet.size());
+				m_Compressor.Recalc(m_KeyMemSet);
+				NewNodeComp.Recalc(newNodeMemSet);
+				return nSplitIndex;
+			//	}
 			}
 			catch (std::exception& exc)
 			{
@@ -426,7 +432,6 @@ namespace bptreedb
 		TLink m_nPrev;
 		bool m_bMulti;
 		CommonLib::IAllocPtr m_pAlloc;
-		bool m_bMinSplit;
 		uint32_t m_nPageSize;
 	};
 

@@ -31,7 +31,9 @@ namespace bptreedb
 
 
 			TBaseNodeCompressor(uint32_t nPageSize, CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr pParams) : m_nCount(0),
-				m_nPageSize(nPageSize), m_KeyEncoder(nPageSize, pAlloc, pParams), m_ValueEncoder(nPageSize, pAlloc, pParams)
+				m_nPageSize(nPageSize), 
+				m_KeyEncoder( pAlloc, pParams), 
+				m_ValueEncoder( pAlloc, pParams)
 			{}
 
 			static TCompressorParamsBasePtr LoadCompressorParams(CommonLib::IReadStream *pStream)
@@ -73,6 +75,9 @@ namespace bptreedb
 					if (!m_nCount)
 						return;
 
+					if (m_nCount > 1000000)
+						throw CommonLib::CExcBase(L"Wrong size %1", m_nCount);
+
 					vecKeys.reserve(m_nCount);
 					vecValues.reserve(m_nCount);
 
@@ -86,8 +91,8 @@ namespace bptreedb
 					KeyStream.AttachBuffer(pMemStream->Buffer()+ pStream->Pos(), nKeySize);
 					ValueStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos() + nKeySize, nValueSize);
 
-					m_KeyEncoder.Decode(m_nCount, vecKeys, &KeyStream);
-					m_ValueEncoder.Decode(m_nCount, vecValues, &ValueStream);
+					m_KeyEncoder.Decode(m_nCount, vecKeys, &KeyStream, nKeySize);
+					m_ValueEncoder.Decode(m_nCount, vecValues, &ValueStream, nValueSize);
 
 				}
 				catch (std::exception& exc_src)
@@ -112,31 +117,42 @@ namespace bptreedb
 					if (!nSize)
 						return 0;
 
-					CommonLib::CFxMemoryWriteStream ValueStream;
-					CommonLib::CFxMemoryWriteStream KeyStream;
+					uint32_t maxCompSize = (m_nPageSize - HeadSize()) / 2;
 
+	
 					m_KeyEncoder.BeginEncoding(vecKeys);
-					m_ValueEncoder.BeginEncoding(vecValues);
-
-					uint32_t nKeySize = m_KeyEncoder.GetCompressSize();
-					uint32_t nValueSize = m_ValueEncoder.GetCompressSize();
+					m_ValueEncoder.BeginEncoding(vecValues);					
 					
-					pStream->Write(nKeySize);
-					pStream->Write(nValueSize);
+					size_t sizePos = pStream->Pos();
 
-					CommonLib::IMemoryStream *pMemStream = dynamic_cast<CommonLib::IMemoryStream *>(pStream); // TO DO fix
-					if (!pMemStream)
-						throw CommonLib::CExcBase(L"IStream isn't memstream");
+					uint32_t keySize = 0;
+					uint32_t valueSize = 0;
+					pStream->Write(keySize);
+					pStream->Write(valueSize);
 
-					KeyStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos(), nKeySize);
-					ValueStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos() + nKeySize, nValueSize);
+					size_t keyStartPos = pStream->Pos();
+					uint32_t keys = m_KeyEncoder.Encode(vecKeys, pStream, maxCompSize);
+					if (keys != 0)
+						return keys;
 
-					pStream->Seek(pStream->Pos() + nKeySize + nValueSize, CommonLib::soFromBegin);
+					size_t valueStartPos = pStream->Pos();
+					keySize = (uint32_t)(valueStartPos - keyStartPos);
 
-					uint32_t keys = m_KeyEncoder.Encode(vecKeys, &KeyStream);
-					uint32_t values = m_ValueEncoder.Encode(vecValues, &ValueStream);
+					maxCompSize = uint32_t(pStream->Size() - valueStartPos);
+					uint32_t values = m_ValueEncoder.Encode(vecValues, pStream, maxCompSize);
+					if (values != 0)
+						return values;
 
-					return keys < values ? values : keys;
+					size_t endPos =  pStream->Pos();
+					valueSize = (uint32_t)(endPos - valueStartPos);
+
+					pStream->Seek(sizePos, CommonLib::soFromBegin);
+					pStream->Write(keySize);
+					pStream->Write(valueSize);
+					pStream->Seek(endPos, CommonLib::soFromBegin);
+
+					return 0;
+
 				}
 				catch (std::exception& exc_src)
 				{

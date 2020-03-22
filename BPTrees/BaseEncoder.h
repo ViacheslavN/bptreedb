@@ -24,7 +24,7 @@ namespace bptreedb
 
 
 		TBaseValueEncoder(uint32_t nPageSize, CommonLib::IAllocPtr& pAlloc, TCompressorParamsPtr pParams) :
-			m_encoder(nPageSize, pAlloc, pParams)
+			m_encoder(pAlloc, pParams)
 		{}
 
 		~TBaseValueEncoder()
@@ -33,17 +33,19 @@ namespace bptreedb
 	
 		void  Init(TCompressorParamsPtr pParams)
 		{
-
+			m_encoder.Init(pParams);
 		}
 
 		void AddSymbol(uint32_t nSize, int nIndex, TValue nValue, const TValueMemSet& vecValues)
 		{
 			m_encoder.AddSymbol(vecValues[nIndex]);
+			m_nCount += 1;
 		}
 
 		void RemoveSymbol(uint32_t nSize, int nIndex, TValue nValue, const TValueMemSet& vecValues)
 		{
 			m_encoder.RemoveSymbol(vecValues[nIndex]);
+			m_nCount -= 1;
 		}
 
 		uint32_t GetCompressSize() const
@@ -56,23 +58,24 @@ namespace bptreedb
 
 		}
 
-		uint64_t Encode(const TValueMemSet& vecValues, CommonLib::IWriteStream *pStream)
-		{		
-
+		uint64_t Encode(const TValueMemSet& vecValues, CommonLib::IWriteStream *pStream, uint32_t maxCompSize)
+		{
 			try
 			{
 				if (m_nCount == vecValues.size())
 					throw CommonLib::CExcBase("BaseValueEncoder  wrong size, count: %1, values size: %2", m_nCount, vecValues.size());
 
-				m_encoder.BeginEncoding(pStream);
+				m_encoder.Clear();
+				m_encoder.BeginEncoding(pStream, maxCompSize);
 
 				for (size_t i = 0; i < vecValues.size(); ++i)
 				{
-					if(!m_encoder.EncodeSymbol(vecValues[i], pStream))
-						return vecValues.size() - 1;
+					if(!m_encoder.EncodeSymbol(vecValues[i]))
+						return vecValues.size() - i;
 				}
 
-				return m_encoder.FinishEncoding(pStream);
+				if (!m_encoder.FinishEncoding(pStream))
+					return vecValues.size() - 2; //heuristic
 			}
 			catch (std::exception& exc_src)
 			{
@@ -110,6 +113,7 @@ namespace bptreedb
 
 	private:
 		TEncoder m_encoder;
+		uint32_t m_nCount{ 0 };
 	};
 }
 

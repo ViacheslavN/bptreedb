@@ -178,7 +178,7 @@ namespace bptreedb
 		try
 		{
 			m_file.SetFilePos64(m_offset + (nAddr * m_minPageSize), CommonLib::soFromBegin);
-			uint32_t nWCnt = m_file.Read(pData, nSize);
+			uint32_t nWCnt = (uint32_t)m_file.Read(pData, nSize);
 			if (nWCnt != nSize)
 				throw CommonLib::CExcBase("can't read the requested size, page size: %1, returned size: %2", nSize, nWCnt);
 
@@ -208,11 +208,11 @@ namespace bptreedb
 					m_bufForChiper.resize(nSize);
 
 				m_pageCipher->encryptBuf(pData, &m_bufForChiper[0], nSize);
-				nCnt = m_file.Write(&m_bufForChiper[0], nSize);
+				nCnt = (uint32_t)m_file.Write(&m_bufForChiper[0], nSize);
 			}
 			else
 			{
-				nCnt = m_file.Write(pData, nSize);
+				nCnt = (uint32_t)m_file.Write(pData, nSize);
 			}
 
 			if (nCnt != nSize)

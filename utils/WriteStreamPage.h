@@ -64,6 +64,11 @@ namespace bptreedb
 					write_bytes_impl(buffer, size, true);
 				}
 
+				virtual bool IsEnoughSpace(size_t size) const
+				{
+					return true;
+				}
+
 				virtual void Close()
 				{
 

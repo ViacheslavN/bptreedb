@@ -322,12 +322,12 @@ namespace bptreedb
 		}
 		
 
-		uint32_t SplitIn(std::shared_ptr<TBPNodeHolder>&  pNewNode, TKey* pSplitKey)
+		uint32_t SplitIn(std::shared_ptr<TBPNodeHolder>&  pNewNode, int32_t count, TKey* pSplitKey)
 		{
 			if (IsLeaf())
-				return m_pLeafNode->SplitIn(pNewNode->m_pLeafNode.get(), pSplitKey);
+				return m_pLeafNode->SplitIn(pNewNode->m_pLeafNode.get(), count, pSplitKey);
 
-			m_pInnerNode->SplitIn(pNewNode->m_pInnerNode.get(), pSplitKey);
+			m_pInnerNode->SplitIn(pNewNode->m_pInnerNode.get(), count, pSplitKey);
 			return 0;
 		}
 

@@ -53,7 +53,7 @@ namespace bptreedb
 		}
 
 		/*common*/
-		void InnitTree(TInnerCompressorParamsPtr innerParams, TLeafCompressorParamsPtr leafParams);
+		void InnitTree(TInnerCompressorParamsPtr innerParams, TLeafCompressorParamsPtr leafParams, bool bMinSplit);
 		bool IsTreeInit();
 		void Flush();
 		TLink GetPageBTreeInfo() const
@@ -105,10 +105,10 @@ namespace bptreedb
 		TBPTreeNodePtr findLeafNodeForInsert(const TKey& key);
 		void CheckLeafNode(TBPTreeNodePtr &pNode);
 		void TransformRootToInner();
-		void SplitLeafNode(TBPTreeNodePtr &pNode, TBPTreeNodePtr &pNewNode, TBPTreeNodePtr &pParentNode);
+		void SplitLeafNode(TBPTreeNodePtr &pNode, TBPTreeNodePtr &pNewNode, TBPTreeNodePtr &pParentNode, int32_t nCount);
 		void SplitRootInnerNode();
 		void SetParentInChildCacheOnly(TBPTreeNodePtr& pNode);
-		void SplitInnerNode(TBPTreeNodePtr&pNode, TBPTreeNodePtr& pParentNode);
+		void SplitInnerNode(TBPTreeNodePtr&pNode, TBPTreeNodePtr& pNodeNewRight, TBPTreeNodePtr& pParentNode, int32_t nCount);
 
 	protected:
 		

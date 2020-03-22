@@ -122,7 +122,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetParentN
 			return TBPTreeNodePtr();
 
 		TBPTreeNodePtr pParent = std::static_pointer_cast<TBPTreeNode>(pNode->GetParentNodePtr());
-		if (!pParent.get())
+		if (!pParent.get() && pNode->GetParentAddr() != -1)
 		{
 			pParent = GetNode(pNode->GetParentAddr());
 			pNode->SetParent(pParent, pNode->GetFoundIndex());
@@ -246,14 +246,14 @@ bool BPSETBASE_DECLARATION::IsTreeInit()
 
 
 BPSETBASE_TEMPLATE_PARAMS
-void  BPSETBASE_DECLARATION::InnitTree(TInnerCompressorParamsPtr innerParams, TLeafCompressorParamsPtr leafParams)
+void  BPSETBASE_DECLARATION::InnitTree(TInnerCompressorParamsPtr innerParams, TLeafCompressorParamsPtr leafParams, bool bMinSplit)
 {
 	try
 	{
 		if (IsTreeInit())
 			throw CommonLib::CExcBase("BTree has been created already");
 
-
+		m_bMinSplit = bMinSplit;
 		if (m_nPageBTreeInfo == -1)
 			m_nPageBTreeInfo = m_pStorage->GetNewFilePageAddr(m_nNodePageSize);
 
@@ -328,9 +328,14 @@ void BPSETBASE_DECLARATION::LoadTree()
 BPSETBASE_TEMPLATE_PARAMS
 void BPSETBASE_DECLARATION::SaveNode(TBPTreeNodePtr& pNode)
 {
+	int64_t nAddr = pNode.get() ? pNode->GetAddr() : -1;
+	int64_t nParent = pNode.get() ? pNode->GetParentAddr() : -1;
+	uint32_t nInCount = pNode.get() ? pNode->Count() : 0;
+	bool isLeaf = pNode.get() ? pNode->IsLeaf() : false;
+
 	try
 	{
-		FilePagePtr pPage = m_pStorage->GetEmptyFilePage(pNode->GetAddr(), m_nNodePageSize);
+		FilePagePtr pPage = m_pStorage->GetEmptyFilePage(nAddr, m_nNodePageSize);
 		CommonLib::CFxMemoryWriteStream stream;
 		stream.AttachBuffer(pPage->GetData(), pPage->GetPageSize());
 
@@ -338,7 +343,27 @@ void BPSETBASE_DECLARATION::SaveNode(TBPTreeNodePtr& pNode)
 		while (nCount != 0)
 		{
 
-			//TO DO split
+			TBPTreeNodePtr pParentNode = GetParentNode(pNode);
+			if (pParentNode.get() == nullptr)
+			{
+				if (pNode->IsLeaf())
+					TransformRootToInner();
+				else
+					SplitRootInnerNode();
+			}
+			else			
+			{
+				if (pNode->IsLeaf())
+				{				
+					TBPTreeNodePtr pNewNode = NewNode(true, true);
+					SplitLeafNode(pNode, pNewNode, pParentNode, nCount);
+				}
+				else
+				{
+					TBPTreeNodePtr pNewNode = NewNode(false, true);
+					SplitInnerNode(pNode, pNewNode, pParentNode, nCount);
+				}
+			}
 
 			stream.Seek(0, CommonLib::soFromBegin);
 			nCount = pNode->Save(&stream);
@@ -350,7 +375,7 @@ void BPSETBASE_DECLARATION::SaveNode(TBPTreeNodePtr& pNode)
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed to save node addr",  exc);
+		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed to save node addr: %1, parent: %2, count: %3, leaf: %4", nAddr, nParent, nInCount, isLeaf, exc);
 	}
 }
 
@@ -393,6 +418,9 @@ void BPSETBASE_DECLARATION::Flush()
 	{
 		m_bLockRemoveItemFromCache = true; // TO DO use RAII
 
+		if (m_pRoot->GetFlags() & CHANGE_NODE)
+			SaveNode(m_pRoot);
+
 		while (m_NodeCache.Size())
 		{
 			
@@ -401,11 +429,11 @@ void BPSETBASE_DECLARATION::Flush()
 				continue;
 
 			SaveNode(pBNode);
+
+			if (m_pRoot->GetFlags() & CHANGE_NODE)
+				SaveNode(m_pRoot);
 		}
-
-		if (m_pRoot->GetFlags() & CHANGE_NODE)
-			SaveNode(m_pRoot);
-
+		
 		m_bLockRemoveItemFromCache = false;
 	}
 	catch (std::exception& exc)

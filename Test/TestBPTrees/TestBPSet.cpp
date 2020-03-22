@@ -22,9 +22,24 @@ struct comp
 	}*/
 };
 
+
+typedef bptreedb::TZstdEncoder<int64_t> TEncoder;
+typedef bptreedb::TZstdEncoder<int64_t>::CZLibCompParams  TCompParams;
+typedef bptreedb::BPTreeLeafNode<int64_t, bptreedb::TBaseLeafNodeSetCompressor<int64_t, TEncoder, TCompParams> > TLeafNode;
+typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TEncoder, TEncoder, TCompParams > > TInnerNode;
+typedef bptreedb::TBPSet<int64_t, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPSet;
+
+/*
+typedef bptreedb::TZLibEncoder<int64_t> TEncoder;
+typedef bptreedb::TZLibEncoder<int64_t>::CZLibCompParams  TCompParams;
+typedef bptreedb::BPTreeLeafNode<int64_t, bptreedb::TBaseLeafNodeSetCompressor<int64_t, TEncoder, TCompParams> > TLeafNode;
+typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TEncoder, TEncoder, TCompParams > > TInnerNode;
+typedef bptreedb::TBPSet<int64_t, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPSet;*/
+
+/*
 typedef bptreedb::BPTreeLeafNode<int64_t, bptreedb::TBaseLeafNodeSetCompressor<int64_t> > TLeafNode;
 typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t> > TInnerNode;
-typedef bptreedb::TBPSet<int64_t, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPSet;
+typedef bptreedb::TBPSet<int64_t, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPSet;*/
 
 template <class TBPTree, class TStorage>
 uint64_t CreateBPTreeSet(CommonLib::IAllocPtr pAlloc, TStorage pStorage)
@@ -36,8 +51,14 @@ uint64_t CreateBPTreeSet(CommonLib::IAllocPtr pAlloc, TStorage pStorage)
 		TBPSet tree(-1, pStorage, pAlloc, 10, nPageSize);
 
 		typename TInnerNode::TInnerCompressorParamsPtr innerCompParmas (new TInnerNode::TInnerCompressorParams());
+		innerCompParmas->m_compressRate = 100;
+	//	innerCompParmas->m_compressLevel = 100;
+
 		typename TLeafNode::TLeafCompressorParamsPtr leafCompParmas (new TLeafNode::TLeafCompressorParams());
-		tree.InnitTree(innerCompParmas, leafCompParmas);
+		leafCompParmas->m_compressRate = 100;
+	//	innerCompParmas->m_compressLevel = 100;
+
+		tree.InnitTree(innerCompParmas, leafCompParmas, false);
 		tree.Flush();
 		return tree.GetPageBTreeInfo();
 	}
@@ -57,6 +78,9 @@ void InsertBPTreeSet(CommonLib::IAllocPtr pAlloc, TStorage pStorage, int64_t nBP
 	{
 		int64_t nCount = (nEnd - nBegin);
 		int64_t nStep = nCount / 100;
+
+		if (nStep == 0)
+			nStep = 1;
 
 		std::cout << "InsertBPTreeSet begin: " << nBegin  << " end: " << nEnd << "\n";
 
@@ -89,7 +113,7 @@ void InsertBPTreeSet(CommonLib::IAllocPtr pAlloc, TStorage pStorage, int64_t nBP
 	}
 	catch (std::exception& exe)
 	{
-		CommonLib::CExcBase::RegenExc("Failed create BPTreeSet", exe);
+		CommonLib::CExcBase::RegenExc("Failed to insert BPTreeSet", exe);
 	}
 }
 
@@ -103,6 +127,8 @@ void FindBPTreeSet(CommonLib::IAllocPtr pAlloc, TStorage pStorage, int64_t nBPTr
 	{
 		int64_t nCount = (nEnd - nBegin);
 		int64_t nStep = nCount / 100;
+		if (nStep == 0)
+			nStep = 1;
 
 		std::cout << "FindBPTreeSet begin: " << nBegin << " end: " << nEnd << "\n";
 
@@ -141,7 +167,7 @@ void TestBPTreeSet()
 	try
 	{
 		int64_t nBegin = 0;
-		int64_t nEnd = 100000000;
+		int64_t nEnd = 20000000;
 		int64_t nBPTreePage = -1;
 
 		CommonLib::IAllocPtr pAlloc(new CommonLib::CSimpleAlloc(true));
@@ -157,6 +183,11 @@ void TestBPTreeSet()
 			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
 			pStorage->Open(L"F:\\BPSetTest.btdb", false, nPageSize);
 			InsertBPTreeSet<TBPSet, bptreedb::TStoragePtr>(pAlloc, pStorage, nBPTreePage, nBegin, nEnd);
+
+			pStorage->Close();
+
+			CommonLib::file::TFilePtr file = CommonLib::file::CFileCreator::OpenFile(L"F:\\BPSetTest.btdb", CommonLib::file::ofmOpenExisting, CommonLib::file::arRead, CommonLib::file::smNoMode, CommonLib::file::oftBinary);
+			std::cout << "Storage size: " << file->GetFileSize() << "\n";
 		}
 
 		{

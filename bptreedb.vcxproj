@@ -309,6 +309,8 @@
     <ClInclude Include="BPTrees\BPBaseTreeSet.h" />
     <ClInclude Include="BPTrees\Compressor\CompressorParams.h" />
     <ClInclude Include="BPTrees\Compressor\CompressUtils.h" />
+    <ClInclude Include="BPTrees\Compressor\ZlibCompressor\ZLibEncoder.h" />
+    <ClInclude Include="BPTrees\Compressor\ZstdEncoder.h" />
     <ClInclude Include="BPTrees\EmptyEncoder.h" />
     <ClInclude Include="crypto\PageCipher.h" />
     <ClInclude Include="stdafx.h" />

@@ -32,7 +32,7 @@ public:
 
 	BPTreeInnerNode(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize) :
 		m_nLess(-1), m_innerKeyMemSet(TKeyAlloc(pAlloc)), m_innerLinkMemSet(TLinkAlloc(pAlloc)), m_bMulti(bMulti),
-		m_pAlloc(pAlloc), m_bMinSplit(false), m_nPageSize(nPageSize), m_Compressor(nPageSize - sizeof(TLink), pAlloc, TInnerCompressorParamsPtr())
+		m_pAlloc(pAlloc), m_nPageSize(nPageSize), m_Compressor(nPageSize - sizeof(TLink), pAlloc, TInnerCompressorParamsPtr())
 	{
 
 	}
@@ -267,92 +267,33 @@ public:
 
 	}
 
-	void SplitIn(BPTreeInnerNode *pNode, TKey* pSplitKey)
+	void SplitIn(BPTreeInnerNode *pNode, int32_t count, TKey* pSplitKey)
 	{
 		try
 		{
+			if (count > (m_innerKeyMemSet.size() - 2))
+				throw CommonLib::CExcBase("invalid count %1", count);
+
 			TKeyMemSet& newNodeKeySet = pNode->m_innerKeyMemSet;
 			TLinkMemSet& newNodeLinkSet = pNode->m_innerLinkMemSet;
 			TCompressor& pNewNodeComp = pNode->m_Compressor;
 
-			if (m_bMinSplit)
-			{
+			int32_t nBegin = (int32_t)m_innerKeyMemSet.size() - count;
 
-				//uint32_t nNewSize = m_innerKeyMemSet.size() - 2;
-				uint32_t nLessIndex = (uint32_t)m_innerKeyMemSet.size() - 2;
-				uint32_t nSplitIndex = (uint32_t)m_innerKeyMemSet.size() - 1;
+			std::move(std::next(m_innerKeyMemSet.begin(), nBegin + 1), m_innerKeyMemSet.end(), std::inserter(newNodeKeySet, newNodeKeySet.begin()));
+			std::move(std::next(m_innerLinkMemSet.begin(), nBegin + 1), m_innerLinkMemSet.end(), std::inserter(newNodeLinkSet, newNodeLinkSet.begin()));
+			
+			uint32_t nNewSize = nBegin;
 
+			*pSplitKey = m_innerKeyMemSet[nNewSize];
+			pNode->m_nLess = m_innerLinkMemSet[nNewSize];
+			
+			m_innerKeyMemSet.resize(nNewSize);
+			m_innerLinkMemSet.resize(nNewSize);
 
+			m_Compressor.Recalc(m_innerKeyMemSet, m_innerLinkMemSet);
+			pNewNodeComp.Recalc(newNodeKeySet, newNodeLinkSet);
 
-				newNodeKeySet.push_back(m_innerKeyMemSet[nSplitIndex]);
-				newNodeLinkSet.push_back(m_innerLinkMemSet[nSplitIndex]);
-
-
-
-
-				m_Compressor.Remove(nSplitIndex, m_innerKeyMemSet[nSplitIndex], m_innerLinkMemSet[nSplitIndex], m_innerKeyMemSet, m_innerLinkMemSet);
-				pNewNodeComp.Insert(0, newNodeKeySet[0], newNodeLinkSet[0], newNodeKeySet, newNodeLinkSet);
-
-				m_innerKeyMemSet.resize(nSplitIndex);
-				m_innerLinkMemSet.resize(nSplitIndex);
-
-				while (true)
-				{
-
-					if (!this->IsNeedSplit())
-						break;
-
-					m_Compressor.Remove(nLessIndex, m_innerKeyMemSet[nLessIndex], m_innerLinkMemSet[nLessIndex], m_innerKeyMemSet, m_innerLinkMemSet);
-
-
-					newNodeKeySet.insert(newNodeKeySet.begin(), m_innerKeyMemSet[nLessIndex]);
-					newNodeLinkSet.insert(newNodeLinkSet.begin(), m_innerLinkMemSet[nLessIndex]);
-
-
-					m_innerKeyMemSet.resize(nLessIndex);
-					m_innerLinkMemSet.resize(nLessIndex);
-
-					pNewNodeComp.Insert((uint32_t)newNodeKeySet.size() - 1, newNodeKeySet.back(), newNodeLinkSet.back(), newNodeKeySet, newNodeLinkSet);
-
-					--nLessIndex;
-				}
-			//	assert(nLessIndex > 0);
-
-				m_Compressor.Remove(nLessIndex, m_innerKeyMemSet[nLessIndex], m_innerLinkMemSet[nLessIndex], m_innerKeyMemSet, m_innerLinkMemSet);
-
-				*pSplitKey = m_innerKeyMemSet[nLessIndex];
-				pNode->m_nLess = m_innerLinkMemSet[nLessIndex];
-
-
-				m_innerKeyMemSet.resize(nLessIndex);
-				m_innerLinkMemSet.resize(nLessIndex);
-			}
-			else
-			{
-				uint32_t nSize = (uint32_t)m_innerKeyMemSet.size() / 2;
-
-
-				std::move(std::next(m_innerKeyMemSet.begin(), nSize + 1), m_innerKeyMemSet.end(), std::inserter(newNodeKeySet, newNodeKeySet.begin()));
-				std::move(std::next(m_innerLinkMemSet.begin(), nSize + 1), m_innerLinkMemSet.end(), std::inserter(newNodeLinkSet, newNodeLinkSet.begin()));
-
-
-
-				uint32_t nNewSize = nSize;
-
-
-				*pSplitKey = m_innerKeyMemSet[nNewSize];
-				pNode->m_nLess = m_innerLinkMemSet[nNewSize];
-
-
-//				assert(pNode->m_nLess != -1);
-
-				m_innerKeyMemSet.resize(nNewSize);
-				m_innerLinkMemSet.resize(nNewSize);
-
-				m_Compressor.Recalc(m_innerKeyMemSet, m_innerLinkMemSet);
-				pNewNodeComp.Recalc(newNodeKeySet, newNodeLinkSet);
-
-			}
 		}
 		catch (std::exception& exc)
 		{
@@ -611,7 +552,6 @@ public:
 	bool m_bMulti;
 	TCompressor  m_Compressor;
 	CommonLib::IAllocPtr m_pAlloc;
-	bool m_bMinSplit;
 	uint32_t m_nPageSize;
 };
 }

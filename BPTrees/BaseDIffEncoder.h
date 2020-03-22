@@ -10,7 +10,7 @@
 namespace bptreedb
 {
 	   
-	template<class _TValue, class _TSignValue, class _TEncoder, class _TCompressorParams = CompressorParamsBase>
+	template<class _TValue, class _TEncoder, class _TCompressorParams = CompressorParamsBase>
 	class TBaseValueDiffEncoder
 	{
 	public:
@@ -20,7 +20,6 @@ namespace bptreedb
 		typedef std::vector<TValue, TAlloc> TValueMemSet;
 		typedef _TCompressorParams TCompressorParams;
 		typedef _TEncoder TEncoder;
-		typedef /*typename TDefSign<TValue>::TSignType*/_TSignValue TSignValue;
 
 		typedef std::shared_ptr<TCompressorParams> TCompressorParamsPtr;
 
@@ -133,7 +132,7 @@ namespace bptreedb
 			try
 			{
 			
-				if (m_nCount == vecValues.size() - 1)
+				if (m_nCount != (vecValues.size() - 1))
 					throw CommonLib::CExcBase("BaseDiffEncoder  wrong size, count: %1, values size: %2", m_nCount, vecValues.size());
 
 				Write(vecValues[0], pStream);
@@ -180,29 +179,5 @@ namespace bptreedb
 	};
 
 
-	template<class _TValue, class _TSignValue, class _TEncoder, class _TCompressorParams = CompressorParamsBase>
-	class TValueDiffEncoder : public TBaseValueDiffEncoder<_TValue, _TSignValue, _TEncoder, _TCompressorParams>
-	{
-	public:
-		typedef TBaseValueDiffEncoder<_TValue, _TSignValue, _TEncoder, _TCompressorParams> TBase;
-
-		typedef typename TBase::TCompressorParamsPtr TCompressorParamsPtr;
-
-		TValueDiffEncoder(uint32_t nPageSize, CommonLib::IAllocPtr pAlloc, TCompressorParamsPtr pParams) : TBase(nPageSize, pAlloc, pParams)
-		{}
-
-		virtual void Write(const TValue& value, CommonLib::IWriteStream *pStream)
-		{
-			pStream->write(value);
-		}
-
-		virtual void Read(TValue& value, CommonLib::IReadStream *pStream)
-		{
-			pStream->read(value);
-		}
-		virtual uint32_t GetValueSize() const
-		{
-			return sizeof(TValue);
-		}
-	};
+	 
 }

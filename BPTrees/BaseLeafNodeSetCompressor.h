@@ -24,7 +24,8 @@ namespace bptreedb
 
 
 			TBaseLeafNodeSetCompressor(uint32_t nPageSize, CommonLib::IAllocPtr& pAlloc, TCompressorParamsPtr  pParams ) : m_nCount(0),
-				m_nPageSize(nPageSize), m_KeyEncoder(nPageSize, pAlloc, pParams)
+				m_nPageSize(nPageSize),
+				m_KeyEncoder(pAlloc, pParams)
 			{}
 
 			static TCompressorParamsPtr LoadCompressorParams(CommonLib::IReadStream *pStream)
@@ -63,6 +64,9 @@ namespace bptreedb
 					if (!m_nCount)
 						return;
 
+					if(m_nCount > 1000000)
+						throw CommonLib::CExcBase(L"Wrong size %1", m_nCount);
+
 					vecKeys.reserve(m_nCount);
 					uint32_t nKeySize = pStream->ReadIntu32();
 
@@ -71,7 +75,7 @@ namespace bptreedb
 						throw CommonLib::CExcBase(L"IStream isn't memstream");
 					
 					KeyStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos(), nKeySize);
-					m_KeyEncoder.Decode(m_nCount, vecKeys, &KeyStream);
+					m_KeyEncoder.Decode(m_nCount, vecKeys, &KeyStream, nKeySize);
 				}
 				catch (std::exception& exc_src)
 				{
@@ -95,22 +99,26 @@ namespace bptreedb
 					if (!nSize)
 						return 0;
 
-					CommonLib::CFxMemoryWriteStream KeyStream;
+					uint32_t compSize = (m_nPageSize - HeadSize());
 
 					m_KeyEncoder.BeginEncoding(vecKeys);
-					uint32_t nKeySize = m_KeyEncoder.GetCompressSize();
+					uint32_t nKeySize = 0;
 
-
+					size_t sizePos = pStream->Pos();
 					pStream->Write(nKeySize);
 
-					CommonLib::IMemoryStream *pMemStream = dynamic_cast<CommonLib::IMemoryStream *>(pStream);
-					if (!pMemStream)
-						throw CommonLib::CExcBase(L"IStream isn't memstream");
+					size_t keyPosStart = pStream->Pos();
+					uint32_t keys = m_KeyEncoder.Encode(vecKeys, pStream, compSize);
+					if (keys != 0)
+						return keys;
 
-					KeyStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos(), nKeySize);
-					pStream->Seek(pStream->Pos() + nKeySize, CommonLib::soFromBegin);
+					size_t endPos = pStream->Pos();
+					nKeySize = (uint32_t)(endPos - keyPosStart);
 
-					m_KeyEncoder.Encode(vecKeys, &KeyStream);
+					pStream->Seek(sizePos, CommonLib::soFromBegin);
+					pStream->Write(nKeySize);
+ 
+					pStream->Seek(endPos, CommonLib::soFromBegin);
 
 					return 0;
 				}
