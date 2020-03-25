@@ -24,8 +24,8 @@ namespace bptreedb
 		typedef typename _TCompressor::TCompressorParams TLeafCompressorParams;
 		typedef std::shared_ptr<TLeafCompressorParams> TLeafCompressorParamsPtr;
 
-		BPTreeLeafNodeSetBase(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize) :
-			m_KeyMemSet(TAlloc(pAlloc)), m_Compressor(nPageSize - 2 * sizeof(TLink), pAlloc, TLeafCompressorParamsPtr()), m_nNext(-1), m_nPrev(-1), m_bMulti(bMulti),
+		BPTreeLeafNodeSetBase(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, TLeafCompressorParamsPtr pParams) :
+			m_KeyMemSet(TAlloc(pAlloc)), m_Compressor(nPageSize - 2 * sizeof(TLink), pAlloc, pParams), m_nNext(-1), m_nPrev(-1), m_bMulti(bMulti),
 			m_pAlloc(pAlloc), m_nPageSize(nPageSize)
 
 		{
@@ -450,8 +450,8 @@ namespace bptreedb
 		typedef typename TBase::TLeafCompressorParams TLeafCompressorParams;
 		typedef std::shared_ptr< TLeafCompressorParams> TLeafCompressorParamsPtr;
 
-		BPTreeLeafNode(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize) :
-			TBase(pAlloc, bMulti, nPageSize)
+		BPTreeLeafNode(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, TLeafCompressorParamsPtr leafCompParams) :
+			TBase(pAlloc, bMulti, nPageSize, leafCompParams)
 		{}
 
 		virtual ~BPTreeLeafNode()
@@ -462,13 +462,13 @@ namespace bptreedb
 			this->m_Compressor.Init(pParams);
 		}
 
-		virtual  uint32_t Save(CommonLib::IWriteStream* stream)
+		virtual  uint32_t Save(CommonLib::IWriteStream* stream, CBPTreeContext *pContext)
 		{
 			try
 			{
 				stream->Write(this->m_nNext);
 				stream->Write(this->m_nPrev);
-				return this->m_Compressor.Write(this->m_KeyMemSet, stream);
+				return this->m_Compressor.Write(this->m_KeyMemSet, stream, pContext);
 			}
 			catch (std::exception& exc)
 			{
@@ -478,13 +478,13 @@ namespace bptreedb
 
 		}
 
-		virtual void Load(CommonLib::IReadStream* stream)
+		virtual void Load(CommonLib::IReadStream* stream, CBPTreeContext *pContext)
 		{
 			try
 			{
 				stream->Read(this->m_nNext);
 				stream->Read(this->m_nPrev);
-				this->m_Compressor.Load(this->m_KeyMemSet, stream);
+				this->m_Compressor.Load(this->m_KeyMemSet, stream, pContext);
 			}
 			catch (std::exception& exc)
 			{

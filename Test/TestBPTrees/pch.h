@@ -14,4 +14,4 @@
 #include "../../BPTrees/BaseNodeCompressor.h"
 #include "../../BPTrees/BaseLeafNodeSetCompressor.h"
 #include "../../BPTrees/Compressor/ZlibCompressor/ZLibEncoder.h"
-#include "../../BPTrees/Compressor/ZstdEncoder.h"
+#include "../../BPTrees/Compressor/ZlibCompressor/ZstdEncoder.h"

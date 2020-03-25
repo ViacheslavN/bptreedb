@@ -40,6 +40,9 @@
     <Filter Include="BPTrees\Compressor\ZlibCompressor">
       <UniqueIdentifier>{31d12565-cbf3-4bd5-b841-01b54495ec66}</UniqueIdentifier>
     </Filter>
+    <Filter Include="BPTrees\Compressor\EntropyEncoder">
+      <UniqueIdentifier>{bfc5126a-2230-4231-9b9d-c8ae007a9360}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -141,8 +144,23 @@
     <ClInclude Include="BPTrees\Compressor\ZlibCompressor\ZLibEncoder.h">
       <Filter>BPTrees\Compressor\ZlibCompressor</Filter>
     </ClInclude>
-    <ClInclude Include="BPTrees\Compressor\ZstdEncoder.h">
-      <Filter>BPTrees\Compressor</Filter>
+    <ClInclude Include="BPTrees\Compressor\ZlibCompressor\zstdencoder.h">
+      <Filter>BPTrees\Compressor\ZlibCompressor</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\Compressor\ZlibCompressor\ZEncoderDiffBase.h">
+      <Filter>BPTrees\Compressor\ZlibCompressor</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\BitUtils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\Compressor\EntropyEncoder\BaseNumLenEncoder.h">
+      <Filter>BPTrees\Compressor\EntropyEncoder</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\MathUtils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\Compressor\ZlibCompressor\ZEncoderBase.h">
+      <Filter>BPTrees\Compressor\ZlibCompressor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -160,6 +178,9 @@
     </ClCompile>
     <ClCompile Include="BPTrees\BPBaseTreeNode.cpp">
       <Filter>BPTrees</Filter>
+    </ClCompile>
+    <ClCompile Include="BPTrees\Compressor\EntropyEncoder\BaseNumLenEncoder.cpp">
+      <Filter>BPTrees\Compressor\EntropyEncoder</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

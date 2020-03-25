@@ -30,9 +30,9 @@ public:
 	typedef typename _TCompressor::TCompressorParams TInnerCompressorParams;
 	typedef std::shared_ptr<TInnerCompressorParams> TInnerCompressorParamsPtr;
 
-	BPTreeInnerNode(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize) :
+	BPTreeInnerNode(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, TInnerCompressorParamsPtr pParams) :
 		m_nLess(-1), m_innerKeyMemSet(TKeyAlloc(pAlloc)), m_innerLinkMemSet(TLinkAlloc(pAlloc)), m_bMulti(bMulti),
-		m_pAlloc(pAlloc), m_nPageSize(nPageSize), m_Compressor(nPageSize - sizeof(TLink), pAlloc, TInnerCompressorParamsPtr())
+		m_pAlloc(pAlloc), m_nPageSize(nPageSize), m_Compressor(nPageSize - sizeof(TLink), pAlloc, pParams)
 	{
 
 	}
@@ -70,12 +70,12 @@ public:
 		return m_Compressor.RowSize();
 	}
 
-	virtual uint32_t Save(CommonLib::IWriteStream *stream)
+	virtual uint32_t Save(CommonLib::IWriteStream *stream, CBPTreeContext *pContext)
 	{
 		try
 		{
 			stream->Write(m_nLess);
-			return m_Compressor.Write(m_innerKeyMemSet, m_innerLinkMemSet, stream);
+			return m_Compressor.Write(m_innerKeyMemSet, m_innerLinkMemSet, stream, pContext);
 		}
 		catch (std::exception& exc)
 		{
@@ -84,12 +84,12 @@ public:
 		}
 	}
 
-	virtual void Load(CommonLib::IReadStream* stream)
+	virtual void Load(CommonLib::IReadStream* stream, CBPTreeContext *pContext)
 	{
 		try
 		{
 			stream->Read(m_nLess);
-			return m_Compressor.Load(m_innerKeyMemSet, m_innerLinkMemSet, stream);
+			return m_Compressor.Load(m_innerKeyMemSet, m_innerLinkMemSet, stream, pContext);
 		}
 		catch (std::exception& exc)
 		{

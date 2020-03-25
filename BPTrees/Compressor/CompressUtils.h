@@ -15,7 +15,7 @@ namespace bptreedb
 	{
 		ectByte = 0,
 		ectUInt16 = 1,
-		ectUint32_t = 2,
+		ectUint32 = 2,
 		ectUInt64 = 3
 	};
 
@@ -28,11 +28,32 @@ namespace bptreedb
 			return 1;
 		case ectUInt16:
 			return 2;
-		case ectUint32_t:
+		case ectUint32:
 			return 4;
 		case ectUInt64:
 			return 8;
 		}
 		return 0;
+	}
+
+
+	static uint32_t GetLenForDiffLen(eCompressDataType nTypeFreq, uint32_t nDiffsLen)
+	{
+		switch (nTypeFreq)
+		{
+		case ectByte:
+			return nDiffsLen;
+			break;
+		case ectUInt16:
+			return nDiffsLen * sizeof(uint16_t);
+			break;
+		case ectUint32:
+			return nDiffsLen * sizeof(uint32_t);
+			break;
+		case ectUInt64:
+			return nDiffsLen * sizeof(uint64_t);
+			break;
+		}
+			return nDiffsLen;
 	}
 }

@@ -22,16 +22,27 @@ struct comp
 	}*/
 };
 
-
+/*
 typedef bptreedb::TZstdEncoder<int64_t> TEncoder;
-typedef bptreedb::TZstdEncoder<int64_t>::CZLibCompParams  TCompParams;
+typedef bptreedb::TZstdEncoder<int64_t>::TCompParams  TCompParams;
+typedef bptreedb::BPTreeLeafNode<int64_t, bptreedb::TBaseLeafNodeSetCompressor<int64_t, TEncoder, TCompParams> > TLeafNode;
+typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TEncoder, TEncoder, TCompParams > > TInnerNode;
+typedef bptreedb::TBPSet<int64_t, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPSet;*/
+
+
+
+typedef bptreedb::TZstdEncoderDiff<int64_t> TEncoder;
+typedef bptreedb::TZstdEncoderDiff<int64_t>::TCompParams  TCompParams;
 typedef bptreedb::BPTreeLeafNode<int64_t, bptreedb::TBaseLeafNodeSetCompressor<int64_t, TEncoder, TCompParams> > TLeafNode;
 typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TEncoder, TEncoder, TCompParams > > TInnerNode;
 typedef bptreedb::TBPSet<int64_t, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPSet;
 
+
+
+
 /*
 typedef bptreedb::TZLibEncoder<int64_t> TEncoder;
-typedef bptreedb::TZLibEncoder<int64_t>::CZLibCompParams  TCompParams;
+typedef bptreedb::TZLibEncoder<int64_t>::TCompParams  TCompParams;
 typedef bptreedb::BPTreeLeafNode<int64_t, bptreedb::TBaseLeafNodeSetCompressor<int64_t, TEncoder, TCompParams> > TLeafNode;
 typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TEncoder, TEncoder, TCompParams > > TInnerNode;
 typedef bptreedb::TBPSet<int64_t, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPSet;*/
@@ -51,12 +62,12 @@ uint64_t CreateBPTreeSet(CommonLib::IAllocPtr pAlloc, TStorage pStorage)
 		TBPSet tree(-1, pStorage, pAlloc, 10, nPageSize);
 
 		typename TInnerNode::TInnerCompressorParamsPtr innerCompParmas (new TInnerNode::TInnerCompressorParams());
-		innerCompParmas->m_compressRate = 100;
-	//	innerCompParmas->m_compressLevel = 100;
+		//innerCompParmas->m_compressRate =1;
+		//innerCompParmas->m_compressLevel = 100;
 
 		typename TLeafNode::TLeafCompressorParamsPtr leafCompParmas (new TLeafNode::TLeafCompressorParams());
-		leafCompParmas->m_compressRate = 100;
-	//	innerCompParmas->m_compressLevel = 100;
+		//leafCompParmas->m_compressRate = 1;
+		//leafCompParmas->m_compressLevel = 100;
 
 		tree.InnitTree(innerCompParmas, leafCompParmas, false);
 		tree.Flush();

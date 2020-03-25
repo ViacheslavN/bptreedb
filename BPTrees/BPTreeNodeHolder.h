@@ -26,7 +26,7 @@ namespace bptreedb
 		typedef std::shared_ptr< TLeafCompressorParams> TLeafCompressorParamsPtr;
 
 	private:
-		TBPNodeHolder(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, bool bLeaf, int64_t nAddr) :
+		TBPNodeHolder(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, bool bLeaf, int64_t nAddr, TInnerCompressorParamsPtr innerCompParams, TLeafCompressorParamsPtr leafCompParams) :
 			m_IsLeaf(bLeaf),
 			m_nAddr(nAddr),
 			m_nParentAddr(-1),
@@ -35,26 +35,26 @@ namespace bptreedb
 
 			if (m_IsLeaf)
 			{
-				m_pLeafNode.reset(new TLeafNode(pAlloc, bMulti, nPageSize));
+				m_pLeafNode.reset(new TLeafNode(pAlloc, bMulti, nPageSize, leafCompParams));
 				m_pCurNode = m_pLeafNode.get();
 			}
 			else
 			{
-				m_pInnerNode.reset(new TInnerNode(pAlloc, bMulti, nPageSize));
+				m_pInnerNode.reset(new TInnerNode(pAlloc, bMulti, nPageSize, innerCompParams));
 				m_pCurNode = m_pInnerNode.get();
 			}
 
 		}
 	public:
 
-		static std::shared_ptr<TBPNodeHolder> Load(CommonLib::IReadStream *pStream, CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, int64_t nAddr)
+		static std::shared_ptr<TBPNodeHolder> Load(CommonLib::IReadStream *pStream, CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, int64_t nAddr, TInnerCompressorParamsPtr innerCompParams, TLeafCompressorParamsPtr leafCompParams, CBPTreeContext *pContext)
 		{
 			try
 			{
 				bool isLeaf = pStream->ReadBool();
 
-				std::shared_ptr<TBPNodeHolder> pNode(new TBPNodeHolder(pAlloc, bMulti, nPageSize, isLeaf, nAddr));
-				pNode->m_pCurNode->Load(pStream);
+				std::shared_ptr<TBPNodeHolder> pNode(new TBPNodeHolder(pAlloc, bMulti, nPageSize, isLeaf, nAddr, innerCompParams, leafCompParams));
+				pNode->m_pCurNode->Load(pStream, pContext);
 
 				return pNode;
 
@@ -67,11 +67,11 @@ namespace bptreedb
 			
 		}
 
-		static std::shared_ptr<TBPNodeHolder> Create(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, int64_t nAddr, bool bLeaf)
+		static std::shared_ptr<TBPNodeHolder> Create(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, int64_t nAddr, bool bLeaf, TInnerCompressorParamsPtr innerCompParams, TLeafCompressorParamsPtr leafCompParams)
 		{
 			try
 			{
-				std::shared_ptr<TBPNodeHolder> pNode(new TBPNodeHolder(pAlloc, bMulti, nPageSize, bLeaf, nAddr));
+				std::shared_ptr<TBPNodeHolder> pNode(new TBPNodeHolder(pAlloc, bMulti, nPageSize, bLeaf, nAddr, innerCompParams, leafCompParams));
 				return pNode;
 
 			}
@@ -83,20 +83,20 @@ namespace bptreedb
 
 		}
 
-		void InitCopmressor(TInnerCompressorParamsPtr& innerComp, TLeafCompressorParamsPtr& leafComp)
+	/*	void InitCopmressor(TInnerCompressorParamsPtr& innerComp, TLeafCompressorParamsPtr& leafComp)
 		{
 			if (IsLeaf())
 				m_pLeafNode->Init(leafComp);
 			else
 				m_pInnerNode->Init(innerComp);
 		}
-		
-		uint32_t Save(CommonLib::IWriteStream *pStream)
+		*/
+		uint32_t Save(CommonLib::IWriteStream *pStream, CBPTreeContext *pContext)
 		{
 			try
 			{
 				pStream->Write(m_IsLeaf);
-				return m_pCurNode->Save(pStream);
+				return m_pCurNode->Save(pStream, pContext);
 			}
 			catch (std::exception& exc)
 			{
@@ -347,8 +347,8 @@ namespace bptreedb
 				if (!IsLeaf())
 					throw CommonLib::CExcBase(" Node addr %1 isn't a leaf node", m_nAddr);
 
-				m_pInnerNode.reset(new TInnerNode(pAlloc, bMulti, nPageSize));
-				m_pInnerNode->Init(innerComp);
+				m_pInnerNode.reset(new TInnerNode(pAlloc, bMulti, nPageSize, innerComp));
+			//	m_pInnerNode->Init(innerComp);
 				m_IsLeaf = false;
 				m_pLeafNode.reset();
 

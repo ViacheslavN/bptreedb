@@ -59,8 +59,8 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::LoadNodeFr
 		CommonLib::CReadMemoryStream stream;
 		stream.AttachBuffer(pFilePage->GetData(), pFilePage->GetPageSize());
 
-		TBPTreeNodePtr node = TBPTreeNode::Load(&stream, m_pAlloc, m_bMulti, m_nNodePageSize, nAddr);
-		node->InitCopmressor(m_InnerCompressParams, m_LeafCompressParams);
+		TBPTreeNodePtr node = TBPTreeNode::Load(&stream, m_pAlloc, m_bMulti, m_nNodePageSize, nAddr, m_InnerCompressParams, m_LeafCompressParams, &m_Context);
+	//	node->InitCopmressor(m_InnerCompressParams, m_LeafCompressParams);
 		return node;
 	}
 	catch (std::exception& exc)
@@ -339,7 +339,7 @@ void BPSETBASE_DECLARATION::SaveNode(TBPTreeNodePtr& pNode)
 		CommonLib::CFxMemoryWriteStream stream;
 		stream.AttachBuffer(pPage->GetData(), pPage->GetPageSize());
 
-		uint32_t nCount = pNode->Save(&stream);
+		uint32_t nCount = pNode->Save(&stream, &m_Context);
 		while (nCount != 0)
 		{
 
@@ -366,7 +366,7 @@ void BPSETBASE_DECLARATION::SaveNode(TBPTreeNodePtr& pNode)
 			}
 
 			stream.Seek(0, CommonLib::soFromBegin);
-			nCount = pNode->Save(&stream);
+			nCount = pNode->Save(&stream, &m_Context);
 		}
 
 		m_pStorage->SaveFilePage(pPage);
@@ -387,10 +387,10 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::CreateNode
 		if (nAddr == -1)
 			nAddr = m_pStorage->GetNewFilePageAddr();
 
-		TBPTreeNodePtr pNode = TBPTreeNode::Create(m_pAlloc, m_bMulti, m_nNodePageSize, nAddr, isLeaf);
+		TBPTreeNodePtr pNode = TBPTreeNode::Create(m_pAlloc, m_bMulti, m_nNodePageSize, nAddr, isLeaf, m_InnerCompressParams, m_LeafCompressParams);
 
 		pNode->SetFlags(CHANGE_NODE, true);
-		pNode->InitCopmressor(m_InnerCompressParams, m_LeafCompressParams);
+		//pNode->InitCopmressor(m_InnerCompressParams, m_LeafCompressParams);
 		if (addToChache)
 		{
 			AddToCache(pNode);

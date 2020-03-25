@@ -52,7 +52,7 @@ namespace bptreedb
 
 			virtual ~TBaseLeafNodeSetCompressor() {}
 
-			virtual void Load(TKeyMemSet& vecKeys, CommonLib::IReadStream* pStream)
+			virtual void Load(TKeyMemSet& vecKeys, CommonLib::IReadStream* pStream, CBPTreeContext *pContext)
 			{
 				try
 				{
@@ -75,7 +75,7 @@ namespace bptreedb
 						throw CommonLib::CExcBase(L"IStream isn't memstream");
 					
 					KeyStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos(), nKeySize);
-					m_KeyEncoder.Decode(m_nCount, vecKeys, &KeyStream, nKeySize);
+					m_KeyEncoder.Decode(m_nCount, vecKeys, &KeyStream, nKeySize, pContext);
 				}
 				catch (std::exception& exc_src)
 				{
@@ -83,7 +83,7 @@ namespace bptreedb
 				}
 			}
 
-			virtual uint32_t Write(TKeyMemSet& vecKeys,  CommonLib::IWriteStream* pStream)
+			virtual uint32_t Write(TKeyMemSet& vecKeys,  CommonLib::IWriteStream* pStream, CBPTreeContext *pContext)
 			{
 				try
 				{
@@ -108,7 +108,7 @@ namespace bptreedb
 					pStream->Write(nKeySize);
 
 					size_t keyPosStart = pStream->Pos();
-					uint32_t keys = m_KeyEncoder.Encode(vecKeys, pStream, compSize);
+					uint32_t keys = m_KeyEncoder.Encode(vecKeys, pStream, compSize, pContext);
 					if (keys != 0)
 						return keys;
 

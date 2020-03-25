@@ -43,6 +43,7 @@ namespace bptreedb
 			, m_bMinSplit(false)
 			, m_nNodePageSize(nNodesPageSize)
 			, m_bLockRemoveItemFromCache(false)
+			, m_Context(pAlloc)
 		{
 
 		}
@@ -140,6 +141,7 @@ namespace bptreedb
 
 		typedef utils::TCacheLRU_2Q<TLink, TBPTreeNodePtr, TBPTreeFreeChecker> TNodesCache;
 		TNodesCache m_NodeCache;
+		CBPTreeContext m_Context;
 	};
 
 #define  BPSETBASE_TEMPLATE_PARAMS 	template <	class _TKey, class _TComp, class _TStorage,	class _TInnerNode,	class _TLeafNode, class _TNodeHolder>

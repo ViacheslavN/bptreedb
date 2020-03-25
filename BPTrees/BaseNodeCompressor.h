@@ -61,7 +61,7 @@ namespace bptreedb
 
 			virtual ~TBaseNodeCompressor() {}
 
-			virtual void Load(TKeyMemSet& vecKeys, TValueMemSet& vecValues, CommonLib::IReadStream* pStream)
+			virtual void Load(TKeyMemSet& vecKeys, TValueMemSet& vecValues, CommonLib::IReadStream* pStream, CBPTreeContext *pContext)
 			{
 				try
 				{
@@ -91,8 +91,8 @@ namespace bptreedb
 					KeyStream.AttachBuffer(pMemStream->Buffer()+ pStream->Pos(), nKeySize);
 					ValueStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos() + nKeySize, nValueSize);
 
-					m_KeyEncoder.Decode(m_nCount, vecKeys, &KeyStream, nKeySize);
-					m_ValueEncoder.Decode(m_nCount, vecValues, &ValueStream, nValueSize);
+					m_KeyEncoder.Decode(m_nCount, vecKeys, &KeyStream, nKeySize, pContext);
+					m_ValueEncoder.Decode(m_nCount, vecValues, &ValueStream, nValueSize, pContext);
 
 				}
 				catch (std::exception& exc_src)
@@ -101,7 +101,7 @@ namespace bptreedb
 				}
 			}
 
-			virtual uint32_t Write(TKeyMemSet& vecKeys, TValueMemSet& vecValues, CommonLib::IWriteStream* pStream)
+			virtual uint32_t Write(TKeyMemSet& vecKeys, TValueMemSet& vecValues, CommonLib::IWriteStream* pStream, CBPTreeContext *pContext)
 			{
 				try
 				{
@@ -131,7 +131,7 @@ namespace bptreedb
 					pStream->Write(valueSize);
 
 					size_t keyStartPos = pStream->Pos();
-					uint32_t keys = m_KeyEncoder.Encode(vecKeys, pStream, maxCompSize);
+					uint32_t keys = m_KeyEncoder.Encode(vecKeys, pStream, maxCompSize, pContext);
 					if (keys != 0)
 						return keys;
 
@@ -139,7 +139,7 @@ namespace bptreedb
 					keySize = (uint32_t)(valueStartPos - keyStartPos);
 
 					maxCompSize = uint32_t(pStream->Size() - valueStartPos);
-					uint32_t values = m_ValueEncoder.Encode(vecValues, pStream, maxCompSize);
+					uint32_t values = m_ValueEncoder.Encode(vecValues, pStream, maxCompSize, pContext);
 					if (values != 0)
 						return values;
 

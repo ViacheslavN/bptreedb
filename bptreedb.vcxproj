@@ -309,8 +309,10 @@
     <ClInclude Include="BPTrees\BPBaseTreeSet.h" />
     <ClInclude Include="BPTrees\Compressor\CompressorParams.h" />
     <ClInclude Include="BPTrees\Compressor\CompressUtils.h" />
+    <ClInclude Include="BPTrees\Compressor\EntropyEncoder\BaseNumLenEncoder.h" />
+    <ClInclude Include="BPTrees\Compressor\ZlibCompressor\ZEncoderDiffBase.h" />
     <ClInclude Include="BPTrees\Compressor\ZlibCompressor\ZLibEncoder.h" />
-    <ClInclude Include="BPTrees\Compressor\ZstdEncoder.h" />
+    <ClInclude Include="BPTrees\Compressor\ZlibCompressor\zstdencoder.h" />
     <ClInclude Include="BPTrees\EmptyEncoder.h" />
     <ClInclude Include="crypto\PageCipher.h" />
     <ClInclude Include="stdafx.h" />
@@ -319,15 +321,19 @@
     <ClInclude Include="storage\FileStorage.h" />
     <ClInclude Include="storage\storage.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="utils\BitUtils.h" />
     <ClInclude Include="utils\CacheLRU_2Q.h" />
     <ClInclude Include="utils\CRC.h" />
     <ClInclude Include="utils\List.h" />
+    <ClInclude Include="utils\MathUtils.h" />
     <ClInclude Include="utils\ReadStreamPage.h" />
     <ClInclude Include="utils\WriteStreamPage.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BPTrees\BPBaseTreeNode.cpp" />
     <ClInclude Include="BPTrees\BPTreeNodeHolder.h" />
+    <ClInclude Include="BPTrees\Compressor\ZlibCompressor\ZEncoderBase.h" />
+    <ClCompile Include="BPTrees\Compressor\EntropyEncoder\BaseNumLenEncoder.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">Create</PrecompiledHeader>
