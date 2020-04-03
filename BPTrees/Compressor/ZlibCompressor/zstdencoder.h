@@ -21,11 +21,8 @@ namespace bptreedb
 		typedef TZEncoder<_TValue, CommonLib::CZstdCompressionStream, CommonLib::CZstdDecompressionStream> TBase;
 		typedef typename TBase::TValue TValue;
 		typedef typename TBase::TValueMemSet TValueMemSet;
-		typedef typename TBase::TCompParams TCompParams;
-		typedef typename TBase::TCompressorParamsPtr TCompressorParamsPtr;
-
-
-		TZstdEncoder(CommonLib::IAllocPtr& pAlloc, TCompressorParamsPtr pParams) : TBase(pAlloc, pParams)
+ 
+		TZstdEncoder(CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr pParams, ECompressParams type) : TBase(pAlloc, pParams, type)
 		{}
 
 		~TZstdEncoder()
@@ -43,11 +40,9 @@ namespace bptreedb
 		typedef ZEncoderDiffBase<_TValue, CommonLib::CZstdCompressionStream, CommonLib::CZstdDecompressionStream> TBase;
 		typedef typename TBase::TValue TValue;
 		typedef typename TBase::TValueMemSet TValueMemSet;
-		typedef typename TBase::TCompParams TCompParams;
-		typedef typename TBase::TCompressorParamsPtr TCompressorParamsPtr;
 
 
-		TZstdEncoderDiff(CommonLib::IAllocPtr& pAlloc, TCompressorParamsPtr pParams) : TBase(pAlloc, pParams)
+		TZstdEncoderDiff(CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr pParams, ECompressParams type) : TBase(pAlloc, pParams, type)
 		{}
 
 		~TZstdEncoderDiff()

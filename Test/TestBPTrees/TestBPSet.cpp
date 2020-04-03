@@ -22,29 +22,31 @@ struct comp
 	}*/
 };
 
-/*
+
 typedef bptreedb::TZstdEncoder<int64_t> TEncoder;
-typedef bptreedb::TZstdEncoder<int64_t>::TCompParams  TCompParams;
-typedef bptreedb::BPTreeLeafNode<int64_t, bptreedb::TBaseLeafNodeSetCompressor<int64_t, TEncoder, TCompParams> > TLeafNode;
-typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TEncoder, TEncoder, TCompParams > > TInnerNode;
-typedef bptreedb::TBPSet<int64_t, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPSet;*/
-
-
-
-typedef bptreedb::TZstdEncoderDiff<int64_t> TEncoder;
-typedef bptreedb::TZstdEncoderDiff<int64_t>::TCompParams  TCompParams;
-typedef bptreedb::BPTreeLeafNode<int64_t, bptreedb::TBaseLeafNodeSetCompressor<int64_t, TEncoder, TCompParams> > TLeafNode;
-typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TEncoder, TEncoder, TCompParams > > TInnerNode;
+typedef bptreedb::BPTreeLeafNode<int64_t, bptreedb::TBaseLeafNodeSetCompressor<int64_t, TEncoder> > TLeafNode;
+typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TEncoder, TEncoder> > TInnerNode;
 typedef bptreedb::TBPSet<int64_t, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPSet;
 
 
+/*
+typedef bptreedb::TZstdEncoderDiff<int64_t> TEncoder;
+typedef bptreedb::BPTreeLeafNode<int64_t, bptreedb::TBaseLeafNodeSetCompressor<int64_t, TEncoder> > TLeafNode;
+typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TEncoder, TEncoder > > TInnerNode;
+typedef bptreedb::TBPSet<int64_t, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPSet;*/
+
+/*
+
+typedef bptreedb::TZLibEncoderDiff<int64_t> TEncoder;
+typedef bptreedb::BPTreeLeafNode<int64_t, bptreedb::TBaseLeafNodeSetCompressor<int64_t, TEncoder> > TLeafNode;
+typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TEncoder, TEncoder > > TInnerNode;
+typedef bptreedb::TBPSet<int64_t, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPSet;*/
 
 
 /*
 typedef bptreedb::TZLibEncoder<int64_t> TEncoder;
-typedef bptreedb::TZLibEncoder<int64_t>::TCompParams  TCompParams;
-typedef bptreedb::BPTreeLeafNode<int64_t, bptreedb::TBaseLeafNodeSetCompressor<int64_t, TEncoder, TCompParams> > TLeafNode;
-typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TEncoder, TEncoder, TCompParams > > TInnerNode;
+typedef bptreedb::BPTreeLeafNode<int64_t, bptreedb::TBaseLeafNodeSetCompressor<int64_t, TEncoder> > TLeafNode;
+typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TEncoder, TEncoder > > TInnerNode;
 typedef bptreedb::TBPSet<int64_t, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPSet;*/
 
 /*
@@ -60,16 +62,31 @@ uint64_t CreateBPTreeSet(CommonLib::IAllocPtr pAlloc, TStorage pStorage)
 		std::cout << "CreateBPTreeSet";
 
 		TBPSet tree(-1, pStorage, pAlloc, 10, nPageSize);
+	
+		bptreedb::TCompressorParamsBasePtr pCompParmas (new bptreedb::CompressorParamsBase());
+		bptreedb::TCompressorParamsPtr pCompInnerKey(new bptreedb::CompressorParams());
+		bptreedb::TCompressorParamsPtr pCompInnerValue(new bptreedb::CompressorParams());
+		bptreedb::TCompressorParamsPtr pCompLeafKey(new bptreedb::CompressorParams());
 
-		typename TInnerNode::TInnerCompressorParamsPtr innerCompParmas (new TInnerNode::TInnerCompressorParams());
-		//innerCompParmas->m_compressRate =1;
-		//innerCompParmas->m_compressLevel = 100;
+		pCompInnerKey->SetIntParam("compressLevel", 9);
+		pCompInnerKey->SetIntParam("compressLevel", 9);
+		pCompInnerKey->SetIntParam("compressRate", 10);
 
-		typename TLeafNode::TLeafCompressorParamsPtr leafCompParmas (new TLeafNode::TLeafCompressorParams());
-		//leafCompParmas->m_compressRate = 1;
-		//leafCompParmas->m_compressLevel = 100;
+		pCompParmas->AddCompressParams(pCompInnerKey, bptreedb::eInnerKey);
 
-		tree.InnitTree(innerCompParmas, leafCompParmas, false);
+		pCompInnerValue->SetIntParam("compressLevel", 9);
+		pCompInnerValue->SetIntParam("compressLevel", 9);
+		pCompInnerValue->SetIntParam("compressRate", 10);
+
+		pCompParmas->AddCompressParams(pCompInnerValue, bptreedb::eInnerValue);
+
+		pCompLeafKey->SetIntParam("compressLevel", 9);
+		pCompLeafKey->SetIntParam("compressLevel", 9);
+		pCompLeafKey->SetIntParam("compressRate", 10);
+
+		pCompParmas->AddCompressParams(pCompLeafKey, bptreedb::eLeafKey);
+
+		tree.InnitTree(pCompParmas, false);
 		tree.Flush();
 		return tree.GetPageBTreeInfo();
 	}
@@ -178,7 +195,7 @@ void TestBPTreeSet()
 	try
 	{
 		int64_t nBegin = 0;
-		int64_t nEnd = 20000000;
+		int64_t nEnd = 100000;
 		int64_t nBPTreePage = -1;
 
 		CommonLib::IAllocPtr pAlloc(new CommonLib::CSimpleAlloc(true));

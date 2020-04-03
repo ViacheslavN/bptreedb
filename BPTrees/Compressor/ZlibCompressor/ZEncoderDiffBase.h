@@ -14,34 +14,37 @@ namespace bptreedb
 	{
 	public:
 
+		enum ECodeType
+		{
+			SingleValue = 0,
+			UsingContextBuffer = 1,
+		};
+
 		typedef _TValue TValue;
 		typedef CommonLib::STLAllocator<TValue> TAlloc;
 		typedef std::vector<TValue, TAlloc> TValueMemSet;
-		typedef CZCompParams  TCompParams;
 		typedef _TEncoder  TEncoder;
 		typedef _TDecoder  TDecoder;
-		typedef std::shared_ptr<TCompParams> TCompressorParamsPtr;
 
 
-		ZEncoderDiffBase(CommonLib::IAllocPtr& pAlloc, TCompressorParamsPtr pParams) : m_nCount(0), m_pCompParams(pParams), m_pAlloc(pAlloc)
+		ZEncoderDiffBase(CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr  pParamsBase, ECompressParams type) : m_nCount(0),  m_pAlloc(pAlloc)
 		{
-			if (m_pCompParams.get() == nullptr)
-				m_pCompParams.reset(new TCompParams());
+			
+			TCompressorParamsPtr pParams = pParamsBase->GetCompressParams(type);
 
-			m_pCompParams->m_codeType = CZCompParams::UsingContextBuffer;
+			if (pParams.get() != nullptr)
+			{
+				m_compressLevel = pParams->GetIntParam("compressLevel", m_compressLevel);
+				m_compressRate = pParams->GetIntParam("compressRate", m_compressRate);
+				m_codeType = pParams->GetIntParam("codeType ", m_codeType);
+			}
 		}
 
 		~ZEncoderDiffBase()
 		{
 
 		}
-
-		void  Init(TCompressorParamsPtr pParams)
-		{
-			if (pParams.get() != nullptr)
-				m_pCompParams = pParams;
-		}
-
+		
 		void AddSymbol(uint32_t nSize, int nIndex, const TValue& value, const TValueMemSet& vecValues)
 		{
 			m_nCount++;
@@ -58,7 +61,7 @@ namespace bptreedb
 
 		uint32_t GetCompressSize() const
 		{
-			return (m_nCount * sizeof(TValue)) / m_pCompParams->m_compressRate;
+			return (m_nCount * sizeof(TValue)) / m_compressRate;
 		}
 
 		void BeginEncoding(const TValueMemSet& vecValues)
@@ -84,23 +87,24 @@ namespace bptreedb
 				uint32_t streamSize = uint32_t(pStream->Size() - pStream->Pos());
 				streamSize = streamSize > maxCompSize ? maxCompSize : streamSize;
 
-				TEncoder zStream(m_pCompParams->m_compressLevel);
+				TEncoder zStream(m_compressLevel);
 				zStream.AttachOut((Bytef*)pMemStream->Buffer() + pStream->Pos(), streamSize);
 
 				uint32_t count = 0;
-				switch (m_pCompParams->m_codeType)
+				switch (m_codeType)
 				{
 
-				case CZCompParams::SingleValue:
-					count = EncodeSingleValue(vecValues, zStream);
-					break;
-				case CZCompParams::UsingContextBuffer:
-					count = EncodeWithContextBuffer(vecValues, zStream, pContext);
-					break;
-				default:
-					throw CommonLib::CExcBase("Unknown type %1", m_pCompParams->m_codeType);
-					break;
+					case SingleValue:
+						count = EncodeSingleValue(vecValues, zStream);
+						break;
+					case UsingContextBuffer:
+						count = EncodeWithContextBuffer(vecValues, zStream, pContext);
+						break;
+					default:
+						throw CommonLib::CExcBase("Unknown type %1", m_codeType);
+						break;
 				}
+
 				if (count != 0)
 					return count;
 
@@ -225,19 +229,17 @@ namespace bptreedb
 				TDecoder zStream;
 				zStream.AttachIn(pMemStream->Buffer() + pStream->Pos(), nCompSize - sizeof(TValue));
 
-				switch (m_pCompParams->m_codeType)
+				switch (m_codeType)
 				{
 
-				case CZCompParams::SingleValue:
+				case SingleValue:
 					DecodeBySingleValue(nCount, vecValues, zStream);
 					break;
-				case CZCompParams::UsingContextBuffer:
+				case UsingContextBuffer:
 					DecodeWithContextBuffer(nCount, vecValues, zStream, pContext);
 					break;
-			
-					break;
 				default:
-					throw CommonLib::CExcBase("Unknown type %1", m_pCompParams->m_codeType);
+					throw CommonLib::CExcBase("Unknown type %1", m_codeType);
 					break;
 				}
 
@@ -291,8 +293,6 @@ namespace bptreedb
 			{
 
 				uint32_t readCount = 0;
-				TValue value;
-
 
 				size_t bufSize = nCount * sizeof(TValue);
 				pContext->ResizeCommonBuf(bufSize);
@@ -320,9 +320,6 @@ namespace bptreedb
 				readCount += nCount;
 				if (readCount > nCount)
 					throw CommonLib::CExcBase("Error decompress");
-
-				vecValues.push_back(value);
-				zStream.AttachOut((byte_t*)stream.Buffer(), stream.Size());
 
 				if (readCount != nCount)
 					throw CommonLib::CExcBase("Error decompress");
@@ -364,7 +361,9 @@ namespace bptreedb
 
 	protected:
 		uint32_t m_nCount{ 0 };
-		TCompressorParamsPtr m_pCompParams;
+		int32_t m_compressLevel{ 9 };
+		int32_t m_compressRate{ 5 };
+		int32_t m_codeType{ UsingContextBuffer };
 		CommonLib::IAllocPtr m_pAlloc;
 	};
 }

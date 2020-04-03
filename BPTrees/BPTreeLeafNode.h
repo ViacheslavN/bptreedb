@@ -20,12 +20,10 @@ namespace bptreedb
 		typedef _TCompressor TCompressor;
 		typedef CommonLib::STLAllocator<TKey> TAlloc;
 		typedef std::vector<TKey, TAlloc> TKeyMemSet;
+ 
 
-		typedef typename _TCompressor::TCompressorParams TLeafCompressorParams;
-		typedef std::shared_ptr<TLeafCompressorParams> TLeafCompressorParamsPtr;
-
-		BPTreeLeafNodeSetBase(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, TLeafCompressorParamsPtr pParams) :
-			m_KeyMemSet(TAlloc(pAlloc)), m_Compressor(nPageSize - 2 * sizeof(TLink), pAlloc, pParams), m_nNext(-1), m_nPrev(-1), m_bMulti(bMulti),
+		BPTreeLeafNodeSetBase(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr pParams) :
+			m_KeyMemSet(TAlloc(pAlloc)), m_Compressor(nPageSize - 2 * sizeof(TLink), pAlloc, pParams, eLeafNode), m_nNext(-1), m_nPrev(-1), m_bMulti(bMulti),
 			m_pAlloc(pAlloc), m_nPageSize(nPageSize)
 
 		{
@@ -36,11 +34,7 @@ namespace bptreedb
 		{
 
 		}
-
-		virtual void Init(TLeafCompressorParamsPtr& pParams)
-		{
-			 m_Compressor.Init(pParams);
-		}
+		
 
 		virtual bool IsLeaf() const { return true; }
 
@@ -447,20 +441,14 @@ namespace bptreedb
 
 		typedef typename TBase::TCompressor TCompressor;
 		typedef typename TBase::TKeyMemSet TLeafMemSet;
-		typedef typename TBase::TLeafCompressorParams TLeafCompressorParams;
-		typedef std::shared_ptr< TLeafCompressorParams> TLeafCompressorParamsPtr;
 
-		BPTreeLeafNode(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, TLeafCompressorParamsPtr leafCompParams) :
+
+		BPTreeLeafNode(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr leafCompParams) :
 			TBase(pAlloc, bMulti, nPageSize, leafCompParams)
 		{}
 
 		virtual ~BPTreeLeafNode()
 		{}
-
-		void Init(TLeafCompressorParamsPtr pParams)
-		{
-			this->m_Compressor.Init(pParams);
-		}
 
 		virtual  uint32_t Save(CommonLib::IWriteStream* stream, CBPTreeContext *pContext)
 		{

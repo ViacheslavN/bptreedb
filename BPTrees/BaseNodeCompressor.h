@@ -11,8 +11,7 @@
 namespace bptreedb
 {
 
-	template<class _TKey, class _TValue,  class _TKeyEncoder = TEmptyValueEncoder<_TKey>, class _TValueEncoder = TEmptyValueEncoder<_TValue>
-		, class _TCompressorParams = CompressorParamsBase>
+	template<class _TKey, class _TValue,  class _TKeyEncoder = TEmptyValueEncoder<_TKey>, class _TValueEncoder = TEmptyValueEncoder<_TValue> >
 			class TBaseNodeCompressor
 		{
 		public:
@@ -21,44 +20,19 @@ namespace bptreedb
 			typedef _TKeyEncoder TKeyEncoder;
 			typedef _TValueEncoder TValueEncoder;
 
-			typedef _TCompressorParams TCompressorParams;
 			typedef CommonLib::STLAllocator<TKey> TKeyAlloc;
 			typedef CommonLib::STLAllocator<TValue> TValueAlloc;
 			typedef std::vector<TKey, TKeyAlloc> TKeyMemSet;
 			typedef std::vector<TValue, TValueAlloc> TValueMemSet;
 
-			typedef std::shared_ptr<TCompressorParams> TCompressorParamsBasePtr;
 
-
-			TBaseNodeCompressor(uint32_t nPageSize, CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr pParams) : m_nCount(0),
+			TBaseNodeCompressor(uint32_t nPageSize, CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr pParams, ECompressNodeType type) : m_nCount(0),
 				m_nPageSize(nPageSize), 
-				m_KeyEncoder( pAlloc, pParams), 
-				m_ValueEncoder( pAlloc, pParams)
+				m_KeyEncoder( pAlloc, pParams, type == eInnerNode ? eInnerKey : eLeafKey),
+				m_ValueEncoder( pAlloc, pParams, type == eInnerNode ? eInnerValue : eLeafValue)
 			{}
 
-			static TCompressorParamsBasePtr LoadCompressorParams(CommonLib::IReadStream *pStream)
-			{
-				try
-				{
-					TCompressorParamsBasePtr pParam(new CompressorParamsBase());
-
-					pParam->Load(pStream);
-
-					return pParam;
-				}
-				catch (std::exception& exc_src)
-				{
-					CommonLib::CExcBase::RegenExcT("BaseNodeCompressor failed to load compressor params", exc_src);
-				}
-			}
-
-			void Init(TCompressorParamsBasePtr pParams)
-			{
-
-				m_KeyEncoder.Init(pParams);
-				m_ValueEncoder.Init(pParams);
-			}
-
+			
 			virtual ~TBaseNodeCompressor() {}
 
 			virtual void Load(TKeyMemSet& vecKeys, TValueMemSet& vecValues, CommonLib::IReadStream* pStream, CBPTreeContext *pContext)

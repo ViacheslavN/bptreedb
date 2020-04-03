@@ -26,22 +26,13 @@ public:
 	typedef std::vector<TLink, TLinkAlloc> TLinkMemSet;
 
 
-
-	typedef typename _TCompressor::TCompressorParams TInnerCompressorParams;
-	typedef std::shared_ptr<TInnerCompressorParams> TInnerCompressorParamsPtr;
-
-	BPTreeInnerNode(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, TInnerCompressorParamsPtr pParams) :
+	BPTreeInnerNode(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr pParams) :
 		m_nLess(-1), m_innerKeyMemSet(TKeyAlloc(pAlloc)), m_innerLinkMemSet(TLinkAlloc(pAlloc)), m_bMulti(bMulti),
-		m_pAlloc(pAlloc), m_nPageSize(nPageSize), m_Compressor(nPageSize - sizeof(TLink), pAlloc, pParams)
+		m_pAlloc(pAlloc), m_nPageSize(nPageSize), m_Compressor(nPageSize - sizeof(TLink), pAlloc, pParams, eInnerNode)
 	{
 
 	}
-
-	virtual void Init(TInnerCompressorParamsPtr pParams)
-	{
-		m_Compressor.Init(pParams);
-	}
-
+ 
 	virtual ~BPTreeInnerNode()
 	{
 

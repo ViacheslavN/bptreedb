@@ -18,23 +18,16 @@ namespace bptreedb
 		typedef _TValue TValue;
 		typedef STLAllocator<TValue> TAlloc;
 		typedef std::vector<TValue, TAlloc> TValueMemSet;
-		typedef _TCompressorParams TCompressorParams;
 		typedef _TEncoder TEncoder;
+		
 
-		typedef std::shared_ptr<TCompressorParams> TCompressorParamsPtr;
-
-
-		TBaseValueDiffEncoder(uint32_t nPageSize, CommonLib::IAllocPtr pAlloc, TCompressorParamsPtr pParams) :
-			m_encoder(nPageSize, pAlloc, pParams)
+		TBaseValueDiffEncoder(uint32_t nPageSize, CommonLib::IAllocPtr pAlloc, TCompressorParamsBasePtr pParams, ECompressParams type) :
+			m_encoder(nPageSize, pAlloc, pParams, type)
 		{}
 
 		~TBaseValueDiffEncoder()
 		{}		
 
-		void  Init(TCompressorParamsPtr pParams)
-		{
-
-		}
 
 		virtual void Write(const TValue& value, CommonLib::IWriteStream *pStream) = 0;
 		virtual void Read(TValue& value, CommonLib::IReadStream *pStream) = 0;

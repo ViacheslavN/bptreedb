@@ -9,7 +9,7 @@
 namespace bptreedb
 {
 
-	class CZCompParams
+	/*class CZCompParams
 	{
 		public:
 			enum ECodeType
@@ -38,7 +38,7 @@ namespace bptreedb
 				pStream->Write(m_codeType);
 			}
 	};
-
+	*/
 
 	template <class _TValue, class _TEncoder, class _TDecoder>
 	class TZEncoder
@@ -48,28 +48,36 @@ namespace bptreedb
 		typedef _TValue TValue;
 		typedef CommonLib::STLAllocator<TValue> TAlloc;
 		typedef std::vector<TValue, TAlloc> TValueMemSet;
-		typedef CZCompParams  TCompParams;
 		typedef _TEncoder  TEncoder;
 		typedef _TDecoder  TDecoder;
-		typedef std::shared_ptr<TCompParams> TCompressorParamsPtr;
 
-
-		TZEncoder(CommonLib::IAllocPtr& pAlloc, TCompressorParamsPtr pParams) : m_nCount(0), m_pCompParams(pParams), m_pAlloc(pAlloc)
+		enum ECodeType
 		{
-			if (m_pCompParams.get() == nullptr)
-				m_pCompParams.reset(new TCompParams());
+			SingleValue = 0,
+			UsingContextBuffer = 1,
+			UsingValueBuffer = 2
+		};
+
+
+		TZEncoder(CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr pParamsBase, ECompressParams type) : m_nCount(0),  m_pAlloc(pAlloc)
+		{	
+			 
+			TCompressorParamsPtr pParams = pParamsBase->GetCompressParams(type);
+
+			if (pParams.get() != nullptr)
+			{
+				m_compressLevel = pParams->GetIntParam("compressLevel", m_compressLevel);
+				m_compressRate = pParams->GetIntParam("compressRate", m_compressRate);
+				m_codeType = pParams->GetIntParam("codeType ", m_codeType);
+			}
+
 		}
 
 		~TZEncoder()
 		{
 
 		}
-
-		void  Init(TCompressorParamsPtr pParams)
-		{
-			if (pParams.get() != nullptr)
-				m_pCompParams = pParams;
-		}
+ 
 
 		void AddSymbol(uint32_t nSize, int nIndex, const TValue& value, const TValueMemSet& vecValues)
 		{
@@ -87,7 +95,7 @@ namespace bptreedb
 
 		uint32_t GetCompressSize() const
 		{
-			return (m_nCount * sizeof(TValue)) / m_pCompParams->m_compressRate;
+			return (m_nCount * sizeof(TValue)) / m_compressRate;
 		}
 
 		void BeginEncoding(const TValueMemSet& vecValues)
@@ -110,24 +118,24 @@ namespace bptreedb
 				uint32_t streamSize = uint32_t(pStream->Size() - pStream->Pos());
 				streamSize = streamSize > maxCompSize ? maxCompSize : streamSize;
 
-				TEncoder zStream(m_pCompParams->m_compressLevel);
+				TEncoder zStream(m_compressLevel);
 				zStream.AttachOut((Bytef*)pMemStream->Buffer() + pStream->Pos(), streamSize);
 
 				uint32_t count = 0;
-				switch (m_pCompParams->m_codeType)
+				switch (m_codeType)
 				{
 
-					case CZCompParams::SingleValue:
+					case SingleValue:
 						count = EncodeSingleValue(vecValues,  zStream);
 						break;
-					case CZCompParams::UsingContextBuffer:
+					case UsingContextBuffer:
 						count = EncodeWithContextBuffer(vecValues, zStream, pContext);
 						break;
-					case CZCompParams::UsingValueBuffer:
+					case UsingValueBuffer:
 						count = EncodeWithValueBuffer(vecValues, zStream);
 						break;
 					default:
-						throw CommonLib::CExcBase("Unknown type %1", m_pCompParams->m_codeType);
+						throw CommonLib::CExcBase("Unknown type %1", m_codeType);
 						break;
 				}
 				if (count != 0)
@@ -274,20 +282,20 @@ namespace bptreedb
 				TDecoder zStream;
 				zStream.AttachIn(pMemStream->Buffer() + pStream->Pos(), nCompSize);
 			
-				switch (m_pCompParams->m_codeType)
+				switch (m_codeType)
 				{
 
-				case CZCompParams::SingleValue:
+				case SingleValue:
 					DecodeBySingleValue(nCount, vecValues, zStream);
 					break;
-				case CZCompParams::UsingContextBuffer:
+				case UsingContextBuffer:
 					DecodeWithContextBuffer(nCount, vecValues, zStream, pContext);
 					break;
-				case CZCompParams::UsingValueBuffer:
+				case UsingValueBuffer:
 					DecodeWithValueBuffer(nCount, vecValues, zStream);
 					break;
 				default:
-					throw CommonLib::CExcBase("Unknown type %1", m_pCompParams->m_codeType);
+					throw CommonLib::CExcBase("Unknown type %1", m_codeType);
 					break;
 				}
 			
@@ -414,7 +422,10 @@ namespace bptreedb
 
 	protected:
 		uint32_t m_nCount{ 0 };
-		TCompressorParamsPtr m_pCompParams;
 		CommonLib::IAllocPtr m_pAlloc;
+
+		int32_t m_compressLevel{ 9 };
+		int32_t m_compressRate{ 5 };
+		int32_t m_codeType{ UsingValueBuffer };
 	};
 }

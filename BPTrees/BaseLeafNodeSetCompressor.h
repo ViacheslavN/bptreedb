@@ -10,45 +10,21 @@
 
 namespace bptreedb
 {
-	template<class _TKey, class _TKeyEncoder = TEmptyValueEncoder<_TKey>,
-		 class _TCompressorParams = CompressorParamsBase>
+	template<class _TKey, class _TKeyEncoder = TEmptyValueEncoder<_TKey> >
 			class TBaseLeafNodeSetCompressor
 		{
 		public:
 			typedef _TKey TKey;
 			typedef _TKeyEncoder TKeyEncoder;
-			typedef _TCompressorParams TCompressorParams;
 			typedef CommonLib::STLAllocator<TKey> TKeyAlloc;
 			typedef std::vector<TKey, TKeyAlloc> TKeyMemSet;
-			typedef std::shared_ptr<TCompressorParams> TCompressorParamsPtr;
 
 
-			TBaseLeafNodeSetCompressor(uint32_t nPageSize, CommonLib::IAllocPtr& pAlloc, TCompressorParamsPtr  pParams ) : m_nCount(0),
+			TBaseLeafNodeSetCompressor(uint32_t nPageSize, CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr  pParams, ECompressNodeType type) : m_nCount(0),
 				m_nPageSize(nPageSize),
-				m_KeyEncoder(pAlloc, pParams)
+				m_KeyEncoder(pAlloc, pParams, eLeafKey)
 			{}
 
-			static TCompressorParamsPtr LoadCompressorParams(CommonLib::IReadStream *pStream)
-			{
-				try
-				{
-					TCompressorParamsPtr pParam(new TCompressorParams());
-
-					pParam->Load(pStream);
-
-					return pParam;
-				}
-				catch (std::exception& exc_src)
-				{
-					CommonLib::CExcBase::RegenExcT("BaseLeafNodeSetCompressor failed to load compressor params", exc_src);
-				}
-			}
-
-
-			void  Init(TCompressorParamsPtr pParams)
-			{
-				m_KeyEncoder.Init(pParams);
-			}
 
 			virtual ~TBaseLeafNodeSetCompressor() {}
 

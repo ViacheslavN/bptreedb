@@ -8,7 +8,7 @@
 
 namespace bptreedb
 {
-	template <class _TValue, class _TCompressorParams = CompressorParamsBase>
+	template <class _TValue>
 	class TEmptyValueEncoder
 	{
 	public:
@@ -16,11 +16,9 @@ namespace bptreedb
 		typedef _TValue TValue;
 		typedef CommonLib::STLAllocator<TValue> TAlloc;
 		typedef std::vector<TValue, TAlloc> TValueMemSet;
-		typedef _TCompressorParams TCompressorParams;
-		typedef std::shared_ptr< TCompressorParams> TCompressorParamsPtr;
- 
 
-		TEmptyValueEncoder(CommonLib::IAllocPtr& pAlloc, TCompressorParamsPtr pParams) : m_nCount(0)
+
+		TEmptyValueEncoder(CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr pParams, ECompressParams type) : m_nCount(0)
 		{
 
 		}
@@ -30,15 +28,11 @@ namespace bptreedb
 
 		}
 
-		void  Init(TCompressorParamsPtr pParams)
-		{
-
-		}
-
 		void AddSymbol(uint32_t nSize, int nIndex, const TValue& value, const TValueMemSet& vecValues)
 		{
 			m_nCount++;
 		}
+
 		void RemoveSymbol(uint32_t nSize, int nIndex, const TValue& value, const TValueMemSet& vecValues)
 		{
 			m_nCount--;

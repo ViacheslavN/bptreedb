@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../../CommonLib/stream/stream.h"
+
 namespace bptreedb
 {
 
@@ -15,7 +17,7 @@ namespace bptreedb
 	{
 		ectByte = 0,
 		ectUInt16 = 1,
-		ectUint32 = 2,
+		ectUInt32 = 2,
 		ectUInt64 = 3
 	};
 
@@ -28,7 +30,7 @@ namespace bptreedb
 			return 1;
 		case ectUInt16:
 			return 2;
-		case ectUint32:
+		case ectUInt32:
 			return 4;
 		case ectUInt64:
 			return 8;
@@ -47,13 +49,78 @@ namespace bptreedb
 		case ectUInt16:
 			return nDiffsLen * sizeof(uint16_t);
 			break;
-		case ectUint32:
+		case ectUInt32:
 			return nDiffsLen * sizeof(uint32_t);
 			break;
 		case ectUInt64:
 			return nDiffsLen * sizeof(uint64_t);
 			break;
 		}
-			return nDiffsLen;
+
+		return nDiffsLen;
 	}
+
+	template<class TValue>
+	void WriteCompressValue(eCompressDataType nType, TValue value, CommonLib::IWriteStream* pStream)
+	{
+		switch (nType)
+		{
+		case ectByte:
+			pStream->Write((byte_t)value);
+			break;
+		case ectUInt16:
+			pStream->Write((uint16_t)value);
+			break;
+		case ectUInt32:
+			pStream->Write((uint32_t)value);
+			break;
+		case ectUInt64:
+			pStream->Write((uint64_t)value);
+			break;
+		}
+	}
+
+	template<class TValue>
+	void ReadCompressValue(eCompressDataType nType, TValue& value, CommonLib::IReadStream* pStream)
+	{
+		switch (nType)
+		{
+		case ectByte:
+			pStream->ReadByte(value);
+			break;
+		case ectUInt16:
+			pStream->Readintu16(value);
+			break;
+		case ectUInt32:
+			pStream->ReadIntu32(value);
+			break;
+		case ectUInt64:
+			pStream->ReadIntu64(value);
+			break;
+		}
+	}
+
+
+	template<class TValue>
+	TValue ReadCompressValue(eCompressDataType nType, CommonLib::IReadStream* pStream)
+	{
+		switch (nType)
+		{
+		case ectByte:
+			return (TValue)pStream->ReadByte();
+			break;
+		case ectUInt16:
+			return (TValue)pStream->Readintu16();
+			break;
+		case ectUInt32:
+			return (TValue)pStream->ReadIntu32();
+			break;
+		case ectUInt64:
+			return (TValue)pStream->ReadIntu64();
+			break;
+		}
+
+		return 0;
+	}
+
 }

@@ -7,47 +7,111 @@
 
 namespace bptreedb
 {
-
-	enum eCompressorParamsID
+	enum ECompressNodeType
 	{
-		eBaseCompID = 1,
-		eComposeIndexCompID = 2
+		eInnerNode,
+		eLeafNode
+
 	};
 
+	enum ECompressParams
+	{
+		eInnerKey,
+		eInnerValue,
+		eLeafKey,
+		eLeafValue
+
+	};
+
+
+	class CompressorParams
+	{
+	public:
+		CompressorParams();
+		virtual ~CompressorParams();
+		virtual void Load(CommonLib::IReadStream *pStream);
+		virtual void Save(CommonLib::IWriteStream *pStream);
+
+		int32_t GetIntParam(const astr& name, int32_t defValue) const;
+		double GetDoubleParam(const astr& name, double defValue) const;
+
+		void SetIntParam(const astr& name, int32_t value);
+		void SetDoubleParam(const astr& name, double value);
+	protected:
+
+		template <class Type>
+		Type GetParam(const astr& name, const std::map<astr, Type>& mapParams, const Type& defValue) const
+		{
+			auto it = mapParams.find(name);
+			if (it != mapParams.end())
+				return it->second;
+
+			return defValue;
+		}
+
+		template <class Type>
+		void SaveParams(const std::map<astr, Type>& mapParams, CommonLib::IWriteStream *pStream)
+		{
+			pStream->Write(uint32_t(mapParams.size()));
+			auto it = mapParams.begin();
+			auto end = mapParams.end();
+			for (; it != end; ++it)
+			{
+				pStream->Write(it->first);
+				pStream->Write(it->second);
+			}
+		}
+
+		template <class Type>
+		void LoadParams(std::map<astr, Type>& mapParams, CommonLib::IReadStream *pStream)
+		{
+			uint32_t size = pStream->ReadIntu32();
+
+			for (uint32_t i = 0; i < size; ++i)
+			{
+				astr name;
+				Type value;
+
+				pStream->Read(name);
+				pStream->Read(value);
+
+				mapParams.insert(std::make_pair(name, value));
+			}
+
+		}
+
+
+	protected:
+		//To do: XML probability is better choice
+		typedef std::map<astr, int32_t> TMapIntParams;
+		typedef std::map<astr, double> TMapDoubleParams;
+		TMapIntParams m_IntParams;
+		TMapDoubleParams m_DoubleParams;
+	};
+
+	typedef std::shared_ptr<CompressorParams> TCompressorParamsPtr;
 
 	class CompressorParamsBase
 	{
 	public:
-		CompressorParamsBase() : m_compressType(ACCoding), m_bCalcOnlineSize(false), m_nErrorCalcMiliproñ(100), m_nMaxRowCoeff(1)
-		{}
-		virtual ~CompressorParamsBase() {}
+		CompressorParamsBase();
+		virtual ~CompressorParamsBase();
+		virtual void Load(CommonLib::IReadStream *pStream);
+		virtual void Save(CommonLib::IWriteStream *pStream);
 
+		TCompressorParamsPtr GetCompressParams(ECompressParams eId);
+		void AddCompressParams(TCompressorParamsPtr ptrParams, ECompressParams eId);
+	protected:
 
+		typedef std::map<ECompressParams, TCompressorParamsPtr> TMapParams;
+		TMapParams m_params;
 
-		virtual void Load(CommonLib::IReadStream *pStream)
-		{
-			m_compressType = (EncoderType)pStream->Readint16();
-			m_bCalcOnlineSize = pStream->ReadBool();
-			m_nErrorCalcMiliproñ = pStream->ReadIntu32();
-			m_nMaxRowCoeff = pStream->ReadIntu32();
-		}
-
-		virtual void Save(CommonLib::IWriteStream *pStream)
-		{
-			pStream->Write(uint16_t(m_compressType));
-			pStream->Write(m_bCalcOnlineSize);
-			pStream->Write(m_nErrorCalcMiliproñ);
-			pStream->Write(m_nMaxRowCoeff);
-		 
-		}
-
-		EncoderType m_compressType;
-		bool m_bCalcOnlineSize;
-		uint32_t m_nErrorCalcMiliproñ;
-		uint32_t m_nMaxRowCoeff;
 	};
 
 	typedef std::shared_ptr<CompressorParamsBase> TCompressorParamsBasePtr;
+ 
+
 }
 
  
+

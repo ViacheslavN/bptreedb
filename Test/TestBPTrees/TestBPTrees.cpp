@@ -8,7 +8,7 @@ void TestBPTreeSet();
 
 int main()
 {
-	TestBPTreeSet();
+	TestBPTreeSet(); 
 
 	return 0;
 }

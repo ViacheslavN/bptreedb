@@ -4,6 +4,7 @@
 #include "../utils/ReadStreamPage.h"
 #include "../utils/WriteStreamPage.h"
 #include "BPTreeNodeHolder.h"
+#include "Compressor/CompressorParams.h"
 
 namespace bptreedb
 {
@@ -25,13 +26,7 @@ namespace bptreedb
 		typedef typename TLeafNode::TCompressor   TLeafCompess;
 		typedef _TNodeHolder TBPTreeNode;
 		typedef std::shared_ptr<TBPTreeNode> TBPTreeNodePtr;
-
-		typedef typename TInnerNode::TInnerCompressorParams TInnerCompressorParams;
-		typedef typename TLeafNode::TLeafCompressorParams TLeafCompressorParams;
-
-		typedef std::shared_ptr< TInnerCompressorParams> TInnerCompressorParamsPtr;
-		typedef std::shared_ptr< TLeafCompressorParams> TLeafCompressorParamsPtr;
-
+ 
 
 		TBPlusTreeSetBase(int64_t nPageBTreeInfo, std::shared_ptr<TStorage> pStorage, CommonLib::IAllocPtr pAlloc, uint32_t nChacheSize, uint32_t nNodesPageSize, bool bMulti = false) :
 			m_nPageBTreeInfo(nPageBTreeInfo), m_pStorage(pStorage), m_pAlloc(pAlloc), m_nChacheSize(nChacheSize)
@@ -54,7 +49,7 @@ namespace bptreedb
 		}
 
 		/*common*/
-		void InnitTree(TInnerCompressorParamsPtr innerParams, TLeafCompressorParamsPtr leafParams, bool bMinSplit);
+		void InnitTree(TCompressorParamsBasePtr pParams, bool bMinSplit);
 		bool IsTreeInit();
 		void Flush();
 		TLink GetPageBTreeInfo() const
@@ -128,8 +123,8 @@ namespace bptreedb
 		bool m_bLockRemoveItemFromCache;
 
 
-		TInnerCompressorParamsPtr m_InnerCompressParams;
-		TLeafCompressorParamsPtr  m_LeafCompressParams;
+		TCompressorParamsBasePtr m_pCompressParams;
+ 
 
 		struct TBPTreeFreeChecker
 		{

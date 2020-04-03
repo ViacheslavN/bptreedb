@@ -59,7 +59,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::LoadNodeFr
 		CommonLib::CReadMemoryStream stream;
 		stream.AttachBuffer(pFilePage->GetData(), pFilePage->GetPageSize());
 
-		TBPTreeNodePtr node = TBPTreeNode::Load(&stream, m_pAlloc, m_bMulti, m_nNodePageSize, nAddr, m_InnerCompressParams, m_LeafCompressParams, &m_Context);
+		TBPTreeNodePtr node = TBPTreeNode::Load(&stream, m_pAlloc, m_bMulti, m_nNodePageSize, nAddr, m_pCompressParams, &m_Context);
 	//	node->InitCopmressor(m_InnerCompressParams, m_LeafCompressParams);
 		return node;
 	}
@@ -246,7 +246,7 @@ bool BPSETBASE_DECLARATION::IsTreeInit()
 
 
 BPSETBASE_TEMPLATE_PARAMS
-void  BPSETBASE_DECLARATION::InnitTree(TInnerCompressorParamsPtr innerParams, TLeafCompressorParamsPtr leafParams, bool bMinSplit)
+void  BPSETBASE_DECLARATION::InnitTree(TCompressorParamsBasePtr pParams, bool bMinSplit)
 {
 	try
 	{
@@ -264,18 +264,13 @@ void  BPSETBASE_DECLARATION::InnitTree(TInnerCompressorParamsPtr innerParams, TL
 
 		stream.Write(m_nRootAddr);
 
-		bool bInnerParams = innerParams.get() != nullptr ? true : false;
-		bool bLeafParams = leafParams.get() != nullptr ? true : false;
+		bool bParams = pParams.get() != nullptr ? true : false;
+ 		stream.Write(bParams);
+		m_pCompressParams = pParams;
 
-		stream.Write(bInnerParams);
-		stream.Write(bLeafParams);
-
-		if (bInnerParams)
-			innerParams->Save(&stream);
+		if (bParams)
+			pParams->Save(&stream);
 	
-		if (bLeafParams)
-			leafParams->Save(&stream);
-
 		stream.Close();
 
 		m_pRoot = CreateNode(m_nRootAddr, true, false); 
@@ -300,21 +295,15 @@ void BPSETBASE_DECLARATION::LoadTree()
 		stream.Open(m_nPageBTreeInfo, m_nNodePageSize, true);
 
 		m_nRootAddr = stream.ReadInt64();
-		bool bInnerParams = stream.ReadBool();
-		bool bLeafParams = stream.ReadBool();
+		bool bParams = stream.ReadBool();
+ 
 		
-		if (bInnerParams)
+		if (bParams)
 		{
-			m_InnerCompressParams.reset(new TInnerCompressorParams());
-			m_InnerCompressParams->Load(&stream);
+			m_pCompressParams.reset(new CompressorParamsBase());
+			m_pCompressParams->Load(&stream);
 		}
-
-		if (bLeafParams)
-		{
-			m_LeafCompressParams.reset(new TLeafCompressorParams());
-			m_LeafCompressParams->Load(&stream);
-		}
-		
+ 		
 		m_pRoot = LoadNodeFromStorage(m_nRootAddr);
 		m_pRoot->SetFlags(ROOT_NODE, true);
 	}
@@ -387,7 +376,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::CreateNode
 		if (nAddr == -1)
 			nAddr = m_pStorage->GetNewFilePageAddr();
 
-		TBPTreeNodePtr pNode = TBPTreeNode::Create(m_pAlloc, m_bMulti, m_nNodePageSize, nAddr, isLeaf, m_InnerCompressParams, m_LeafCompressParams);
+		TBPTreeNodePtr pNode = TBPTreeNode::Create(m_pAlloc, m_bMulti, m_nNodePageSize, nAddr, isLeaf, m_pCompressParams);
 
 		pNode->SetFlags(CHANGE_NODE, true);
 		//pNode->InitCopmressor(m_InnerCompressParams, m_LeafCompressParams);

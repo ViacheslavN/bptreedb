@@ -310,6 +310,7 @@
     <ClInclude Include="BPTrees\Compressor\CompressorParams.h" />
     <ClInclude Include="BPTrees\Compressor\CompressUtils.h" />
     <ClInclude Include="BPTrees\Compressor\EntropyEncoder\BaseNumLenEncoder.h" />
+    <ClInclude Include="BPTrees\Compressor\EntropyEncoder\UnsignedNumLenEncoder.h" />
     <ClInclude Include="BPTrees\Compressor\ZlibCompressor\ZEncoderDiffBase.h" />
     <ClInclude Include="BPTrees\Compressor\ZlibCompressor\ZLibEncoder.h" />
     <ClInclude Include="BPTrees\Compressor\ZlibCompressor\zstdencoder.h" />
@@ -333,6 +334,7 @@
     <ClCompile Include="BPTrees\BPBaseTreeNode.cpp" />
     <ClInclude Include="BPTrees\BPTreeNodeHolder.h" />
     <ClInclude Include="BPTrees\Compressor\ZlibCompressor\ZEncoderBase.h" />
+    <ClCompile Include="BPTrees\Compressor\CompressorParams.cpp" />
     <ClCompile Include="BPTrees\Compressor\EntropyEncoder\BaseNumLenEncoder.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

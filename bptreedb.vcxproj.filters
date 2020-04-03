@@ -162,6 +162,9 @@
     <ClInclude Include="BPTrees\Compressor\ZlibCompressor\ZEncoderBase.h">
       <Filter>BPTrees\Compressor\ZlibCompressor</Filter>
     </ClInclude>
+    <ClInclude Include="BPTrees\Compressor\EntropyEncoder\UnsignedNumLenEncoder.h">
+      <Filter>BPTrees\Compressor\EntropyEncoder</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -181,6 +184,9 @@
     </ClCompile>
     <ClCompile Include="BPTrees\Compressor\EntropyEncoder\BaseNumLenEncoder.cpp">
       <Filter>BPTrees\Compressor\EntropyEncoder</Filter>
+    </ClCompile>
+    <ClCompile Include="BPTrees\Compressor\CompressorParams.cpp">
+      <Filter>BPTrees\Compressor</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
