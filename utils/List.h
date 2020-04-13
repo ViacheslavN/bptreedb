@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../../commonlib/CommonLib.h"
-#include "../../commonlib/exception/exc_base.h"
-#include "../../commonlib/alloc/alloc.h"
-#include "../../commonlib/alloc/simpleAlloc.h"
+#include "../../CommonLib/CommonLib.h"
+#include "../../CommonLib/exception/exc_base.h"
+#include "../../CommonLib/alloc/alloc.h"
+#include "../../CommonLib/alloc/simpleAlloc.h"
 
 namespace bptreedb
 {

@@ -5,6 +5,8 @@ TIterator BPSETBASE_DECLARATION::find(const TComparator& comp, const TKey& key, 
 {
 	try
 	{
+		CommonLib::CPrefCounterHolder holder(m_pBPTreePerfCounter, eFindKey);
+
 		if (pFromIterator)
 		{
 			TIterator it(this, pFromIterator->m_pCurNode, pFromIterator->m_pCurNode->binary_search(comp, key));

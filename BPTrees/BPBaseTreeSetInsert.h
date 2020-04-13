@@ -6,7 +6,10 @@ void BPSETBASE_DECLARATION::insert(TKey& key)
 {
 	try
 	{
+		
+		CommonLib::CPrefCounterHolder holder(m_pBPTreePerfCounter, eInsertValue);
 		TBPTreeNodePtr pNode = findLeafNodeForInsert(key);
+
 		pNode->InsertInLeaf(m_comp, key);
 		pNode->SetFlags(CHANGE_NODE, true);
 
@@ -23,7 +26,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::findLeafNo
 {
 	try
 	{
-
+	
 		if (m_pRoot.get() == nullptr)
 			LoadTree();
 
@@ -35,17 +38,18 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::findLeafNo
 		int32_t nIndex = -1;
 		int64_t nNextAddr = m_pRoot->FindNodeInsert(m_comp, key, nIndex);
 		TBPTreeNodePtr pParent = m_pRoot;
-
 		while (nNextAddr != -1)
 		{
+
 			TBPTreeNodePtr pNode = GetNode(nNextAddr);
 			pNode->SetParent(pParent, nIndex);
+
 			if (pNode->IsLeaf())
 			{
 				return pNode;
 			}
 
-			pParent = pNode;
+			pParent = pNode;		
 			nNextAddr = pNode->FindNodeInsert(m_comp, key, nIndex);
 		}
 
@@ -88,7 +92,7 @@ void BPSETBASE_DECLARATION::CheckLeafNode(TBPTreeNodePtr &pNode)
 			}
 
 			TBPTreeNodePtr pNodeNewRight = NewNode(false, true);
-			SplitInnerNode(pCheckNode, pNodeNewRight, pParentNode, m_bMinSplit ? 3 : pNode->Count() / 2);
+			SplitInnerNode(pCheckNode, pNodeNewRight, pParentNode, m_bMinSplit ? 3 : (pCheckNode->Count() / 2) - 3);
 			pCheckNode = pParentNode;
 
 		}

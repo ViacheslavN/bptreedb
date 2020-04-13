@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../../commonlib/CommonLib.h"
-#include "../../commonlib/stream/FixedMemoryStream.h"
-#include "../../commonlib/stream/MemoryStream.h"
-#include "../../commonlib/stream/StreamBaseEmpty.h"
+#include "../../CommonLib/CommonLib.h"
+#include "../../CommonLib/stream/FixedMemoryStream.h"
+#include "../../CommonLib/stream/MemoryStream.h"
+#include "../../CommonLib/stream/StreamBaseEmpty.h"
 
 namespace bptreedb
 {

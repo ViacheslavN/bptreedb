@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../commonlib/CommonLib.h"
+#include "../../CommonLib/CommonLib.h"
 
 namespace bptreedb
 {
@@ -52,10 +52,18 @@ namespace bptreedb
 
 	};
 
-
 	class IStorage
 	{
 	public:
+		enum EPrefOperation
+		{
+			eReadData,
+			eWriteData,
+			eEncryptData,
+			eDecryptData
+		};
+		
+
 		IStorage() {}
 		virtual ~IStorage() {}
 
@@ -74,7 +82,13 @@ namespace bptreedb
 		virtual FilePagePtr GetEmptyFilePage(int64_t nAddr, uint32_t nSize) = 0;
 
 		virtual void Flush() = 0;
+
+		virtual void SetStoragePerformer(CommonLib::TPrefCounterPtr pStoragePerformer) = 0;
+		
 	};
 
 	typedef std::shared_ptr<IStorage> TStoragePtr;
+
+
+
 }

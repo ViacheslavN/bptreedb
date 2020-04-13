@@ -27,7 +27,7 @@ namespace bptreedb
 		typedef typename TBase::TBPTreeNodePtr TBPTreeNodePtr;
 
 
-		template <class _TKey, class _TBTreeNode, class _TBTree>
+		template <class _TK, class _TNode, class _TBTree>
 		friend class TBPSetIterator;
 
 		typedef TBPSetIterator<TKey, TBPTreeNode, TBase> iterator;

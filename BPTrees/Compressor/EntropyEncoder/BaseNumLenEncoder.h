@@ -17,8 +17,9 @@ namespace bptreedb
 			void Reset();
 			uint32_t EstimateCompressSize() const;
 
+
 			template <class TSymbol>
-			void AddCalcSymbol(const TSymbol& symbol)
+			void AddSymbol(const TSymbol& symbol)
 			{
 				uint32_t nBitsLen = 0;
 				if (symbol < 2)
@@ -31,7 +32,7 @@ namespace bptreedb
 
 
 			template <class TSymbol>
-			void RemoveCalcSymbol(const TSymbol& symbol)
+			void RemoveSymbol(const TSymbol& symbol)
 			{
 				uint32_t nBitsLen = 0;
 				if (symbol < 2)

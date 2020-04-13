@@ -289,6 +289,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Text Include="CMakeLists.txt" />
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -307,6 +308,7 @@
     <ClInclude Include="BPTrees\BPTreeInnerNode.h" />
     <ClInclude Include="BPTrees\BPTreeLeafNode.h" />
     <ClInclude Include="BPTrees\BPBaseTreeSet.h" />
+    <ClInclude Include="BPTrees\BPTreePerfCounter.h" />
     <ClInclude Include="BPTrees\Compressor\CompressorParams.h" />
     <ClInclude Include="BPTrees\Compressor\CompressUtils.h" />
     <ClInclude Include="BPTrees\Compressor\EntropyEncoder\BaseNumLenEncoder.h" />

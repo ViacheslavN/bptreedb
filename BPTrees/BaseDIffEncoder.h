@@ -1,21 +1,22 @@
 #pragma once
 
 #include "Compressor/CompressorParams.h"
-#include "../../commonlib/CommonLib.h"
-#include "../../commonlib/exception/exc_base.h"
-#include "../../commonlib/alloc/alloc.h"
-#include "../../commonlib/alloc/simpleAlloc.h"
-#include "../../commonlib/alloc/stl_alloc.h"
+#include "../../CommonLib/CommonLib.h"
+#include "../../CommonLib/exception/exc_base.h"
+#include "../../CommonLib/alloc/alloc.h"
+#include "../../CommonLib/alloc/simpleAlloc.h"
+#include "../../CommonLib/alloc/stl_alloc.h"
 
 namespace bptreedb
 {
 	   
-	template<class _TValue, class _TEncoder, class _TCompressorParams = CompressorParamsBase>
+	template<class _TValue, class _TSignValue, class _TEncoder, class _TCompressorParams = CompressorParamsBase>
 	class TBaseValueDiffEncoder
 	{
 	public:
 
 		typedef _TValue TValue;
+		typedef _TSignValue TSignValue;
 		typedef STLAllocator<TValue> TAlloc;
 		typedef std::vector<TValue, TAlloc> TValueMemSet;
 		typedef _TEncoder TEncoder;
@@ -29,8 +30,8 @@ namespace bptreedb
 		{}		
 
 
-		virtual void Write(const TValue& value, CommonLib::IWriteStream *pStream) = 0;
-		virtual void Read(TValue& value, CommonLib::IReadStream *pStream) = 0;
+		virtual void Write(const TValue& value, CommonLib::IWriteStream *pStream, CBPTreeContext *pContext) = 0;
+		virtual void Read(TValue& value, CommonLib::IReadStream *pStream, CBPTreeContext *pContext) = 0;
 		virtual uint32_t GetValueSize() const = 0;
 
 

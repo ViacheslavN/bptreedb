@@ -15,19 +15,22 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="TestBPTrees.cpp">
+    <None Include="build.ps1">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TestBPSet.cpp">
+    </None>
+    <None Include="build.sh">
       <Filter>Source Files</Filter>
-    </ClCompile>
+    </None>
+    <None Include="clean.ps1">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="CMakeLists.txt" />
+    <ClCompile Include="bptreedbLinuxlBuild">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="clean">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

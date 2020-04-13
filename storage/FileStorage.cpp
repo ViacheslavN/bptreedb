@@ -2,8 +2,10 @@
 #include "FileStorage.h"
 #include "FilePage.h"
 
+
 namespace bptreedb
 {
+
 	CFileStorage::CFileStorage(CommonLib::IAllocPtr pAlloc, /*uint32_t nCacheSize, */bool bCheckCRC) : m_pAlloc(pAlloc), /*m_pageCache(pAlloc), m_cacheSize(nCacheSize),*/ m_checkCRC(bCheckCRC)
 	{
 		 
@@ -177,13 +179,20 @@ namespace bptreedb
 	{
 		try
 		{
-			m_file.SetFilePos64(m_offset + (nAddr * m_minPageSize), CommonLib::soFromBegin);
-			uint32_t nWCnt = (uint32_t)m_file.Read(pData, nSize);
-			if (nWCnt != nSize)
-				throw CommonLib::CExcBase("can't read the requested size, page size: %1, returned size: %2", nSize, nWCnt);
+			{
+
+				CommonLib::CPrefCounterHolder holder(m_pStoragePerformer, eReadData, nSize);
+
+				m_file.SetFilePos64(m_offset + (nAddr * m_minPageSize), CommonLib::soFromBegin);
+				uint32_t nWCnt = (uint32_t)m_file.Read(pData, nSize);
+
+				if (nWCnt != nSize)
+					throw CommonLib::CExcBase("can't read the requested size, page size: %1, returned size: %2", nSize, nWCnt);
+			}
 
 			if (m_pageCipher.get() && decrypt)
 			{
+				CommonLib::CPrefCounterHolder holder(m_pStoragePerformer, eDecryptData, nSize);
 				m_pageCipher->decryptBuf(pData, decrypt);
 			}
 		}
@@ -206,12 +215,18 @@ namespace bptreedb
 			{
 				if (m_bufForChiper.size() < nSize)
 					m_bufForChiper.resize(nSize);
-
-				m_pageCipher->encryptBuf(pData, &m_bufForChiper[0], nSize);
-				nCnt = (uint32_t)m_file.Write(&m_bufForChiper[0], nSize);
+				{
+					CommonLib::CPrefCounterHolder holder(m_pStoragePerformer, eEncryptData, nSize);
+					m_pageCipher->encryptBuf(pData, &m_bufForChiper[0], nSize);
+				}
+				{
+					CommonLib::CPrefCounterHolder holder(m_pStoragePerformer, eWriteData, nSize);
+					nCnt = (uint32_t)m_file.Write(&m_bufForChiper[0], nSize);
+				}
 			}
 			else
 			{
+				CommonLib::CPrefCounterHolder holder(m_pStoragePerformer, eWriteData, nSize);
 				nCnt = (uint32_t)m_file.Write(pData, nSize);
 			}
 
@@ -283,6 +298,11 @@ namespace bptreedb
 			CommonLib::CExcBase::RegenExcT("Failed to flush storage", excSrc);
 			throw;
 		}
+	}
+
+	void CFileStorage::SetStoragePerformer(CommonLib::TPrefCounterPtr pStoragePerformer)
+	{
+		m_pStoragePerformer = pStoragePerformer;
 	}
 		   	 
 }

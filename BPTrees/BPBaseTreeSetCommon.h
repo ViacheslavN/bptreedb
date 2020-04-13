@@ -18,6 +18,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetNode(in
 {
 	 try
 	 {
+		 CommonLib::CPrefCounterHolder holder(m_pBPTreePerfCounter, eGetNode);
 		 TBPTreeNodePtr pNode = m_NodeCache.GetElem(nAddr);
 		 if (pNode.get() == nullptr)
 		 {
@@ -59,8 +60,9 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::LoadNodeFr
 		CommonLib::CReadMemoryStream stream;
 		stream.AttachBuffer(pFilePage->GetData(), pFilePage->GetPageSize());
 
+		CommonLib::CPrefCounterHolder holder(m_pBPTreePerfCounter, eLoadNode);
 		TBPTreeNodePtr node = TBPTreeNode::Load(&stream, m_pAlloc, m_bMulti, m_nNodePageSize, nAddr, m_pCompressParams, &m_Context);
-	//	node->InitCopmressor(m_InnerCompressParams, m_LeafCompressParams);
+
 		return node;
 	}
 	catch (std::exception& exc)
@@ -328,9 +330,20 @@ void BPSETBASE_DECLARATION::SaveNode(TBPTreeNodePtr& pNode)
 		CommonLib::CFxMemoryWriteStream stream;
 		stream.AttachBuffer(pPage->GetData(), pPage->GetPageSize());
 
-		uint32_t nCount = pNode->Save(&stream, &m_Context);
+		uint32_t nCount = 0;
+		
+		{
+			CommonLib::CPrefCounterHolder holder(m_pBPTreePerfCounter, eSaveNode);
+			nCount = pNode->Save(&stream, &m_Context);
+		}
+
 		while (nCount != 0)
 		{
+			if (m_pBPTreePerfCounter.get() != nullptr)
+			{
+				m_pBPTreePerfCounter->StartOperation(eMissedNode);
+				m_pBPTreePerfCounter->StopOperation(eMissedNode);
+			}
 
 			TBPTreeNodePtr pParentNode = GetParentNode(pNode);
 			if (pParentNode.get() == nullptr)
@@ -355,7 +368,10 @@ void BPSETBASE_DECLARATION::SaveNode(TBPTreeNodePtr& pNode)
 			}
 
 			stream.Seek(0, CommonLib::soFromBegin);
-			nCount = pNode->Save(&stream, &m_Context);
+			{
+				CommonLib::CPrefCounterHolder holder(m_pBPTreePerfCounter, eSaveNode);
+				nCount = pNode->Save(&stream, &m_Context);
+			}
 		}
 
 		m_pStorage->SaveFilePage(pPage);
@@ -405,6 +421,7 @@ void BPSETBASE_DECLARATION::Flush()
 {
 	try
 	{
+		CommonLib::CPrefCounterHolder holder(m_pBPTreePerfCounter, eFlush);
 		m_bLockRemoveItemFromCache = true; // TO DO use RAII
 
 		if (m_pRoot->GetFlags() & CHANGE_NODE)
@@ -429,4 +446,11 @@ void BPSETBASE_DECLARATION::Flush()
 	{
 		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed to flash", exc);
 	}
+}
+
+
+BPSETBASE_TEMPLATE_PARAMS
+void BPSETBASE_DECLARATION::SetBPTreePerfCounter(CommonLib::TPrefCounterPtr pBPTreePerfCounter)
+{
+	m_pBPTreePerfCounter = pBPTreePerfCounter;
 }

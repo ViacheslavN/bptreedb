@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../../commonlib/CommonLib.h"
-#include "../../commonlib/exception/exc_base.h"
-#include "../../commonlib/alloc/alloc.h"
-#include "../../commonlib/alloc/simpleAlloc.h"
-#include "../../commonlib/alloc/stl_alloc.h"
+#include "../../CommonLib/CommonLib.h"
+#include "../../CommonLib/exception/exc_base.h"
+#include "../../CommonLib/alloc/alloc.h"
+#include "../../CommonLib/alloc/simpleAlloc.h"
+#include "../../CommonLib/alloc/stl_alloc.h"
 
 #include "BPBaseTreeNode.h"
 
@@ -96,6 +96,9 @@ public:
 	TLink FindNodeInsert(const TComp& comp, const TKey& key, int32_t& nIndex)
 	{
 		nIndex = -1;
+	//	nIndex = m_innerLinkMemSet.size() - 1;
+	//	return m_innerLinkMemSet[nIndex];
+
 		if (!m_bMulti)
 		{
 			return lower_bound(comp, key, nIndex);
@@ -263,7 +266,7 @@ public:
 		try
 		{
 			if (count > (m_innerKeyMemSet.size() - 2))
-				throw CommonLib::CExcBase("invalid count %1", count);
+				throw CommonLib::CExcBase("invalid count %1, size %2", count, m_innerKeyMemSet.size());
 
 			TKeyMemSet& newNodeKeySet = pNode->m_innerKeyMemSet;
 			TLinkMemSet& newNodeLinkSet = pNode->m_innerLinkMemSet;

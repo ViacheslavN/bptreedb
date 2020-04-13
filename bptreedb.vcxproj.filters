@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
+    <Text Include="CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -164,6 +165,9 @@
     </ClInclude>
     <ClInclude Include="BPTrees\Compressor\EntropyEncoder\UnsignedNumLenEncoder.h">
       <Filter>BPTrees\Compressor\EntropyEncoder</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BPTreePerfCounter.h">
+      <Filter>BPTrees\BPTreeSet</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

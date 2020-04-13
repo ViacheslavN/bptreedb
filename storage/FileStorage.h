@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../../commonlib/CommonLib.h"
-#include "../../commonlib/exception/exc_base.h"
-#include "../../commonlib/alloc/alloc.h"
-#include "../../commonlib/alloc/simpleAlloc.h"
+#include "../../CommonLib/CommonLib.h"
+#include "../../CommonLib/exception/exc_base.h"
+#include "../../CommonLib/alloc/alloc.h"
+#include "../../CommonLib/alloc/simpleAlloc.h"
 #include "storage.h"
 #include "../utils/CacheLRU_2Q.h"
 #include "../../CommonLib/filesystem/filesystem.h"
@@ -21,8 +21,10 @@ namespace bptreedb
 		CFileStorage& operator = (const CFileStorage&&);
 	public:
 
+		
 		CFileStorage(std::shared_ptr<CommonLib::IAlloc> pAlloc, /*uint32_t nCacheSize = 1000,*/ bool bCheckCRC = true);
 		virtual ~CFileStorage();
+
 
 
 		virtual void Open(const wchar_t* pszName, bool bCreate, uint32_t nMinPageSize = 8192);
@@ -43,7 +45,7 @@ namespace bptreedb
 		virtual FilePagePtr GetEmptyFilePage(int64_t nAddr, uint32_t nSize);
 
 		virtual void Flush();
-
+		virtual void SetStoragePerformer(CommonLib::TPrefCounterPtr pStoragePerformer);
 	private:
 
 		CommonLib::file::CFile m_file;
@@ -69,6 +71,6 @@ namespace bptreedb
 
 		typedef std::vector<byte_t> TBufferForChiper;
 		TBufferForChiper m_bufForChiper;
-
+		CommonLib::TPrefCounterPtr m_pStoragePerformer;
 	};
 }

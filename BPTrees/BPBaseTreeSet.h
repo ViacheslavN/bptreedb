@@ -5,6 +5,7 @@
 #include "../utils/WriteStreamPage.h"
 #include "BPTreeNodeHolder.h"
 #include "Compressor/CompressorParams.h"
+#include "BPTreePerfCounter.h"
 
 namespace bptreedb
 {
@@ -26,6 +27,8 @@ namespace bptreedb
 		typedef typename TLeafNode::TCompressor   TLeafCompess;
 		typedef _TNodeHolder TBPTreeNode;
 		typedef std::shared_ptr<TBPTreeNode> TBPTreeNodePtr;
+
+
  
 
 		TBPlusTreeSetBase(int64_t nPageBTreeInfo, std::shared_ptr<TStorage> pStorage, CommonLib::IAllocPtr pAlloc, uint32_t nChacheSize, uint32_t nNodesPageSize, bool bMulti = false) :
@@ -52,6 +55,8 @@ namespace bptreedb
 		void InnitTree(TCompressorParamsBasePtr pParams, bool bMinSplit);
 		bool IsTreeInit();
 		void Flush();
+		void SetBPTreePerfCounter(CommonLib::TPrefCounterPtr pBPTreePerfCounter);
+
 		TLink GetPageBTreeInfo() const
 		{
 			return m_nPageBTreeInfo;
@@ -82,6 +87,7 @@ namespace bptreedb
 		void LoadTree();
 
 		//common
+
 		TBPTreeNodePtr GetNode(int64_t nAddr);
 		TBPTreeNodePtr GetNodeAndCheckParent(int64_t nAddr);
 		TBPTreeNodePtr LoadNodeFromStorage(int64_t nAddr);
@@ -121,6 +127,7 @@ namespace bptreedb
 		bool m_bMulti;
 		bool m_bMinSplit;
 		bool m_bLockRemoveItemFromCache;
+		CommonLib::TPrefCounterPtr m_pBPTreePerfCounter;
 
 
 		TCompressorParamsBasePtr m_pCompressParams;
