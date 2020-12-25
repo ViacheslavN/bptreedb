@@ -100,7 +100,7 @@ namespace bptreedb
 				}
 				catch (std::exception& exc_src)
 				{
-					CommonLib::CExcBase::RegenExcT("BaseNodeCompressor failed to write leaf node", exc_src);
+					CommonLib::CExcBase::RegenExcT("[BaseNodeCompressor] failed to write leaf node", exc_src);
 					throw;
 				}
 			}
@@ -188,7 +188,7 @@ namespace bptreedb
 				}
 			}
 
-			bool IsHaveUnion(TBaseLeafNodeSetCompressor& pCompressor) const
+			bool PossibleUnion(TBaseLeafNodeSetCompressor& pCompressor) const
 			{
 				if ((m_nCount + pCompressor.m_nCount) > m_nPageSize * 8) //max bits for elem
 					return false;
@@ -196,7 +196,7 @@ namespace bptreedb
 				return (RowSize() + pCompressor.RowSize()) < (m_nPageSize - HeadSize());
 			}
 
-			bool IsHaveAlignment(TBaseLeafNodeSetCompressor& pCompressor) const
+			bool PossibleAlignment(TBaseLeafNodeSetCompressor& pCompressor) const
 			{
 				uint32_t nNoCompSize = m_nCount * sizeof(TKey);
 				return nNoCompSize < (m_nPageSize - HeadSize());

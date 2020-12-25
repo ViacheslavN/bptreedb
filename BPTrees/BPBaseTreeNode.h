@@ -13,6 +13,11 @@ namespace bptreedb
 		CHECK_REM_NODE = 16
 	};
 
+
+	#define  LESS_INDEX  -1
+	#define  EMPTY_PAGE_ADDR  -1
+ 
+
 	class IBPTreeNode;
 	typedef std::shared_ptr<IBPTreeNode> IBPTreeNodePtr;
 	typedef std::weak_ptr<IBPTreeNode> TParentNodePtr;
@@ -51,6 +56,8 @@ namespace bptreedb
 		virtual uint32_t RowSize() const = 0;
 		virtual	uint32_t TupleSize() const = 0;
 		virtual bool IsNeedSplit() const = 0;
+		virtual bool IsHalfEmpty() const = 0;
+		virtual void RemoveByIndex(uint32_t nIndex) = 0;
 
 		virtual uint32_t GetFlags() const;
 		virtual uint32_t Count() const = 0;

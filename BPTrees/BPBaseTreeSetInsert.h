@@ -17,7 +17,7 @@ void BPSETBASE_DECLARATION::insert(TKey& key)
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed insert", exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed insert", exc);
 	}
 }
 
@@ -57,7 +57,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::findLeafNo
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed findLeafNodeForInsert", exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed findLeafNodeForInsert", exc);
 		throw;
 	}
 }
@@ -100,7 +100,7 @@ void BPSETBASE_DECLARATION::CheckLeafNode(TBPTreeNodePtr &pNode)
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed CheckLeafNode", exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed CheckLeafNode", exc);
 	}
 }
 
@@ -133,7 +133,7 @@ void BPSETBASE_DECLARATION::TransformRootToInner()
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed TransformRootToInner", exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed TransformRootToInner", exc);
 	}
 }
 
@@ -171,7 +171,7 @@ void BPSETBASE_DECLARATION::SplitLeafNode(TBPTreeNodePtr &pNode, TBPTreeNodePtr 
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed SplitLeafNode", exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed SplitLeafNode", exc);
 	}
 }
 
@@ -203,7 +203,7 @@ void BPSETBASE_DECLARATION::SplitRootInnerNode()
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed TransformRootToInner", exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed TransformRootToInner", exc);
 	}
 
 }
@@ -226,7 +226,7 @@ void BPSETBASE_DECLARATION::SetParentInChildCacheOnly(TBPTreeNodePtr& pNode)
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed SetParentInChildCacheOnly", exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed SetParentInChildCacheOnly", exc);
 	}
 }
 
@@ -256,7 +256,7 @@ void BPSETBASE_DECLARATION::SplitInnerNode(TBPTreeNodePtr&pNode, TBPTreeNodePtr&
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed SplitInnerNode", exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed SplitInnerNode", exc);
 	}
 }
 

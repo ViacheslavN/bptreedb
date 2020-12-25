@@ -80,6 +80,13 @@ void LogBPtreePerf(CommonLib::TPrefCounterPtr  pPerf)
 	Log.InfoT("get node %1, total time %2", pPerf->GetCountOperation(bptreedb::eGetNode), pPerf->GetTimeOperation(bptreedb::eGetNode));
 }
 
+void LogBPtreeRemovePerf(CommonLib::TPrefCounterPtr pPerf)
+{
+	Log.Info("------BPTREE DELETE------");
+	Log.InfoT("remove total time: %1,", pPerf->GetTimeOperation(bptreedb::eRemoveValue));
+	Log.InfoT("Flush total time %1", pPerf->GetTimeOperation(bptreedb::eFlush));
+}
+
 void LogBPtreeFindPerf(CommonLib::TPrefCounterPtr pPerf)
 {
 	Log.Info("------BPTREE FIND------");
@@ -224,20 +231,70 @@ void FindBPTreeSet(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf
 }
 
 
+
+
+template <class TBPTree, class TStorage>
+void DeleteFromBPTreeSet(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage, int64_t nBegin, int64_t nEnd)
+{
+	try
+	{
+		int64_t nCount = (nEnd - nBegin);
+		int64_t nStep = nCount / 100;
+
+		if (nStep == 0)
+			nStep = 1;
+
+		CommonLib::CLogInfo info(Log, "DeleteFromBPTreeSet start: %1 end: %2", nBegin, nEnd);
+
+		TBPSet tree(nBPTreePage, pStorage, pAlloc, 10, nPageSize);
+		tree.SetBPTreePerfCounter(pPerf);
+		for (int64_t i = nBegin; i < nEnd; ++i)
+		{			
+
+			if (i == 91379)
+			{
+				int dd = 0;
+				dd++;
+			}
+
+
+			tree.remove(i);
+
+			
+			if (i%nStep == 0)
+			{
+				std::cout << i << "  " << (i * 100) / nCount << " %" << '\r';
+			}
+		}
+
+		tree.Flush();
+
+		info.Complete("DeleteFromBPTreeSet finish");
+
+	}
+	catch (std::exception& exe)
+	{
+		CommonLib::CExcBase::RegenExc("Failed to insert BPTreeSet", exe);
+	}
+}
+
+
 void TestBPTreeSet()
 {
 
-	bool bCycle = false;
-	while (bCycle)
-	{
-		sleep(1);
-	}
 
 	try
 	{
 #ifdef _WIN32
 		wstr storagePath = L"F:\\BPSetTest.btdb";
 #else
+		bool bCycle = false;
+		while (bCycle)
+		{
+			sleep(1);
+		}
+
+
 		wstr storagePath = L"/home/slava/BPSetTest";
 #endif
 
@@ -283,8 +340,11 @@ void TestBPTreeSet()
 			pStorage->SetStoragePerformer(pStoragePerformer);
 
 			FindBPTreeSet<TBPSet, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nBegin, nEnd);
-			LogBPtreeFindPerf(pBPTreePerf);
+			DeleteFromBPTreeSet<TBPSet, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nBegin, nEnd);
+
+			LogBPtreeFindPerf(pBPTreePerf);			
 			LogBPtreePerf(pBPTreePerf);
+			LogBPtreeRemovePerf(pBPTreePerf);
 			LogPerfStorage(pStoragePerformer);
 		}
 	}

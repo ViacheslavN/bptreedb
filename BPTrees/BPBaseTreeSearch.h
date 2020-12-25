@@ -56,7 +56,7 @@ TIterator BPSETBASE_DECLARATION::find(const TComparator& comp, const TKey& key, 
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed to find", exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed to find", exc);
 		throw;
 	}
 }

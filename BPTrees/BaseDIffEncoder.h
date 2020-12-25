@@ -127,7 +127,7 @@ namespace bptreedb
 			{
 			
 				if (m_nCount != (vecValues.size() - 1))
-					throw CommonLib::CExcBase("BaseDiffEncoder  wrong size, count: %1, values size: %2", m_nCount, vecValues.size());
+					throw CommonLib::CExcBase("wrong size, count: %1, values size: %2", m_nCount, vecValues.size());
 
 				Write(vecValues[0], pStream);
 				m_encoder.BeginEncoding(pStream);
@@ -142,7 +142,7 @@ namespace bptreedb
 			}
 			catch (std::exception& exc_src)
 			{
-				CommonLib::CExcBase::RegenExcT("BaseDiffEncoder failed encode", exc_src);
+				CommonLib::CExcBase::RegenExcT("[BaseDiffEncoder]  failed encode", exc_src);
 			}
 		}
 		void Decode(uint32_t nCount, TValueMemSet& vecValues, CommonLib::IReadStream *pStream)

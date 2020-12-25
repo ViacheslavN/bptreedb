@@ -171,7 +171,7 @@ namespace bptreedb
 			RemoveByIndex(nIndex);
 		}
 
-		void RemoveByIndex(uint32_t nIndex)
+		virtual void RemoveByIndex(uint32_t nIndex)
 		{
 			m_Compressor.Remove(nIndex, m_KeyMemSet[nIndex], m_KeyMemSet);
 			m_KeyMemSet.erase(std::next(m_KeyMemSet.begin(), nIndex));
@@ -245,7 +245,7 @@ namespace bptreedb
 			}
 			catch (std::exception& exc)
 			{
-				CommonLib::CExcBase::RegenExcT("BPTreeLeafNode failed to SplitIn", exc);
+				CommonLib::CExcBase::RegenExcT("[BPTreeLeafNode] failed to SplitIn", exc);
 				throw;
 			}
 			
@@ -276,7 +276,7 @@ namespace bptreedb
 			}
 			catch (std::exception& exc)
 			{
-				CommonLib::CExcBase::RegenExcT("BPTreeLeafNode failed to SplitIn", exc);
+				CommonLib::CExcBase::RegenExcT("[BPTreeLeafNode] failed to SplitIn", exc);
 				throw;
 			}
 
@@ -334,7 +334,7 @@ namespace bptreedb
 			UnionVec(m_KeyMemSet, pNode->m_KeyMemSet, bLeft, nCheckIndex);
 
 
-			this->m_Compressor.recalc(this->m_KeyMemSet);
+			this->m_Compressor.Recalc(this->m_KeyMemSet);
 			return true;
 		}
 
@@ -354,7 +354,7 @@ namespace bptreedb
 			{
 				if (nCheckIndex)
 					*nCheckIndex += nCnt;
-				uint32_t oldSize = dstVec.size();
+				uint32_t oldSize = (uint32_t)dstVec.size();
 
 				std::move(std::next(srcVec.begin(), newSize), srcVec.end(), std::inserter(dstVec, dstVec.end()));
 				std::rotate(dstVec.begin(), std::next(dstVec.begin(), oldSize), dstVec.end());
@@ -376,8 +376,8 @@ namespace bptreedb
 			if (!AlignmentOfVec(m_KeyMemSet, nodeMemset, bFromLeft))
 				return false;
 
-			pNodeComp.recalc(nodeMemset);
-			m_Compressor.recalc(m_KeyMemSet);
+			pNodeComp.Recalc(nodeMemset);
+			m_Compressor.Recalc(m_KeyMemSet);
 
 			return true;
 		}
@@ -398,18 +398,18 @@ namespace bptreedb
 			m_Compressor.Clear();
 		}
 
-		bool IsHaveUnion(BPTreeLeafNodeSetBase *pNode)
+		bool PossibleUnion(BPTreeLeafNodeSetBase *pNode)
 		{
 
-			return this->m_Compressor.IsHaveUnion(pNode->m_Compressor);
+			return this->m_Compressor.PossibleUnion(pNode->m_Compressor);
 		}
 
-		bool IsHaveAlignment(BPTreeLeafNodeSetBase *pNode)
+		bool PossibleAlignment(BPTreeLeafNodeSetBase *pNode)
 		{
-			return this->m_Compressor.IsHaveAlignment(pNode->m_Compressor);
+			return this->m_Compressor.PossibleAlignment(pNode->m_Compressor);
 		}
 
-		bool IsHalfEmpty() const
+		virtual bool IsHalfEmpty() const
 		{
 			return this->m_Compressor.IsHalfEmpty();
 		}

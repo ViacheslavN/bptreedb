@@ -88,14 +88,14 @@ namespace bptreedb
 			}
 			catch (std::exception& exc)
 			{
-				CommonLib::CExcBase::RegenExcT("TBPSetIterator failed to next step", exc);
+				CommonLib::CExcBase::RegenExcT("[TBPSetIterator] failed to next step", exc);
 			}
 		}
 
 		void Update()
 		{
 			if(IsNull())
-				throw CommonLib::CExcBase("TBPSetIterator Update node is null");
+				throw CommonLib::CExcBase("[TBPSetIterator] Update node is null");
 
 			m_pCurNode->SetFlags(CHANGE_NODE, true);
 		}
@@ -126,7 +126,7 @@ namespace bptreedb
 			}
 			catch (std::exception& exc)
 			{
-				CommonLib::CExcBase::RegenExcT("TBPSetIterator failed to next step", exc);
+				CommonLib::CExcBase::RegenExcT("[TBPSetIterator] failed to next step", exc);
 			}
 		}
 
@@ -137,6 +137,7 @@ namespace bptreedb
 
 			return m_pCurNode->addr();
 		}
+
 		int32_t Pos() const
 		{
 			return m_nIndex;
@@ -161,7 +162,7 @@ namespace bptreedb
 			}
 			catch (std::exception& exc)
 			{
-				CommonLib::CExcBase::RegenExcT("TBPSetIterator failed SetAddr addr %1, pos %2", nAddr, nPos, exc);
+				CommonLib::CExcBase::RegenExcT("[TBPSetIterator] failed SetAddr addr %1, pos %2", nAddr, nPos, exc);
 			}
 		}
 

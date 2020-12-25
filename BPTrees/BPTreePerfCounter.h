@@ -10,6 +10,7 @@ namespace bptreedb
 		eGetNode,
 		eMissedNode,
 		eInsertValue,
+		eRemoveValue,
 		eFlush,
 		eFindKey
 	};

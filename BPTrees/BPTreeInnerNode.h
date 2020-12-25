@@ -70,7 +70,7 @@ public:
 		}
 		catch (std::exception& exc)
 		{
-			CommonLib::CExcBase::RegenExcT("Inner node failed to save", exc);
+			CommonLib::CExcBase::RegenExcT("[Inner node] failed to save", exc);
 			throw;
 		}
 	}
@@ -84,7 +84,7 @@ public:
 		}
 		catch (std::exception& exc)
 		{
-			CommonLib::CExcBase::RegenExcT("Inner node failed to load", exc);
+			CommonLib::CExcBase::RegenExcT("[Inner node] failed to load", exc);
 		}
 	}
 	uint32_t TupleSize() const
@@ -253,9 +253,9 @@ public:
 	}
 
 
-	void RemoveByIndex(int32_t nIndex)
+	virtual void RemoveByIndex(uint32_t nIndex)
 	{
-		m_Compressor.remove(nIndex, m_innerKeyMemSet[nIndex], m_innerLinkMemSet[nIndex], m_innerKeyMemSet, m_innerLinkMemSet);
+		m_Compressor.Remove(nIndex, m_innerKeyMemSet[nIndex], m_innerLinkMemSet[nIndex], m_innerKeyMemSet, m_innerLinkMemSet);
 		m_innerKeyMemSet.erase(m_innerKeyMemSet.begin() + nIndex);
 		m_innerLinkMemSet.erase(m_innerLinkMemSet.begin() + nIndex);
 
@@ -291,7 +291,7 @@ public:
 		}
 		catch (std::exception& exc)
 		{
-			CommonLib::CExcBase::RegenExcT("InnerNod failed to SplitIn", exc);
+			CommonLib::CExcBase::RegenExcT("[Inner node] failed to split in", exc);
 		}
 	}
 
@@ -336,7 +336,7 @@ public:
 		}
 		catch (std::exception& exc)
 		{
-			CommonLib::CExcBase::RegenExcT("InnerNod failed to SplitIn", exc);
+			CommonLib::CExcBase::RegenExcT("[Inner node] failed to split in", exc);
 		}
 	}
 
@@ -412,7 +412,7 @@ public:
 
 			m_nLess = pNode->m_nLess;
 
-			m_Compressor.recalc(m_innerKeyMemSet, m_innerLinkMemSet);
+			m_Compressor.Recalc(m_innerKeyMemSet, m_innerLinkMemSet);
 		}
 		else
 		{
@@ -430,7 +430,7 @@ public:
 			std::move(pNode->m_innerKeyMemSet.begin(), pNode->m_innerKeyMemSet.end(), std::inserter(m_innerKeyMemSet, m_innerKeyMemSet.end()));
 			std::move(pNode->m_innerLinkMemSet.begin(), pNode->m_innerLinkMemSet.end(), std::inserter(m_innerLinkMemSet, m_innerLinkMemSet.end()));
 
-			m_Compressor.recalc(m_innerKeyMemSet, m_innerLinkMemSet);
+			m_Compressor.Recalc(m_innerKeyMemSet, m_innerLinkMemSet);
 		}
 	}
 
@@ -462,14 +462,14 @@ public:
 			std::rotate(m_innerKeyMemSet.begin(), std::next(m_innerKeyMemSet.begin(), oldSize), m_innerKeyMemSet.end());
 			std::rotate(m_innerLinkMemSet.begin(), std::next(m_innerLinkMemSet.begin(), oldSize), m_innerLinkMemSet.end());
 
-			m_Compressor.recalc(m_innerKeyMemSet, m_innerLinkMemSet);
+			m_Compressor.Recalc(m_innerKeyMemSet, m_innerLinkMemSet);
 
 			m_nLess = pNode->m_innerLinkMemSet[newSize];
 
 			pNode->m_innerKeyMemSet.resize(newSize);
 			pNode->m_innerLinkMemSet.resize(newSize);
 
-			pNode->m_Compressor.recalc(pNode->m_innerKeyMemSet, pNode->m_innerLinkMemSet);
+			pNode->m_Compressor.Recalc(pNode->m_innerKeyMemSet, pNode->m_innerLinkMemSet);
 		}
 		else
 		{
@@ -495,8 +495,8 @@ public:
 			pNode->m_innerLinkMemSet.resize(newSize);
 
 
-			m_Compressor.recalc(m_innerKeyMemSet, m_innerLinkMemSet);
-			pNode->m_Compressor.recalc(pNode->m_innerKeyMemSet, pNode->m_innerLinkMemSet);
+			m_Compressor.Recalc(m_innerKeyMemSet, m_innerLinkMemSet);
+			pNode->m_Compressor.Recalc(pNode->m_innerKeyMemSet, pNode->m_innerLinkMemSet);
 		}
 		return true;
 	}
@@ -519,17 +519,17 @@ public:
 		m_Compressor.Clear();
 	}
 
-	bool IsHaveUnion(BPTreeInnerNode *pNode)
+	bool PossibleUnion(BPTreeInnerNode *pNode)
 	{
-		return this->m_Compressor.IsHaveUnion(pNode->m_Compressor);
+		return this->m_Compressor.PossibleUnion(pNode->m_Compressor);
 	}
 
-	bool IsHaveAlignment(BPTreeInnerNode *pNode)
+	bool PossibleAlignment(BPTreeInnerNode *pNode)
 	{
-		return this->m_Compressor.IsHaveAlignment(pNode->m_Compressor);
+		return this->m_Compressor.PossibleAlignment(pNode->m_Compressor);
 	}
 
-	bool IsHalfEmpty() const
+	virtual bool IsHalfEmpty() const
 	{
 		return this->m_Compressor.IsHalfEmpty();
 	}

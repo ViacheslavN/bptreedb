@@ -295,6 +295,7 @@
   <ItemGroup>
     <ClInclude Include="bptreedb.h" />
     <ClInclude Include="bptreedb_lib.h" />
+    <ClInclude Include="BPTrees\BPBaseTreeDelete.h" />
     <ClInclude Include="BPTrees\BaseDIffEncoder.h" />
     <ClInclude Include="BPTrees\BaseEncoder.h" />
     <ClInclude Include="BPTrees\BaseLeafNodeSetCompressor.h" />
@@ -312,7 +313,7 @@
     <ClInclude Include="BPTrees\Compressor\CompressorParams.h" />
     <ClInclude Include="BPTrees\Compressor\CompressUtils.h" />
     <ClInclude Include="BPTrees\Compressor\EntropyEncoder\BaseNumLenEncoder.h" />
-    <ClInclude Include="BPTrees\Compressor\EntropyEncoder\UnsignedNumLenEncoder.h" />
+    <ClInclude Include="BPTrees\Compressor\EntropyEncoder\UnsignedNumLenEncoderAC.h" />
     <ClInclude Include="BPTrees\Compressor\ZlibCompressor\ZEncoderDiffBase.h" />
     <ClInclude Include="BPTrees\Compressor\ZlibCompressor\ZLibEncoder.h" />
     <ClInclude Include="BPTrees\Compressor\ZlibCompressor\zstdencoder.h" />

@@ -297,6 +297,15 @@ namespace bptreedb
 			return m_pInnerNode->FindNodeInsert(comp, key, nIndex);
 		}
 
+		template<class TComp>
+		TLink FindNodeRemove(const TComp& comp, const TKey& key, int32_t& nIndex)
+		{
+			if (IsLeaf())
+				throw CommonLib::CExcBase("BTNode holder findNodeInsert()  Node addr %1 isn't an inner node", m_nAddr);
+
+			return m_pInnerNode->FindNodeInsert(comp, key, nIndex);
+		}
+
 
 		template<class TComp>
 		void InsertInLeaf(TComp& comp, const TKey& key, int nInsertLeafIndex = -1)
@@ -335,6 +344,40 @@ namespace bptreedb
 			return 0;
 		}
 
+		void UnionWithLeafNode(std::shared_ptr<TBPNodeHolder>&  pNode, bool bLeft,  int *nCheckIndex = 0)
+		{
+			if (!IsLeaf())
+				throw CommonLib::CExcBase("BTNode holder UnionWithLeafNode()  Node addr %1 isn't a leaf node", m_nAddr);
+
+			m_pLeafNode->UnionWith(pNode->m_pLeafNode.get(), bLeft, nCheckIndex);
+		}
+
+		void UnionWithInnerNode(std::shared_ptr<TBPNodeHolder>&  pNode, const TKey* lessMin, bool bLeft)
+		{
+			if (IsLeaf())
+				throw CommonLib::CExcBase("BTNode holder UnionWithInnerNode()  Node addr %1 isn't a inner node", m_nAddr);
+
+			m_pInnerNode->UnionWith(pNode->m_pInnerNode.get(), lessMin, bLeft);
+
+		}
+
+		bool AlignmentInnerNodeOf(std::shared_ptr<TBPNodeHolder>&  pNode, const TKey& lessMin, bool bLeft)
+		{
+			if (IsLeaf())
+				throw CommonLib::CExcBase("BTNode holder AlignmentInnerNodeOf()  Node addr %1 isn't a inner node", m_nAddr);
+
+			return m_pInnerNode->AlignmentOf(pNode->m_pInnerNode.get(), lessMin, bLeft);
+		}
+
+
+		bool  AlignmenLeftNodeOf(std::shared_ptr<TBPNodeHolder>&  pNode, bool bLeft)
+		{
+			if (!IsLeaf())
+				throw CommonLib::CExcBase("BTNode holder AlignmentInnerNodeOf()  Node addr %1 isn't a left node", m_nAddr);
+
+			return m_pLeafNode->AlignmentOf(pNode->m_pLeafNode.get(), bLeft);
+		}
+
 		void TransformToInner(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr pCompressParams)
 		{
 			try
@@ -354,6 +397,29 @@ namespace bptreedb
 				CommonLib::CExcBase::RegenExcT("BTNode holder transformToInner failed", exc);
 			}
 		}
+
+
+		void TransformToLeaf(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr pCompressParams)
+		{
+			try
+			{
+				if (IsLeaf())
+					throw CommonLib::CExcBase(" Node addr %1 isn't a inner node", m_nAddr);
+
+				m_pLeafNode.reset(new TLeafNode(pAlloc, bMulti, nPageSize, pCompressParams));
+				//	m_pInnerNode->Init(innerComp);
+				m_IsLeaf = true;
+				m_pInnerNode.reset();
+
+				m_pCurNode = m_pLeafNode.get();
+		 
+
+			}
+			catch (std::exception& exc)
+			{
+				CommonLib::CExcBase::RegenExcT("BTNode holder TransformToLeaf failed", exc);
+			}
+		}
 		
 		bool IsNeedSplit() const
 		{
@@ -365,6 +431,48 @@ namespace bptreedb
 			m_pCurNode->Clear();
 		}
 
+		bool IsHalfEmpty()
+		{			 
+			return m_pCurNode->IsHalfEmpty();
+		}
+
+		bool PossibleUnion(std::shared_ptr<TBPNodeHolder>&  pNode) const
+		{
+			if (IsLeaf()) 
+				return m_pLeafNode->PossibleUnion(pNode->m_pLeafNode.get());
+
+			return m_pInnerNode->PossibleUnion(pNode->m_pInnerNode.get());
+		}
+
+		bool PossibleAlignment(std::shared_ptr<TBPNodeHolder>&  pNode) const
+		{
+			if (IsLeaf())
+				return m_pLeafNode->PossibleAlignment(pNode->m_pLeafNode.get());
+
+			return m_pInnerNode->PossibleAlignment(pNode->m_pInnerNode.get());
+		}
+
+		void RemoveByIndex(uint32_t nIndex)
+		{
+			m_pCurNode->RemoveByIndex(nIndex);
+		}
+
+		template<class TComp>
+		bool IsKey(TComp& comp, const TKey& key, uint32_t nIndex)
+		{
+			if (IsLeaf())
+				return m_pLeafNode->IsKey(comp, key, nIndex);
+			else
+				return m_pLeafNode->IsKey(comp, key, nIndex);
+		}
+
+		void UpdateKey(int32_t nIndex, const TKey& Key)
+		{
+			if (IsLeaf())
+				throw CommonLib::CExcBase(" Node addr %1 isn't a inner node", m_nAddr);
+
+			return m_pInnerNode->UpdateKey(nIndex, Key);
+		}
 
 	private:
 		bool m_IsLeaf;

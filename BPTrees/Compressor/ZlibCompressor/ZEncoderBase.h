@@ -155,7 +155,7 @@ namespace bptreedb
 			}
 			catch (std::exception& exc)
 			{
-				CommonLib::CExcBase::RegenExcT("ZLibEncoder failed to encode", exc);
+				CommonLib::CExcBase::RegenExcT("[ZLibEncoder] failed to encode", exc);
 				throw;
 			}
 		}
@@ -182,7 +182,7 @@ namespace bptreedb
 			}
 			catch (std::exception& exc)
 			{
-				CommonLib::CExcBase::RegenExcT("ZLibEncoder failed to encode by single value", exc);
+				CommonLib::CExcBase::RegenExcT("[ZLibEncoder] failed to encode by single value", exc);
 				throw;
 			}
 		}

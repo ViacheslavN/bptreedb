@@ -40,7 +40,7 @@ namespace bptreedb
 				try
 				{
 					if (pStream == nullptr)
-						throw CommonLib::CExcBase("BaseNodeCompressor  read stream is zero");
+						throw CommonLib::CExcBase("read stream is zero");
 
 					CommonLib::CReadMemoryStream KeyStream;
 					CommonLib::CReadMemoryStream ValueStream;
@@ -71,7 +71,7 @@ namespace bptreedb
 				}
 				catch (std::exception& exc_src)
 				{
-					CommonLib::CExcBase::RegenExcT("BaseNodeCompressor failed to read leaf node", exc_src);
+					CommonLib::CExcBase::RegenExcT("[BaseNodeCompressor] failed to read leaf node", exc_src);
 				}
 			}
 
@@ -80,11 +80,11 @@ namespace bptreedb
 				try
 				{
 					if (pStream == nullptr)
-						throw CommonLib::CExcBase("BaseNodeCompressor  write stream is zero");
+						throw CommonLib::CExcBase("write stream is zero");
 
 					uint32_t nSize = (uint32_t)vecKeys.size();
 					if (m_nCount != nSize)
-						throw CommonLib::CExcBase("BaseNodeCompressor  wrong size, count: %1, values size: %2", m_nCount, vecValues.size());
+						throw CommonLib::CExcBase("wrong size, count: %1, values size: %2", m_nCount, vecValues.size());
 
 					pStream->Write(nSize);
 
@@ -130,7 +130,7 @@ namespace bptreedb
 				}
 				catch (std::exception& exc_src)
 				{
-					CommonLib::CExcBase::RegenExcT("BaseNodeCompressor failed to write leaf node", exc_src);
+					CommonLib::CExcBase::RegenExcT("[BaseNodeCompressor] failed to write leaf node", exc_src);
 					throw;
 				}
 			}
@@ -235,7 +235,7 @@ namespace bptreedb
 				}
 			}
 			
-			bool IsHaveUnion(TBaseNodeCompressor& pCompressor) const
+			bool PossibleUnion(TBaseNodeCompressor& pCompressor) const
 			{
 				if ((m_nCount + pCompressor.m_nCount) > m_nPageSize * 8) //max bits for elem
 					return false;
@@ -243,7 +243,7 @@ namespace bptreedb
 				return (RowSize() + pCompressor.RowSize()) < (m_nPageSize - HeadSize());
 			}
 
-			bool IsHaveAlignment(TBaseNodeCompressor& pCompressor) const
+			bool PossibleAlignment(TBaseNodeCompressor& pCompressor) const
 			{
 				uint32_t nNoCompSize = m_nCount * (sizeof(TKey) + sizeof(TValue));
 				return nNoCompSize < (m_nPageSize - HeadSize());

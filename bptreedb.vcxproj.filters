@@ -163,10 +163,13 @@
     <ClInclude Include="BPTrees\Compressor\ZlibCompressor\ZEncoderBase.h">
       <Filter>BPTrees\Compressor\ZlibCompressor</Filter>
     </ClInclude>
-    <ClInclude Include="BPTrees\Compressor\EntropyEncoder\UnsignedNumLenEncoder.h">
+    <ClInclude Include="BPTrees\BPTreePerfCounter.h">
+      <Filter>BPTrees\BPTreeSet</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\Compressor\EntropyEncoder\UnsignedNumLenEncoderAC.h">
       <Filter>BPTrees\Compressor\EntropyEncoder</Filter>
     </ClInclude>
-    <ClInclude Include="BPTrees\BPTreePerfCounter.h">
+    <ClInclude Include="BPTrees\BPBaseTreeDelete.h">
       <Filter>BPTrees\BPTreeSet</Filter>
     </ClInclude>
   </ItemGroup>

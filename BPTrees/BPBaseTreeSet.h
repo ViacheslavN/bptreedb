@@ -7,6 +7,8 @@
 #include "Compressor/CompressorParams.h"
 #include "BPTreePerfCounter.h"
 
+
+
 namespace bptreedb
 {
 	template <	class _TKey, class _TComp, class _TStorage,
@@ -82,6 +84,14 @@ namespace bptreedb
 		TIterator lower_bound(const TComparator& comp, const TKey& key, TIterator *pFromIterator = NULL, bool bFindNext = true);
 
 
+
+		/*delete*/
+		bool remove(const TKey& key);
+
+		template<class TIterator, class TComparator>
+		TIterator remove(const TComparator& comp, const TKey& key);
+
+
 	protected:
 
 		void LoadTree();
@@ -102,6 +112,8 @@ namespace bptreedb
 		void DropNode(TBPTreeNodePtr& pNode);
 		void SaveNode(TBPTreeNodePtr& pNode);
 	
+		TBPTreeNodePtr GetMinimumNode(TBPTreeNodePtr pNode);
+
 
 		//insert
 		TBPTreeNodePtr findLeafNodeForInsert(const TKey& key);
@@ -111,6 +123,18 @@ namespace bptreedb
 		void SplitRootInnerNode();
 		void SetParentInChildCacheOnly(TBPTreeNodePtr& pNode);
 		void SplitInnerNode(TBPTreeNodePtr&pNode, TBPTreeNodePtr& pNodeNewRight, TBPTreeNodePtr& pParentNode, int32_t nCount);
+
+
+		//remove
+ 
+		TBPTreeNodePtr FindLeafNodeForDelete(const TKey& key);
+		void RemoveFromLeafNode(TBPTreeNodePtr pNode, int32_t nIndex, const TKey& key);
+		void RemoveFromInnerNode(TBPTreeNodePtr pNode, const TKey& key);
+		void UnionLeafNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pLeafNode, TBPTreeNodePtr pDonorNode, bool bLeft);
+		void DeleteNode(TBPTreeNodePtr pNode);
+		void AlignmentLeafNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pLeafNode, TBPTreeNodePtr pDonorNode, bool bLeft);
+		void UnionInnerNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pNode, TBPTreeNodePtr pDonorNode, bool bLeft);
+		void AlignmentInnerNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pNode, TBPTreeNodePtr pDonorNode, bool bLeft);
 
 	protected:
 		
@@ -154,5 +178,6 @@ namespace bptreedb
 #include "BPBaseTreeSetCommon.h"
 #include "BPBaseTreeSetInsert.h"
 #include "BPBaseTreeSearch.h"
+#include "BPBaseTreeDelete.h"
 
 }

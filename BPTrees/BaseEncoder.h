@@ -55,7 +55,7 @@ namespace bptreedb
 			try
 			{
 				if (m_nCount == vecValues.size())
-					throw CommonLib::CExcBase("BaseValueEncoder  wrong size, count: %1, values size: %2", m_nCount, vecValues.size());
+					throw CommonLib::CExcBase("wrong size, count: %1, values size: %2", m_nCount, vecValues.size());
 
 				m_encoder.Clear();
 				m_encoder.BeginEncoding(pStream, maxCompSize);
@@ -71,7 +71,7 @@ namespace bptreedb
 			}
 			catch (std::exception& exc_src)
 			{
-				CommonLib::CExcBase::RegenExcT("Base encode failed encode");
+				CommonLib::CExcBase::RegenExcT("[BaseValueEncoder] failed encode");
 			}
 			
 		}
@@ -81,7 +81,7 @@ namespace bptreedb
 			try
 			{
 				if (m_nCount == vecValues.size())
-					throw CommonLib::CExcBase("BaseValueEncoder  wrong size, count: %1, values size: %2", m_nCount, vecValues.size());
+					throw CommonLib::CExcBase(" wrong size, count: %1, values size: %2", m_nCount, vecValues.size());
 
 				m_encoder.BeginDecoding(pStream);
 		
@@ -94,7 +94,7 @@ namespace bptreedb
 			}
 			catch (std::exception& exc_src)
 			{
-				CommonLib::CExcBase::RegenExcT("Base encode failed decode");
+				CommonLib::CExcBase::RegenExcT("[BaseValueEncoder] failed decode");
 			}
 		}
 

@@ -5,7 +5,7 @@
 
 
 void TestBPTreeSet();
-CommonLib::CLogger Log;
+ 
 int main()
 {
 

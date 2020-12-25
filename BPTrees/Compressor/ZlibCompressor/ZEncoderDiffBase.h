@@ -122,7 +122,7 @@ namespace bptreedb
 			}
 			catch (std::exception& exc)
 			{
-				CommonLib::CExcBase::RegenExcT("ZLibEncoder failed to encode", exc);
+				CommonLib::CExcBase::RegenExcT("[ZLibEncoder] failed to encode", exc);
 				throw;
 			}
 		}
@@ -151,7 +151,7 @@ namespace bptreedb
 			}
 			catch (std::exception& exc)
 			{
-				CommonLib::CExcBase::RegenExcT("ZLibEncoder failed to encode by single value", exc);
+				CommonLib::CExcBase::RegenExcT("[ZLibEncoder] failed to encode by single value", exc);
 				throw;
 			}
 		}
@@ -207,7 +207,7 @@ namespace bptreedb
 			}
 			catch (std::exception& exc)
 			{
-				CommonLib::CExcBase::RegenExcT("ZLibEncoder failed to encode with context", exc);
+				CommonLib::CExcBase::RegenExcT("[ZLibEncoder] failed to encode with context", exc);
 				throw;
 			}
 		}
@@ -249,7 +249,7 @@ namespace bptreedb
 			}
 			catch (std::exception& exc)
 			{
-				CommonLib::CExcBase::RegenExcT("ZLibEncoder failed to decode", exc);
+				CommonLib::CExcBase::RegenExcT("[ZLibEncoder] failed to decode", exc);
 			}
 		}
 
@@ -282,7 +282,7 @@ namespace bptreedb
 			}
 			catch (std::exception& exc)
 			{
-				CommonLib::CExcBase::RegenExcT("ZLibEncoder failed to decode", exc);
+				CommonLib::CExcBase::RegenExcT("[ZLibEncoder] failed to decode", exc);
 			}
 		}
 
@@ -326,7 +326,7 @@ namespace bptreedb
 			}
 			catch (std::exception& exc)
 			{
-				CommonLib::CExcBase::RegenExcT("ZLibEncoder failed to decode with context buffer", exc);
+				CommonLib::CExcBase::RegenExcT("[ZLibEncoder] failed to decode with context buffer", exc);
 			}
 		}
 
@@ -344,7 +344,7 @@ namespace bptreedb
 			}
 			catch (std::exception& exc)
 			{
-				CommonLib::CExcBase::RegenExcT("ZLibEncoder failed to decode with value buffer", exc);
+				CommonLib::CExcBase::RegenExcT("[ZLibEncoder] failed to decode with value buffer", exc);
 			}
 		}
 

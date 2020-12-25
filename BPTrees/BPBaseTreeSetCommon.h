@@ -18,7 +18,12 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetNode(in
 {
 	 try
 	 {
+
 		 CommonLib::CPrefCounterHolder holder(m_pBPTreePerfCounter, eGetNode);
+
+		 if (nAddr == -1)
+			 return TBPTreeNodePtr();
+
 		 TBPTreeNodePtr pNode = m_NodeCache.GetElem(nAddr);
 		 if (pNode.get() == nullptr)
 		 {
@@ -30,7 +35,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetNode(in
 	 }
 	 catch (std::exception& exc)
 	 {
-		 CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed to get node addr %1", nAddr, exc);
+		 CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed to get node addr %1", nAddr, exc);
 		 throw;
 	 }
 }
@@ -46,7 +51,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetNodeAnd
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed to get node with check parent addr %1", nAddr, exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed to get node with check parent addr %1", nAddr, exc);
 	}
 }
 
@@ -67,7 +72,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::LoadNodeFr
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed to load node from storage addr %1", nAddr, exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed to load node from storage addr %1", nAddr, exc);
 		throw;
 	}
 }
@@ -110,7 +115,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::FindAndSet
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase FindParent failed to find parent node", exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] FindParent failed to find parent node", exc);
 		throw;
 	}
 }
@@ -144,7 +149,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetParentN
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase GetParentNode failed to find parent node", exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] GetParentNode failed to find parent node", exc);
 		throw;
 	}
 }
@@ -168,7 +173,7 @@ void BPSETBASE_DECLARATION::SetParentForNextNode(TBPTreeNodePtr& pNode, TBPTreeN
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed to load node from storage addr %1", pNodeNext->GetAddr(), exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed to load node from storage addr %1", pNodeNext->GetAddr(), exc);
 	}
 }
 
@@ -190,7 +195,7 @@ void BPSETBASE_DECLARATION::SetParentForPrevNode(TBPTreeNodePtr& pNode, TBPTreeN
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed to load node from storage addr %1", pNodeNext->GetAddr(), exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed to load node from storage addr %1", pNodeNext->GetAddr(), exc);
 	}
 }
 
@@ -220,7 +225,7 @@ void BPSETBASE_DECLARATION::DropNode(TBPTreeNodePtr& pNode)
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed to drop node addr", exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed to drop node addr", exc);
 	}
 }
 
@@ -280,7 +285,7 @@ void  BPSETBASE_DECLARATION::InnitTree(TCompressorParamsBasePtr pParams, bool bM
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed to load root", exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed to load root", exc);
 	}
 }
 
@@ -291,7 +296,7 @@ void BPSETBASE_DECLARATION::LoadTree()
 	{
 
 		if (m_nPageBTreeInfo == -1)
-			throw CommonLib::CExcBase("nPageBTreeInfo == -1");
+			throw CommonLib::CExcBase("PageBTreeInfo == -1");
 		 
 		utils::TReadStreamPage<TStorage> stream(m_pStorage);
 		stream.Open(m_nPageBTreeInfo, m_nNodePageSize, true);
@@ -311,7 +316,7 @@ void BPSETBASE_DECLARATION::LoadTree()
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed to load root", exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed to load root", exc);
 	}
 }
 
@@ -380,7 +385,7 @@ void BPSETBASE_DECLARATION::SaveNode(TBPTreeNodePtr& pNode)
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed to save node addr: %1, parent: %2, count: %3, leaf: %4", nAddr, nParent, nInCount, isLeaf, exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed to save node addr: %1, parent: %2, count: %3, leaf: %4", nAddr, nParent, nInCount, isLeaf, exc);
 	}
 }
 
@@ -405,7 +410,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::CreateNode
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase to CreateNode addr %1, isLeaf %2, addToCache %3", nAddr, isLeaf, addToChache, exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] to CreateNode addr %1, isLeaf %2, addToCache %3", nAddr, isLeaf, addToChache, exc);
 		throw;
 	}
 }
@@ -454,3 +459,18 @@ void BPSETBASE_DECLARATION::SetBPTreePerfCounter(CommonLib::TPrefCounterPtr pBPT
 {
 	m_pBPTreePerfCounter = pBPTreePerfCounter;
 }
+
+BPSETBASE_TEMPLATE_PARAMS
+BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetMinimumNode(TBPTreeNodePtr pNode)
+ {
+	TBPTreeNodePtr pMinNode = pNode;
+	while (!pMinNode->IsLeaf())
+	{
+
+		pMinNode = GetNode(pNode->Less());
+		pMinNode->SetParent(pNode, -1);
+		pNode = pMinNode;
+	}
+
+	return pMinNode;
+ }
