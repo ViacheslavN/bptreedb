@@ -24,9 +24,38 @@
 #include "../../BPTrees/BaseLeafNodeSetCompressor.h"
 #include "../../BPTrees/Compressor/ZlibCompressor/ZLibEncoder.h"
 
+#include "../../BPTrees/BPMap.h"
+#include "../../BPTrees/BPIteratorMap.h"
+#include "../../BPTrees/BPTreeMapLeafNode.h"
+#include "../../BPTrees/BPTreeNodeMapHolder.h"
+
+
+
 #ifdef _WIN32
 	#include "../../BPTrees/Compressor/ZlibCompressor/zstdencoder.h"
 #endif
 
 
 extern  CommonLib::CLogger Log;
+
+static uint32_t nPageSize = 8192;
+
+template<class _Ty>
+struct comp
+{
+	bool LE(const _Ty& _Left, const _Ty& _Right) const
+	{
+		return (_Left < _Right);
+	}
+	bool EQ(const _Ty& _Left, const _Ty& _Right) const
+	{
+		return (_Left == _Right);
+	}
+	bool operator() (const _Ty& _Left, const _Ty& _Right) const
+	{
+		return (_Left < _Right);
+	}
+	/*bool MR(const _Ty& _Left, const _Ty& _Right){
+	return (_Left > _Right);
+	}*/
+};

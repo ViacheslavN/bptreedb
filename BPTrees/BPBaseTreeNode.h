@@ -57,7 +57,7 @@ namespace bptreedb
 		virtual	uint32_t TupleSize() const = 0;
 		virtual bool IsNeedSplit() const = 0;
 		virtual bool IsHalfEmpty() const = 0;
-		virtual void RemoveByIndex(uint32_t nIndex) = 0;
+
 
 		virtual uint32_t GetFlags() const;
 		virtual uint32_t Count() const = 0;

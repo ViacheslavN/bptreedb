@@ -114,6 +114,44 @@ namespace bptreedb
 	
 		TBPTreeNodePtr GetMinimumNode(TBPTreeNodePtr pNode);
 
+		template <class TNodeHolder>
+		std::shared_ptr<TNodeHolder> LoadNode(CommonLib::IReadStream *pStream, CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, int64_t nAddr, TCompressorParamsBasePtr pCompressParams, CBPTreeContext *pContext)
+		{
+			try
+			{
+				bool isLeaf = pStream->ReadBool();
+
+				std::shared_ptr<TNodeHolder> pNode(new TNodeHolder(pAlloc, bMulti, nPageSize, isLeaf, nAddr, pCompressParams));
+				pNode->Load(pStream, pContext);
+
+				return pNode;
+
+			}
+			catch (std::exception& exc)
+			{
+				CommonLib::CExcBase::RegenExcT("TBPNodeHolder failed to load ", exc);
+				throw;
+			}
+
+		}
+
+		template <class TNodeHolder>
+		std::shared_ptr<TNodeHolder> CreateNode(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, int64_t nAddr, bool bLeaf, TCompressorParamsBasePtr pCompressParams)
+		{
+			try
+			{
+				std::shared_ptr<TNodeHolder> pNode(new TNodeHolder(pAlloc, bMulti, nPageSize, bLeaf, nAddr, pCompressParams));
+				return pNode;
+
+			}
+			catch (std::exception& exc)
+			{
+				CommonLib::CExcBase::RegenExcT("TBPNodeHolder failed to load ", exc);
+				throw;
+			}
+
+		}
+
 
 		//insert
 		TBPTreeNodePtr findLeafNodeForInsert(const TKey& key);

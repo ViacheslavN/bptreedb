@@ -66,7 +66,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::LoadNodeFr
 		stream.AttachBuffer(pFilePage->GetData(), pFilePage->GetPageSize());
 
 		CommonLib::CPrefCounterHolder holder(m_pBPTreePerfCounter, eLoadNode);
-		TBPTreeNodePtr node = TBPTreeNode::Load(&stream, m_pAlloc, m_bMulti, m_nNodePageSize, nAddr, m_pCompressParams, &m_Context);
+		TBPTreeNodePtr node = LoadNode<TBPTreeNode>(&stream, m_pAlloc, m_bMulti, m_nNodePageSize, nAddr, m_pCompressParams, &m_Context);
 
 		return node;
 	}
@@ -397,7 +397,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::CreateNode
 		if (nAddr == -1)
 			nAddr = m_pStorage->GetNewFilePageAddr();
 
-		TBPTreeNodePtr pNode = TBPTreeNode::Create(m_pAlloc, m_bMulti, m_nNodePageSize, nAddr, isLeaf, m_pCompressParams);
+		TBPTreeNodePtr pNode = CreateNode<TBPTreeNode>(m_pAlloc, m_bMulti, m_nNodePageSize, nAddr, isLeaf, m_pCompressParams);
 
 		pNode->SetFlags(CHANGE_NODE, true);
 		//pNode->InitCopmressor(m_InnerCompressParams, m_LeafCompressParams);

@@ -24,7 +24,7 @@ namespace bptreedb
 
 
 
-		TZLibEncoder( CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr pParams) : TBase(pAlloc, pParams)
+		TZLibEncoder( CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr pParams, ECompressParams type) : TBase(pAlloc, pParams, type)
 		{}
 
 		~TZLibEncoder()

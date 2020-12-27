@@ -172,6 +172,18 @@
     <ClInclude Include="BPTrees\BPBaseTreeDelete.h">
       <Filter>BPTrees\BPTreeSet</Filter>
     </ClInclude>
+    <ClInclude Include="BPTrees\BPTreeMapLeafNode.h">
+      <Filter>BPTrees\BPTreeMap</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BPIteratorMap.h">
+      <Filter>BPTrees\BPTreeMap</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BPMap.h">
+      <Filter>BPTrees\BPTreeMap</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BPTreeNodeMapHolder.h">
+      <Filter>BPTrees\BPTreeMap</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

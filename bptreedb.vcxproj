@@ -304,11 +304,15 @@
     <ClInclude Include="BPTrees\BPBaseTreeSearch.h" />
     <ClInclude Include="BPTrees\BPBaseTreeSetCommon.h" />
     <ClInclude Include="BPTrees\BPBaseTreeSetInsert.h" />
+    <ClInclude Include="BPTrees\BPIteratorMap.h" />
     <ClInclude Include="BPTrees\BPIteratorSet.h" />
+    <ClInclude Include="BPTrees\BPMap.h" />
     <ClInclude Include="BPTrees\BPSet.h" />
     <ClInclude Include="BPTrees\BPTreeInnerNode.h" />
     <ClInclude Include="BPTrees\BPTreeLeafNode.h" />
     <ClInclude Include="BPTrees\BPBaseTreeSet.h" />
+    <ClInclude Include="BPTrees\BPTreeMapLeafNode.h" />
+    <ClInclude Include="BPTrees\BPTreeNodeMapHolder.h" />
     <ClInclude Include="BPTrees\BPTreePerfCounter.h" />
     <ClInclude Include="BPTrees\Compressor\CompressorParams.h" />
     <ClInclude Include="BPTrees\Compressor\CompressUtils.h" />

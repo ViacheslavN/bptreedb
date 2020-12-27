@@ -171,7 +171,7 @@ namespace bptreedb
 			RemoveByIndex(nIndex);
 		}
 
-		virtual void RemoveByIndex(uint32_t nIndex)
+		void RemoveByIndex(uint32_t nIndex)
 		{
 			m_Compressor.Remove(nIndex, m_KeyMemSet[nIndex], m_KeyMemSet);
 			m_KeyMemSet.erase(std::next(m_KeyMemSet.begin(), nIndex));

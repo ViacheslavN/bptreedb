@@ -1,51 +1,26 @@
 #include "pch.h"
 #include "PerfLog.h"
 
-
-/*
-typedef bptreedb::TZstdEncoder<int64_t> TEncoder;
-typedef bptreedb::BPTreeLeafNode<int64_t, bptreedb::TBaseLeafNodeSetCompressor<int64_t, TEncoder> > TLeafNode;
-typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TEncoder, TEncoder> > TInnerNode;
-typedef bptreedb::TBPSet<int64_t, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPSet;
-*/
-
-/*
-typedef bptreedb::TZstdEncoderDiff<int64_t> TEncoder;
-typedef bptreedb::BPTreeLeafNode<int64_t, bptreedb::TBaseLeafNodeSetCompressor<int64_t, TEncoder> > TLeafNode;
-typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TEncoder, TEncoder > > TInnerNode;
-typedef bptreedb::TBPSet<int64_t, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPSet;*/
+typedef bptreedb::TZLibEncoderDiff<int64_t> TKeyEncoder;
+typedef bptreedb::TZLibEncoder<double> TValueEncoder;
+typedef bptreedb::BPTreeLeafNodeMap<int64_t, double,  bptreedb::TBaseNodeCompressor<int64_t, double, TKeyEncoder, TValueEncoder > > TLeafNode;
 
 
-
-typedef bptreedb::TZLibEncoderDiff<int64_t> TEncoder;
-typedef bptreedb::BPTreeLeafNode<int64_t, bptreedb::TBaseLeafNodeSetCompressor<int64_t, TEncoder> > TLeafNode;
-typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TEncoder, TEncoder > > TInnerNode;
-typedef bptreedb::TBPSet<int64_t, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPSet;
-
-
-/*
-typedef bptreedb::TZLibEncoder<int64_t> TEncoder;
-typedef bptreedb::BPTreeLeafNode<int64_t, bptreedb::TBaseLeafNodeSetCompressor<int64_t, TEncoder> > TLeafNode;
-typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TEncoder, TEncoder > > TInnerNode;
-typedef bptreedb::TBPSet<int64_t, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPSet;*/
-
-/*
-typedef bptreedb::BPTreeLeafNode<int64_t, bptreedb::TBaseLeafNodeSetCompressor<int64_t> > TLeafNode;
-typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t> > TInnerNode;
-typedef bptreedb::TBPSet<int64_t, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPSet;*/
+typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TKeyEncoder, TKeyEncoder > > TInnerNode;
+typedef bptreedb::TBPMap<int64_t, double, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPMap;
 
 
 
 template <class TBPTree, class TStorage>
-uint64_t CreateBPTreeSet(CommonLib::IAllocPtr pAlloc, TStorage pStorage)
+uint64_t CreateBPTreeMap(CommonLib::IAllocPtr pAlloc, TStorage pStorage)
 {
 	try
 	{
-		CommonLib::CLogInfo info(Log, "CreateBPTreeSet");
+		CommonLib::CLogInfo info(Log, "CreateBPTreeMap");
 
-		TBPSet tree(-1, pStorage, pAlloc, 10, nPageSize);
-	
-		bptreedb::TCompressorParamsBasePtr pCompParmas (new bptreedb::CompressorParamsBase());
+		TBPMap tree(-1, pStorage, pAlloc, 10, nPageSize);
+
+		bptreedb::TCompressorParamsBasePtr pCompParmas(new bptreedb::CompressorParamsBase());
 		bptreedb::TCompressorParamsPtr pCompInnerKey(new bptreedb::CompressorParams());
 		bptreedb::TCompressorParamsPtr pCompInnerValue(new bptreedb::CompressorParams());
 		bptreedb::TCompressorParamsPtr pCompLeafKey(new bptreedb::CompressorParams());
@@ -75,7 +50,7 @@ uint64_t CreateBPTreeSet(CommonLib::IAllocPtr pAlloc, TStorage pStorage)
 		return tree.GetPageBTreeInfo();
 	}
 	catch (std::exception& exe)
-	{		
+	{
 		CommonLib::CExcBase::RegenExc("Failed create BPTreeSet", exe);
 		throw;
 	}
@@ -83,8 +58,10 @@ uint64_t CreateBPTreeSet(CommonLib::IAllocPtr pAlloc, TStorage pStorage)
 
 
 
+
+
 template <class TBPTree, class TStorage>
-void InsertBPTreeSet(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage, int64_t nBegin, int64_t nEnd)
+void InsertBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage, int64_t nBegin, int64_t nEnd)
 {
 	try
 	{
@@ -94,9 +71,9 @@ void InsertBPTreeSet(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPe
 		if (nStep == 0)
 			nStep = 1;
 
-		CommonLib::CLogInfo info(Log, "InsertBPTreeSet start: %1 end: %2", nBegin, nEnd);
+		CommonLib::CLogInfo info(Log, "InsertBPTreeMap start: %1 end: %2", nBegin, nEnd);
 
-		TBPSet tree(nBPTreePage, pStorage, pAlloc, 10, nPageSize);
+		TBPTree tree(nBPTreePage, pStorage, pAlloc, 10, nPageSize);
 		tree.SetBPTreePerfCounter(pPerf);
 		for (int64_t i = nBegin; i < nEnd; ++i)
 		{
@@ -106,7 +83,7 @@ void InsertBPTreeSet(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPe
 				dd++;
 			}
 
-			tree.insert(i);
+			tree.insert(i, (double)i);
 
 			if (i == 261120)
 			{
@@ -134,7 +111,7 @@ void InsertBPTreeSet(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPe
 
 
 template <class TBPTree, class TStorage>
-void FindBPTreeSet(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage, int64_t nBegin, int64_t nEnd)
+void FindBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage, int64_t nBegin, int64_t nEnd)
 {
 	try
 	{
@@ -142,9 +119,9 @@ void FindBPTreeSet(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf
 		int64_t nStep = nCount / 100;
 		if (nStep == 0)
 			nStep = 1;
-		
-		CommonLib::CLogInfo info(Log, "FindBPTreeSet begin: %1, end %2", nBegin, nEnd);
-		TBPSet tree(nBPTreePage, pStorage, pAlloc, 10, nPageSize);
+
+		CommonLib::CLogInfo info(Log, "FindBPTreeMap begin: %1, end %2", nBegin, nEnd);
+		TBPTree tree(nBPTreePage, pStorage, pAlloc, 10, nPageSize);
 		tree.SetBPTreePerfCounter(pPerf);
 		for (int64_t i = nBegin; i < nEnd; ++i)
 		{
@@ -156,6 +133,9 @@ void FindBPTreeSet(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf
 			if (it.Key() != i)
 				throw CommonLib::CExcBase("Error find key %1", it.Key(), i);
 
+			if (it.Value() != (double)i)
+				throw CommonLib::CExcBase("Error find value %1", it.Value(), i);
+
 			if (i%nStep == 0)
 			{
 				std::cout << i << "  " << (i * 100) / nCount << " %" << '\r';
@@ -164,19 +144,18 @@ void FindBPTreeSet(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf
 
 		tree.Flush();
 
-		info.Complete("FindBPTreeSet finish");
+		info.Complete("FindBPTreeMap finish");
 	}
 	catch (std::exception& exe)
 	{
-		CommonLib::CExcBase::RegenExc("Failed FindBPTreeSet", exe);
+		CommonLib::CExcBase::RegenExc("Failed FindBPTreeMap", exe);
 	}
 }
 
 
 
-
 template <class TBPTree, class TStorage>
-void DeleteFromBPTreeSet(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage, int64_t nBegin, int64_t nEnd)
+void DeleteFromBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage, int64_t nBegin, int64_t nEnd)
 {
 	try
 	{
@@ -186,12 +165,12 @@ void DeleteFromBPTreeSet(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr
 		if (nStep == 0)
 			nStep = 1;
 
-		CommonLib::CLogInfo info(Log, "DeleteFromBPTreeSet start: %1 end: %2", nBegin, nEnd);
+		CommonLib::CLogInfo info(Log, "DeleteFromBPTreeMap start: %1 end: %2", nBegin, nEnd);
 
-		TBPSet tree(nBPTreePage, pStorage, pAlloc, 10, nPageSize);
+		TBPTree tree(nBPTreePage, pStorage, pAlloc, 10, nPageSize);
 		tree.SetBPTreePerfCounter(pPerf);
 		for (int64_t i = nBegin; i < nEnd; ++i)
-		{			
+		{
 
 			if (i == 91379)
 			{
@@ -202,7 +181,7 @@ void DeleteFromBPTreeSet(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr
 
 			tree.remove(i);
 
-			
+
 			if (i%nStep == 0)
 			{
 				std::cout << i << "  " << (i * 100) / nCount << " %" << '\r';
@@ -211,24 +190,23 @@ void DeleteFromBPTreeSet(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr
 
 		tree.Flush();
 
-		info.Complete("DeleteFromBPTreeSet finish");
+		info.Complete("DeleteFromBPTreeMap finish");
 
 	}
 	catch (std::exception& exe)
 	{
-		CommonLib::CExcBase::RegenExc("Failed to insert BPTreeSet", exe);
+		CommonLib::CExcBase::RegenExc("Failed to insert BPTreeMap", exe);
 	}
 }
 
-
-void TestBPTreeSet()
+void TestBPTreeMap()
 {
 
 
 	try
 	{
 #ifdef _WIN32
-		wstr storagePath = L"F:\\BPSetTest.btdb";
+		wstr storagePath = L"F:\\BPMapTest.btdb";
 #else
 		bool bCycle = false;
 		while (bCycle)
@@ -237,7 +215,7 @@ void TestBPTreeSet()
 		}
 
 
-		wstr storagePath = L"/home/slava/BPSetTest";
+		wstr storagePath = L"/home/slava/BPMapTest";
 #endif
 
 		int64_t nBegin = 0;
@@ -251,7 +229,7 @@ void TestBPTreeSet()
 			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
 			pStorage->Open(storagePath.c_str(), true, nPageSize);
 			pStorage->SetStoragePerformer(pStoragePerformer);
-			nBPTreePage = CreateBPTreeSet<TBPSet, bptreedb::TStoragePtr>(pAlloc, pStorage);
+			nBPTreePage = CreateBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pStorage);
 			//LogPerf(pStoragePerformer);
 		}
 
@@ -262,7 +240,7 @@ void TestBPTreeSet()
 			pStoragePerformer->Reset();
 			pBPTreePerf->Reset();
 			pStorage->SetStoragePerformer(pStoragePerformer);
-			InsertBPTreeSet<TBPSet, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nBegin, nEnd);
+			InsertBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nBegin, nEnd);
 
 			pStorage->Close();
 
@@ -273,7 +251,6 @@ void TestBPTreeSet()
 			CPerfLog::LogBPtreePerf(pBPTreePerf);
 			CPerfLog::LogPerfStorage(pStoragePerformer);
 		}
-
 		{
 			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
 			pStorage->Open(storagePath.c_str(), false, nPageSize);
@@ -281,16 +258,17 @@ void TestBPTreeSet()
 			pBPTreePerf->Reset();
 			pStorage->SetStoragePerformer(pStoragePerformer);
 
-			FindBPTreeSet<TBPSet, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nBegin, nEnd);
-			DeleteFromBPTreeSet<TBPSet, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nBegin, nEnd);
+			FindBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nBegin, nEnd);
+			DeleteFromBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nBegin, nEnd);
 
 			CPerfLog::LogBPtreeFindPerf(pBPTreePerf);
 			CPerfLog::LogBPtreePerf(pBPTreePerf);
 			CPerfLog::LogBPtreeRemovePerf(pBPTreePerf);
 			CPerfLog::LogPerfStorage(pStoragePerformer);
 		}
+		 
 	}
-	catch (std::exception& exe )
+	catch (std::exception& exe)
 	{
 		std::cout << "TestBPTreeSet failed: " << "\n";
 
@@ -306,5 +284,5 @@ void TestBPTreeSet()
 		}
 
 	}
-	
+
 }

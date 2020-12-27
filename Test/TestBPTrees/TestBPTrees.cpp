@@ -5,6 +5,7 @@
 
 
 void TestBPTreeSet();
+void TestBPTreeMap();
  
 int main()
 {
@@ -14,7 +15,9 @@ int main()
 	Log.InnitLog(std::shared_ptr<CommonLib::IlogLineFormat>(), pLogWriter);
 
 
-	TestBPTreeSet(); 
+	//TestBPTreeSet(); 
+
+	TestBPTreeMap();
 
 	return 0;
 }
