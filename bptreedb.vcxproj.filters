@@ -43,6 +43,9 @@
     <Filter Include="BPTrees\Compressor\EntropyEncoder">
       <UniqueIdentifier>{bfc5126a-2230-4231-9b9d-c8ae007a9360}</UniqueIdentifier>
     </Filter>
+    <Filter Include="BPTrees\StringBPMap">
+      <UniqueIdentifier>{a5836bec-400c-4fe6-9006-146875df1e3d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -183,6 +186,9 @@
     </ClInclude>
     <ClInclude Include="BPTrees\BPTreeNodeMapHolder.h">
       <Filter>BPTrees\BPTreeMap</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BPTreeStatistics.h">
+      <Filter>BPTrees</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

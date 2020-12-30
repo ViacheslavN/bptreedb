@@ -392,6 +392,9 @@ namespace bptreedb
 		
 		bool IsNeedSplit() const
 		{
+		//	if (Count() > 100)
+		//		return true;
+
 			return m_pCurNode->IsNeedSplit();
 		}
 
@@ -401,7 +404,10 @@ namespace bptreedb
 		}
 
 		bool IsHalfEmpty()
-		{			 
+		{			
+		//	if (Count() < 50)
+		//		return true;
+
 			return m_pCurNode->IsHalfEmpty();
 		}
 
@@ -435,7 +441,7 @@ namespace bptreedb
 			if (IsLeaf())
 				return m_pLeafNode->IsKey(comp, key, nIndex);
 			else
-				return m_pLeafNode->IsKey(comp, key, nIndex);
+				return m_pInnerNode->IsKey(comp, key, nIndex);
 		}
 
 		void UpdateKey(int32_t nIndex, const TKey& Key)

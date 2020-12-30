@@ -10,6 +10,7 @@
 #include "../../../CommonLib/log/ConsoleLogWriter.h"
 #include "../../../CommonLib/log/LogInfo.h"
 #include "../../../CommonLib/perf/PerfCount.h"
+#include "../../../CommonLib/filesystem/File.h"
 #include "../../utils/CacheLRU_2Q.h"
 #include "../../storage/FileStorage.h"
 #include "../../utils/ReadStreamPage.h"

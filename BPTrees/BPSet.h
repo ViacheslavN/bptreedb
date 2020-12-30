@@ -2,6 +2,7 @@
 
 #include "BPBaseTreeSet.h"
 #include "BPIteratorSet.h"
+#include "BPTreeStatistics.h"
 
 namespace bptreedb
 {
@@ -32,12 +33,24 @@ namespace bptreedb
 
 		typedef TBPSetIterator<TKey, TBPTreeNode, TBase> iterator;
 
+		template <class _TK, class _TNode, class _TBTree>
+		friend class TBPTreeStatistics;
+
+		typedef TBPTreeStatistics<TKey, TBPTreeNode, TBase> TreeStatistics;
+		typedef std::shared_ptr< TreeStatistics> TreeStatisticsPtr;
+
 
 
 		TBPSet(int64_t nPageBTreeInfo, std::shared_ptr<TStorage> pStorage, CommonLib::IAllocPtr pAlloc, uint32_t nChacheSize, uint32_t nNodesPageSize, bool bMulti = false) :
 			TBase(nPageBTreeInfo, pStorage, pAlloc, nChacheSize, nNodesPageSize, bMulti)
 		{
 
+		}
+
+
+		iterator begin()
+		{
+			return TBase::template begin<iterator>();
 		}
 
 		iterator find(const TKey& key, iterator *pFromIterator = NULL, bool bFindNext = true)

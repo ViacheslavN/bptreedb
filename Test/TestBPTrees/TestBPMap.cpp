@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "PerfLog.h"
 
+
 typedef bptreedb::TZLibEncoderDiff<int64_t> TKeyEncoder;
 typedef bptreedb::TZLibEncoder<double> TValueEncoder;
 typedef bptreedb::BPTreeLeafNodeMap<int64_t, double,  bptreedb::TBaseNodeCompressor<int64_t, double, TKeyEncoder, TValueEncoder > > TLeafNode;
@@ -26,18 +27,15 @@ uint64_t CreateBPTreeMap(CommonLib::IAllocPtr pAlloc, TStorage pStorage)
 		bptreedb::TCompressorParamsPtr pCompLeafKey(new bptreedb::CompressorParams());
 
 		pCompInnerKey->SetIntParam("compressLevel", 9);
-		pCompInnerKey->SetIntParam("compressLevel", 9);
 		pCompInnerKey->SetIntParam("compressRate", 10);
 
 		pCompParmas->AddCompressParams(pCompInnerKey, bptreedb::eInnerKey);
 
 		pCompInnerValue->SetIntParam("compressLevel", 9);
-		pCompInnerValue->SetIntParam("compressLevel", 9);
 		pCompInnerValue->SetIntParam("compressRate", 3);
 
 		pCompParmas->AddCompressParams(pCompInnerValue, bptreedb::eInnerValue);
 
-		pCompLeafKey->SetIntParam("compressLevel", 9);
 		pCompLeafKey->SetIntParam("compressLevel", 9);
 		pCompLeafKey->SetIntParam("compressRate", 10);
 
@@ -115,7 +113,7 @@ void FindBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf
 {
 	try
 	{
-		int64_t nCount = (nEnd - nBegin);
+		int64_t nCount = abs(nEnd - nBegin);
 		int64_t nStep = nCount / 100;
 		if (nStep == 0)
 			nStep = 1;
@@ -123,25 +121,49 @@ void FindBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf
 		CommonLib::CLogInfo info(Log, "FindBPTreeMap begin: %1, end %2", nBegin, nEnd);
 		TBPTree tree(nBPTreePage, pStorage, pAlloc, 10, nPageSize);
 		tree.SetBPTreePerfCounter(pPerf);
-		for (int64_t i = nBegin; i < nEnd; ++i)
+
+		if (nBegin < nEnd)
 		{
-			auto it = tree.find(i);
-
-			if (it.IsNull())
-				throw CommonLib::CExcBase("Error find %1", i);
-
-			if (it.Key() != i)
-				throw CommonLib::CExcBase("Error find key %1", it.Key(), i);
-
-			if (it.Value() != (double)i)
-				throw CommonLib::CExcBase("Error find value %1", it.Value(), i);
-
-			if (i%nStep == 0)
+			for (int64_t i = nBegin; i < nEnd; ++i)
 			{
-				std::cout << i << "  " << (i * 100) / nCount << " %" << '\r';
+				auto it = tree.find(i);
+
+				if (it.IsNull())
+					throw CommonLib::CExcBase("Error find %1", i);
+
+				if (it.Key() != i)
+					throw CommonLib::CExcBase("Error find key %1", it.Key(), i);
+
+				if (it.Value() != (double)i)
+					throw CommonLib::CExcBase("Error find value %1", it.Value(), i);
+
+				if (i%nStep == 0)
+				{
+					std::cout << i << "  " << (i * 100) / nCount << " %" << '\r';
+				}
 			}
 		}
+		else
+		{
+			for (int64_t i = nBegin; i > nEnd; --i)
+			{
+				auto it = tree.find(i);
 
+				if (it.IsNull())
+					throw CommonLib::CExcBase("Error find %1", i);
+
+				if (it.Key() != i)
+					throw CommonLib::CExcBase("Error find key %1", it.Key(), i);
+
+				if (it.Value() != (double)i)
+					throw CommonLib::CExcBase("Error find value %1", it.Value(), i);
+
+				if (i%nStep == 0)
+				{
+					std::cout << i << "  " << (i * 100) / nCount << " %" << '\r';
+				}
+			}
+		}
 		tree.Flush();
 
 		info.Complete("FindBPTreeMap finish");
@@ -159,7 +181,7 @@ void DeleteFromBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr
 {
 	try
 	{
-		int64_t nCount = (nEnd - nBegin);
+		int64_t nCount = abs((nEnd - nBegin));
 		int64_t nStep = nCount / 100;
 
 		if (nStep == 0)
@@ -169,24 +191,33 @@ void DeleteFromBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr
 
 		TBPTree tree(nBPTreePage, pStorage, pAlloc, 10, nPageSize);
 		tree.SetBPTreePerfCounter(pPerf);
-		for (int64_t i = nBegin; i < nEnd; ++i)
+		if (nBegin < nEnd)
 		{
-
-			if (i == 91379)
+			for (int64_t i = nBegin; i < nEnd; ++i)
 			{
-				int dd = 0;
-				dd++;
-			}
 
+				tree.remove(i);
 
-			tree.remove(i);
-
-
-			if (i%nStep == 0)
-			{
-				std::cout << i << "  " << (i * 100) / nCount << " %" << '\r';
+				if (i%nStep == 0)
+				{
+					std::cout << i << "  " << (i * 100) / nCount << " %" << '\r';
+				}
 			}
 		}
+		else
+		{
+			for (int64_t i = nBegin; i >= nEnd; --i)
+			{
+
+				tree.remove(i);
+
+				if (i%nStep == 0)
+				{
+					std::cout << i << "  " << (i * 100) / nCount << " %" << '\r';
+				}
+			}
+		}
+	
 
 		tree.Flush();
 
@@ -198,6 +229,60 @@ void DeleteFromBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr
 		CommonLib::CExcBase::RegenExc("Failed to insert BPTreeMap", exe);
 	}
 }
+
+
+template <class TBPTree, class TStorage>
+void TravelTree(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage)
+{
+	CommonLib::CLogInfo info(Log, "Trave tree ");
+
+
+	TBPTree tree(nBPTreePage, pStorage, pAlloc, 10, nPageSize);
+	tree.SetBPTreePerfCounter(pPerf);
+
+	auto it = tree.begin();
+
+	while (!it.IsNull())
+	{
+		it.Next();
+	}
+
+}
+
+
+template <class TBPTree, class TStorage>
+void InfoBPTree(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage)
+{
+
+	Log.Info("InfoBPTree");
+
+
+	TBPTree tree(nBPTreePage, pStorage, pAlloc, 10, nPageSize);
+	tree.SetBPTreePerfCounter(pPerf);
+
+
+	auto treeStat = tree.GetStatistics();
+	treeStat->CalcNodesInTree();
+
+	Log.InfoT("Inner Nodes: %1, Leaf Nodes: %2, Keys: %3", treeStat->m_nInnerNodeCount, treeStat->m_nLeafNodeCount, treeStat->m_nKeyCount);
+
+ 
+	if (treeStat->m_setHeights.size() == 1)
+		Log.InfoT("Height: %1, ", *treeStat->m_setHeights.begin());
+	else
+	{
+		Log.Info(" Heights:");
+		auto it = treeStat->m_setHeights.begin();
+		auto end = treeStat->m_setHeights.end();
+
+		for (; it != end; ++it)
+		{
+			Log.InfoT("%1", *it);
+		}
+	}
+}
+
+
 
 void TestBPTreeMap()
 {
@@ -251,6 +336,27 @@ void TestBPTreeMap()
 			CPerfLog::LogBPtreePerf(pBPTreePerf);
 			CPerfLog::LogPerfStorage(pStoragePerformer);
 		}
+
+
+		{
+			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
+			pStorage->Open(storagePath.c_str(), false, nPageSize);
+			pStoragePerformer->Reset();
+			pBPTreePerf->Reset();
+			pStorage->SetStoragePerformer(pStoragePerformer);
+			TravelTree<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage);
+		}
+
+		{
+			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
+			pStorage->Open(storagePath.c_str(), false, nPageSize);
+			pStoragePerformer->Reset();
+			pBPTreePerf->Reset();
+			pStorage->SetStoragePerformer(pStoragePerformer);
+			InfoBPTree<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage);
+		}
+
+
 		{
 			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
 			pStorage->Open(storagePath.c_str(), false, nPageSize);
@@ -259,7 +365,47 @@ void TestBPTreeMap()
 			pStorage->SetStoragePerformer(pStoragePerformer);
 
 			FindBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nBegin, nEnd);
-			DeleteFromBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nBegin, nEnd);
+
+			CPerfLog::LogBPtreeFindPerf(pBPTreePerf);
+			CPerfLog::LogBPtreePerf(pBPTreePerf);
+			CPerfLog::LogBPtreeRemovePerf(pBPTreePerf);
+			CPerfLog::LogPerfStorage(pStoragePerformer);
+		}
+
+
+		{
+			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
+			pStorage->Open(storagePath.c_str(), false, nPageSize);
+			pStoragePerformer->Reset();
+			pBPTreePerf->Reset();
+			pStorage->SetStoragePerformer(pStoragePerformer);
+
+			DeleteFromBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nEnd / 2, nBegin);
+
+
+			CPerfLog::LogBPtreeFindPerf(pBPTreePerf);
+			CPerfLog::LogBPtreePerf(pBPTreePerf);
+			CPerfLog::LogBPtreeRemovePerf(pBPTreePerf);
+			CPerfLog::LogPerfStorage(pStoragePerformer);
+		}
+		{
+			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
+			pStorage->Open(storagePath.c_str(), false, nPageSize);
+			pStoragePerformer->Reset();
+			pBPTreePerf->Reset();
+			pStorage->SetStoragePerformer(pStoragePerformer);
+			InfoBPTree<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage);
+		}
+
+
+		{
+			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
+			pStorage->Open(storagePath.c_str(), false, nPageSize);
+			pStoragePerformer->Reset();
+			pBPTreePerf->Reset();
+			pStorage->SetStoragePerformer(pStoragePerformer);
+
+			FindBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nEnd / 2 + 1, nEnd);
 
 			CPerfLog::LogBPtreeFindPerf(pBPTreePerf);
 			CPerfLog::LogBPtreePerf(pBPTreePerf);

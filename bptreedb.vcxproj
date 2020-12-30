@@ -314,6 +314,7 @@
     <ClInclude Include="BPTrees\BPTreeMapLeafNode.h" />
     <ClInclude Include="BPTrees\BPTreeNodeMapHolder.h" />
     <ClInclude Include="BPTrees\BPTreePerfCounter.h" />
+    <ClInclude Include="BPTrees\BPTreeStatistics.h" />
     <ClInclude Include="BPTrees\Compressor\CompressorParams.h" />
     <ClInclude Include="BPTrees\Compressor\CompressUtils.h" />
     <ClInclude Include="BPTrees\Compressor\EntropyEncoder\BaseNumLenEncoder.h" />

@@ -89,7 +89,7 @@ TIterator BPSETBASE_DECLARATION::begin()
 				break;
 			}
 			TBPTreeNodePtr pNode = GetNode(nNextAddr);
-			pNode->SetParent(pParent);
+			pNode->SetParent(pParent, LESS_INDEX);
 
 			if (pNode->IsLeaf())
 			{
@@ -106,6 +106,7 @@ TIterator BPSETBASE_DECLARATION::begin()
 	catch (std::exception& exc)
 	{
 		CommonLib::CExcBase::RegenExcT("TBPlusTreeSetBase failed to begin", exc);
+		throw;
 	}
 }
 

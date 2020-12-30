@@ -71,13 +71,13 @@ namespace bptreedb
 				if ((uint32_t)m_nIndex < m_pCurNode->Count())
 					return true;
 
-				if (m_pCurNode->Next() != -1)
+				if (m_pCurNode->GetNext() != -1)
 				{
-					TBPTreeNodePtr pNode = m_pTree->GetNode(m_pCurNode->Next());
+					TBPTreeNodePtr pNode = m_pTree->GetNode(m_pCurNode->GetNext());
 					if (!pNode.get())
-						throw CExcBase("Failed to get node %1", m_pCurNode->Next());
+						throw CommonLib::CExcBase("Failed to get node %1", m_pCurNode->GetNext());
 			
-					m_pTree->SetParentForNextNode(m_pCurNode.get(), pNode.get());
+					m_pTree->SetParentForNextNode(m_pCurNode, pNode);
 					m_nIndex = 0;
 					m_pCurNode = pNode;
 					return true;
@@ -89,7 +89,9 @@ namespace bptreedb
 			catch (std::exception& exc)
 			{
 				CommonLib::CExcBase::RegenExcT("[TBPSetIterator] failed to next step", exc);
+				throw;
 			}
+ 
 		}
 
 		void Update()

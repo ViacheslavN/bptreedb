@@ -3,6 +3,7 @@
 #include "BPBaseTreeSet.h"
 #include "BPIteratorMap.h"
 #include "BPTreeNodeMapHolder.h"
+#include "BPTreeStatistics.h"
 
 namespace bptreedb
 {
@@ -35,6 +36,12 @@ namespace bptreedb
 
 		typedef TBPMapIterator<TKey, TValue, TBPTreeNode, TBase> iterator;
 
+		template <class _TKey, class _TNodeHolder, class _TBTree>
+		friend class TBPTreeStatistics;
+
+		typedef TBPTreeStatistics<TKey, TBPTreeNode, TBase> TreeStatistics;
+		typedef std::shared_ptr< TreeStatistics> TreeStatisticsPtr;
+
 
 
 		TBPMap(int64_t nPageBTreeInfo, std::shared_ptr<TStorage> pStorage, CommonLib::IAllocPtr pAlloc, uint32_t nChacheSize, uint32_t nNodesPageSize, bool bMulti = false) :
@@ -62,6 +69,10 @@ namespace bptreedb
 			}
 		}
 		
+		iterator begin()
+		{
+			return TBase::template begin<iterator>();
+		}
 
 		iterator find(const TKey& key, iterator *pFromIterator = NULL, bool bFindNext = true)
 		{
@@ -94,6 +105,12 @@ namespace bptreedb
 		{
 			return TBase::template lower_bound<iterator, _Comp>(comp, key, pFromIterator, bFindNext);
 		}
+
+		TreeStatisticsPtr GetStatistics()
+		{
+			return TreeStatisticsPtr(new TreeStatistics(this));
+		}
+
 
 	private:
 

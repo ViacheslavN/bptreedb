@@ -64,6 +64,7 @@ namespace bptreedb
 			return m_nPageBTreeInfo;
 		}
 
+
 		/*insert*/
 		void insert(TKey& key);
 
@@ -90,23 +91,34 @@ namespace bptreedb
 
 		template<class TIterator, class TComparator>
 		TIterator remove(const TComparator& comp, const TKey& key);
+		//common
+		TBPTreeNodePtr Root() 
+		{ 
+			if (!m_pRoot.get())
+				LoadTree();
 
+			return m_pRoot; 
+		}
+		TBPTreeNodePtr GetNode(int64_t nAddr);
+		void SetParentForNextNode(TBPTreeNodePtr& pNode, TBPTreeNodePtr& pNextNode);
+		void SetParentForPrevNode(TBPTreeNodePtr& pNode, TBPTreeNodePtr& pPrevNode);
 
 	protected:
 
 		void LoadTree();
 
-		//common
 
-		TBPTreeNodePtr GetNode(int64_t nAddr);
+
+	
+		//common
+		
 		TBPTreeNodePtr GetNodeAndCheckParent(int64_t nAddr);
 		TBPTreeNodePtr LoadNodeFromStorage(int64_t nAddr);
 		TBPTreeNodePtr CreateNode(int64_t nAddr, bool isLeaf, bool addToChache);
 		TBPTreeNodePtr NewNode(bool isLeaf, bool addToChache);
 		void AddToCache(TBPTreeNodePtr& node);
 	
-		void SetParentForNextNode(TBPTreeNodePtr& pNode, TBPTreeNodePtr& pNextNode);
-		void SetParentForPrevNode(TBPTreeNodePtr& pNode, TBPTreeNodePtr& pPrevNode);
+
 		TBPTreeNodePtr GetParentNode(TBPTreeNodePtr& pNode);
 		TBPTreeNodePtr FindAndSetParent(TBPTreeNodePtr& pNode);
 		void DropNode(TBPTreeNodePtr& pNode);
@@ -175,7 +187,9 @@ namespace bptreedb
 		void AlignmentInnerNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pNode, TBPTreeNodePtr pDonorNode, bool bLeft);
 
 	protected:
-		
+
+
+
 		TComp		 m_comp;
 		TBPTreeNodePtr m_pRoot;
 		TLink m_nRootAddr;
