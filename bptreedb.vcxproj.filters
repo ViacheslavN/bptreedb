@@ -43,8 +43,11 @@
     <Filter Include="BPTrees\Compressor\EntropyEncoder">
       <UniqueIdentifier>{bfc5126a-2230-4231-9b9d-c8ae007a9360}</UniqueIdentifier>
     </Filter>
-    <Filter Include="BPTrees\StringBPMap">
-      <UniqueIdentifier>{a5836bec-400c-4fe6-9006-146875df1e3d}</UniqueIdentifier>
+    <Filter Include="BPTrees\BPTreeMap\StringBPMap">
+      <UniqueIdentifier>{269278af-91c0-4f7c-b2d8-e6cd1eb941a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BPTrees\Compressor\StringCompressor">
+      <UniqueIdentifier>{30092b10-1adb-4def-94fc-2e319c28307d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -190,6 +193,33 @@
     <ClInclude Include="BPTrees\BPTreeStatistics.h">
       <Filter>BPTrees</Filter>
     </ClInclude>
+    <ClInclude Include="BPTrees\BPSMap.h">
+      <Filter>BPTrees\BPTreeMap\StringBPMap</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\StringPageAlloc.h">
+      <Filter>BPTrees\BPTreeMap\StringBPMap</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\StringVal.h">
+      <Filter>BPTrees\BPTreeMap\StringBPMap</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\Compressor\StringCompressor\ZLibStringEncoder.h">
+      <Filter>BPTrees\Compressor\StringCompressor</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BPTreeContext.h">
+      <Filter>BPTrees</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BPTStringMapLeafNode.h">
+      <Filter>BPTrees\BPTreeMap\StringBPMap</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BPTStringMapNodeHolder.h">
+      <Filter>BPTrees\BPTreeMap\StringBPMap</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\BPTStringMapInnerNode.h">
+      <Filter>BPTrees\BPTreeMap\StringBPMap</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\AllocsSet.h">
+      <Filter>BPTrees</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -212,6 +242,18 @@
     </ClCompile>
     <ClCompile Include="BPTrees\Compressor\CompressorParams.cpp">
       <Filter>BPTrees\Compressor</Filter>
+    </ClCompile>
+    <ClCompile Include="BPTrees\StringPageAlloc.cpp">
+      <Filter>BPTrees\BPTreeMap\StringBPMap</Filter>
+    </ClCompile>
+    <ClCompile Include="BPTrees\Compressor\StringCompressor\ZLibStringEncoder.cpp">
+      <Filter>BPTrees\Compressor\StringCompressor</Filter>
+    </ClCompile>
+    <ClCompile Include="BPTrees\BPTreeContext.cpp">
+      <Filter>BPTrees</Filter>
+    </ClCompile>
+    <ClCompile Include="BPTrees\AllocsSet.cpp">
+      <Filter>BPTrees</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -30,6 +30,9 @@
     <ClCompile Include="PerfLog.cpp">
       <Filter>Source Files\PerfLog</Filter>
     </ClCompile>
+    <ClCompile Include="TestBPStringMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">

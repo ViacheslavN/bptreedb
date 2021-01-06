@@ -8,6 +8,8 @@
 #include "../../../../CommonLib/compress/zstd/ZstdCompressionStream.h"
 #include "../../../../CommonLib/compress/zstd/ZstdDecompressionStream.h"
 #include "ZEncoderDiffBase.h"
+#include "../../AllocsSet.h"
+
 
 namespace bptreedb
 {
@@ -22,7 +24,7 @@ namespace bptreedb
 		typedef typename TBase::TValue TValue;
 		typedef typename TBase::TValueMemSet TValueMemSet;
  
-		TZstdEncoder(CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr pParams, ECompressParams type) : TBase(pAlloc, pParams, type)
+		TZstdEncoder(TAllocsSetPtr pAllocsSet, TCompressorParamsBasePtr pParams, ECompressParams type) : TBase(pAllocsSet, pParams, type)
 		{}
 
 		~TZstdEncoder()
@@ -42,7 +44,7 @@ namespace bptreedb
 		typedef typename TBase::TValueMemSet TValueMemSet;
 
 
-		TZstdEncoderDiff(CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr pParams, ECompressParams type) : TBase(pAlloc, pParams, type)
+		TZstdEncoderDiff(TAllocsSetPtr pAllocsSet, TCompressorParamsBasePtr pParams, ECompressParams type) : TBase(pAllocsSet, pParams, type)
 		{}
 
 		~TZstdEncoderDiff()

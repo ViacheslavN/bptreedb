@@ -1,22 +1,26 @@
 #pragma once
 
-#include "BPBaseTreeSet.h"
-#include "BPIteratorSet.h"
-#include "BPTreeStatistics.h"
-
+#include "BPMap.h"
+#include "StringPageAlloc.h"
+#include "StringVal.h"
+#include "StringPageAlloc.h"
 
 namespace bptreedb
 {
-	template <	class _TKey, class _TComp, class _TStorage,
+
+
+	template <class _TValue, class _TComp,  class _TStorage,
 		class _TInnerNode,
 		class _TLeafNode,
-		class _TNodeHolder = TBPNodeHolder<_TInnerNode, _TLeafNode>
+		class _TNodeHolder = TBPMapNodeHolder<_TInnerNode, _TLeafNode>
 	>
-	class TBPSet : public TBPlusTreeSetBase<_TKey, _TComp, _TStorage, _TInnerNode, _TLeafNode, _TNodeHolder>
+
+	class TBPSMap : public TBPlusTreeSetBase<StringValue, CompStringValue, _TStorage, _TInnerNode, _TLeafNode, _TNodeHolder>
 	{
 	public:
 
-		typedef TBPlusTreeSetBase<_TKey, _TComp, _TStorage, _TInnerNode, _TLeafNode, _TNodeHolder> TBase;
+		typedef TBPlusTreeSetBase<StringValue, _TComp, _TStorage, _TInnerNode, _TLeafNode, _TNodeHolder> TBase;
+		typedef typename _TValue TValue;
 		typedef typename TBase::TKey  TKey;
 		typedef typename TBase::TComp	   TComp;
 		typedef typename TBase::TLink  TLink;
@@ -29,23 +33,61 @@ namespace bptreedb
 		typedef typename TBase::TBPTreeNodePtr TBPTreeNodePtr;
 
 
-		template <class _TK, class _TNode, class _TBTree>
-		friend class TBPSetIterator;
+		template <class _TK, class _TV, class _TNode, class _TBTree>
+		friend class TBPMapIterator;
 
-		typedef TBPSetIterator<TKey, TBPTreeNode, TBase> iterator;
+		typedef TBPMapIterator<StringValue, TValue, TBPTreeNode, TBase> iterator;
 
-		template <class _TK, class _TNode, class _TBTree>
+		template <class _TKey, class _TNodeHolder, class _TBTree>
 		friend class TBPTreeStatistics;
 
-		typedef TBPTreeStatistics<TKey, TBPTreeNode, TBase> TreeStatistics;
+		typedef TBPTreeStatistics<StringValue, TBPTreeNode, TBase> TreeStatistics;
 		typedef std::shared_ptr< TreeStatistics> TreeStatisticsPtr;
 
 
 
-		TBPSet(int64_t nPageBTreeInfo, std::shared_ptr<TStorage> pStorage, CommonLib::IAllocPtr pAlloc, uint32_t nChacheSize, uint32_t nNodesPageSize, bool bMulti = false) :
-			TBase(nPageBTreeInfo, pStorage, pAlloc, nChacheSize, nNodesPageSize, bMulti)
+		TBPSMap(int64_t nPageBTreeInfo, std::shared_ptr<TStorage> pStorage, CommonLib::IAllocPtr pAlloc, uint32_t nChacheSize, uint32_t nNodesPageSize, uint32_t nMaxStr, bool bMulti = false) :
+			TBase(nPageBTreeInfo, pStorage, pAlloc, nChacheSize, nNodesPageSize, bMulti),
+			m_nMaxStr(nMaxStr)
 		{
+			 
 
+
+			m_StringAlloc = this->m_pAllocsSet->GetAlloc(eStringAlloc);
+		}
+
+		void insert(const char *pszUtf8, const TValue& value)
+		{
+			try
+			{
+				CommonLib::CPrefCounterHolder holder(this->m_pBPTreePerfCounter, eInsertValue);
+
+
+
+				size_t strLen = strnlen_s(pszUtf8, m_nMaxStr + 1);
+				if (strLen > m_nMaxStr)
+					throw CommonLib::CExcBase("exceeding the maximum size %1", m_nMaxStr);
+
+				StringValue strVal;
+				strVal.m_utf8 = m_StringAlloc->Alloc(strLen);
+				strVal.m_nLen = strLen;
+
+				memcpy(strVal.m_utf8, pszUtf8, strLen);
+
+
+				TBPTreeNodePtr pNode = this->findLeafNodeForInsert(strVal);
+
+
+				pNode->InsertInLeaf(this->m_comp, strVal, value);
+				pNode->SetFlags(CHANGE_NODE, true);
+
+				this->CheckLeafNode(pNode);
+
+			}
+			catch (std::exception& exc)
+			{
+				CommonLib::CExcBase::RegenExcT("[TBPSMap] failed insert", exc);
+			}
 		}
 
 		virtual TBPTreeNodePtr AllocateNewNode( int64_t nAddr, bool bLeaf)
@@ -63,7 +105,6 @@ namespace bptreedb
 			}
 
 		}
-
 
 		iterator begin()
 		{
@@ -101,5 +142,17 @@ namespace bptreedb
 		{
 			return TBase::template lower_bound<iterator, _Comp>(comp, key, pFromIterator, bFindNext);
 		}
+
+		TreeStatisticsPtr GetStatistics()
+		{
+			return TreeStatisticsPtr(new TreeStatistics(this));
+		}
+
+
+		private:
+
+			uint32_t m_nMaxStr;
+			CommonLib::IAllocPtr m_StringAlloc;
+
 	};
 }

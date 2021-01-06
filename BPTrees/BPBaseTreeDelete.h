@@ -319,7 +319,7 @@ void BPSETBASE_DECLARATION::RemoveFromInnerNode(TBPTreeNodePtr pCheckNode, const
 					if (pNode->IsLeaf())
 					{
 						pCheckNode->Clear();
-						pCheckNode->TransformToLeaf(m_pAlloc, m_bMulti, m_nNodePageSize, m_pCompressParams);
+						pCheckNode->TransformToLeaf(m_pAllocsSet, m_bMulti, m_nNodePageSize, m_pCompressParams);
 						pCheckNode->UnionWithLeafNode(pNode, false);
 						pCheckNode->SetFlags(ROOT_NODE, true);
 					}

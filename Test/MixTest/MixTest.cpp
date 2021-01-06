@@ -3,8 +3,17 @@
 
 #include "pch.h"
 
+
+void TestStringCompressor();
+
+
 int main()
 {
+
+
+	TestStringCompressor();
+	return 0;
+
 
 	typedef bptreedb::utils::TCacheLRU_2Q<int, int> TCache;
 	TCache m_cache(std::shared_ptr<CommonLib::IAlloc>(), -1);

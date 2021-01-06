@@ -7,12 +7,13 @@
 #include "../../CommonLib/alloc/simpleAlloc.h"
 #include "../../CommonLib/alloc/stl_alloc.h"
 #include "EmptyEncoder.h"
+#include "AllocsSet.h"
 
 namespace bptreedb
 {
 
-	template<class _TKey, class _TValue,  class _TKeyEncoder = TEmptyValueEncoder<_TKey>, class _TValueEncoder = TEmptyValueEncoder<_TValue> >
-			class TBaseNodeCompressor
+		template<class _TKey, class _TValue,  class _TKeyEncoder = TEmptyValueEncoder<_TKey>, class _TValueEncoder = TEmptyValueEncoder<_TValue> >
+		class TBaseNodeCompressor
 		{
 		public:
 			typedef _TKey TKey;
@@ -26,10 +27,10 @@ namespace bptreedb
 			typedef std::vector<TValue, TValueAlloc> TValueMemSet;
 
 
-			TBaseNodeCompressor(uint32_t nPageSize, CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr pParams, ECompressNodeType type) : m_nCount(0),
+			TBaseNodeCompressor(uint32_t nPageSize, TAllocsSetPtr pAllocsSet, TCompressorParamsBasePtr pParams, ECompressNodeType type) : m_nCount(0),
 				m_nPageSize(nPageSize), 
-				m_KeyEncoder( pAlloc, pParams, type == eInnerNode ? eInnerKey : eLeafKey),
-				m_ValueEncoder( pAlloc, pParams, type == eInnerNode ? eInnerValue : eLeafValue)
+				m_KeyEncoder(pAllocsSet, pParams, type == eInnerNode ? eInnerKey : eLeafKey),
+				m_ValueEncoder(pAllocsSet, pParams, type == eInnerNode ? eInnerValue : eLeafValue)
 			{}
 
 			

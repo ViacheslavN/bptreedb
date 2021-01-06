@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BPTreeLeafNode.h"
+#include "AllocsSet.h"
 
 namespace bptreedb
 {
@@ -20,7 +21,8 @@ namespace bptreedb
 		typedef CommonLib::STLAllocator<TValue> TValueAlloc;
 		typedef std::vector<TValue, TValueAlloc> TValueMemSet;
   
-		BPTreeLeafNodeMap(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr pParams) : TBase(pAlloc, bMulti, nPageSize, pParams)
+		BPTreeLeafNodeMap(TAllocsSetPtr pAllocsSet, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr pParams) : TBase(pAllocsSet, bMulti, nPageSize, pParams),
+			m_ValueMemSet(TValueAlloc(pAllocsSet->GetCommonAlloc()))
 		{
 
 		}

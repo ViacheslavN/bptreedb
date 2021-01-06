@@ -117,7 +117,7 @@ void BPSETBASE_DECLARATION::TransformRootToInner()
 		int nSplitIndex = m_pRoot->SplitIn(pLeftNode, pRightNode, &splitKey);
 
 		m_pRoot->Clear();
-		m_pRoot->TransformToInner(m_pAlloc, m_bMulti, m_nNodePageSize, m_pCompressParams);
+		m_pRoot->TransformToInner(m_pAllocsSet, m_bMulti, m_nNodePageSize, m_pCompressParams);
 
 		m_pRoot->SetLess(pLeftNode->GetAddr());
 		int nInsertIndex = m_pRoot->InsertInInnerNode(m_comp, splitKey, pRightNode->GetAddr());

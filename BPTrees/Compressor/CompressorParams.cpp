@@ -70,10 +70,6 @@ namespace bptreedb
 		m_params[eId] = ptrParams;
 	}
 
-
-
-
-
 	CompressorParams::CompressorParams()
 	{
 		

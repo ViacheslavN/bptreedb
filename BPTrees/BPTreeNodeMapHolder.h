@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BPTreeNodeHolder.h"
+#include "AllocsSet.h"
 
 namespace bptreedb
 {
@@ -20,8 +21,8 @@ namespace bptreedb
 			typedef typename TBase::TLeafNodePtr TLeafNodePtr;
 
 	public:
-		TBPMapNodeHolder(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, bool bLeaf, int64_t nAddr, TCompressorParamsBasePtr pCompressParams) : 
-			TBase(pAlloc, bMulti, nPageSize, bLeaf, nAddr, pCompressParams)
+		TBPMapNodeHolder(TAllocsSetPtr pAllocsSet, bool bMulti, uint32_t nPageSize, bool bLeaf, int64_t nAddr, TCompressorParamsBasePtr pCompressParams) : 
+			TBase(pAllocsSet, bMulti, nPageSize, bLeaf, nAddr, pCompressParams)
 		{}
 
 

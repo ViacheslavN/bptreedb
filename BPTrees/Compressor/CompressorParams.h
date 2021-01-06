@@ -24,6 +24,8 @@ namespace bptreedb
 	};
 
 
+
+
 	class CompressorParams
 	{
 	public:
@@ -37,6 +39,8 @@ namespace bptreedb
 
 		void SetIntParam(const astr& name, int32_t value);
 		void SetDoubleParam(const astr& name, double value);
+
+
 	protected:
 
 		template <class Type>
@@ -87,6 +91,7 @@ namespace bptreedb
 		typedef std::map<astr, double> TMapDoubleParams;
 		TMapIntParams m_IntParams;
 		TMapDoubleParams m_DoubleParams;
+
 	};
 
 	typedef std::shared_ptr<CompressorParams> TCompressorParamsPtr;
@@ -101,6 +106,8 @@ namespace bptreedb
 
 		TCompressorParamsPtr GetCompressParams(ECompressParams eId);
 		void AddCompressParams(TCompressorParamsPtr ptrParams, ECompressParams eId);
+
+
 	protected:
 
 		typedef std::map<ECompressParams, TCompressorParamsPtr> TMapParams;

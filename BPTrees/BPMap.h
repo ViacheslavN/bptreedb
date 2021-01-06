@@ -5,6 +5,7 @@
 #include "BPTreeNodeMapHolder.h"
 #include "BPTreeStatistics.h"
 
+
 namespace bptreedb
 {
 	template <	class _TKey, class _TValue, class _TComp, class _TStorage,
@@ -67,6 +68,22 @@ namespace bptreedb
 			{
 				CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed insert", exc);
 			}
+		}
+
+		virtual TBPTreeNodePtr AllocateNewNode( int64_t nAddr, bool bLeaf)
+		{
+			try
+			{
+				TBPTreeNodePtr pNode(new TBPTreeNode(this->m_pAllocsSet, this->m_bMulti, this->m_nNodePageSize, bLeaf, nAddr, this->m_pCompressParams));
+				return pNode;
+
+			}
+			catch (std::exception& exc)
+			{
+				CommonLib::CExcBase::RegenExcT("TBPNodeHolder failed to load ", exc);
+				throw;
+			}
+
 		}
 		
 		iterator begin()

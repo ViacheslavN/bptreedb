@@ -295,6 +295,7 @@
   <ItemGroup>
     <ClInclude Include="bptreedb.h" />
     <ClInclude Include="bptreedb_lib.h" />
+    <ClInclude Include="BPTrees\AllocsSet.h" />
     <ClInclude Include="BPTrees\BPBaseTreeDelete.h" />
     <ClInclude Include="BPTrees\BaseDIffEncoder.h" />
     <ClInclude Include="BPTrees\BaseEncoder.h" />
@@ -308,6 +309,11 @@
     <ClInclude Include="BPTrees\BPIteratorSet.h" />
     <ClInclude Include="BPTrees\BPMap.h" />
     <ClInclude Include="BPTrees\BPSet.h" />
+    <ClInclude Include="BPTrees\BPSMap.h" />
+    <ClInclude Include="BPTrees\BPTStringMapInnerNode.h" />
+    <ClInclude Include="BPTrees\BPTStringMapLeafNode.h" />
+    <ClInclude Include="BPTrees\BPTStringMapNodeHolder.h" />
+    <ClInclude Include="BPTrees\BPTreeContext.h" />
     <ClInclude Include="BPTrees\BPTreeInnerNode.h" />
     <ClInclude Include="BPTrees\BPTreeLeafNode.h" />
     <ClInclude Include="BPTrees\BPBaseTreeSet.h" />
@@ -319,10 +325,13 @@
     <ClInclude Include="BPTrees\Compressor\CompressUtils.h" />
     <ClInclude Include="BPTrees\Compressor\EntropyEncoder\BaseNumLenEncoder.h" />
     <ClInclude Include="BPTrees\Compressor\EntropyEncoder\UnsignedNumLenEncoderAC.h" />
+    <ClInclude Include="BPTrees\Compressor\StringCompressor\ZLibStringEncoder.h" />
     <ClInclude Include="BPTrees\Compressor\ZlibCompressor\ZEncoderDiffBase.h" />
     <ClInclude Include="BPTrees\Compressor\ZlibCompressor\ZLibEncoder.h" />
     <ClInclude Include="BPTrees\Compressor\ZlibCompressor\zstdencoder.h" />
     <ClInclude Include="BPTrees\EmptyEncoder.h" />
+    <ClInclude Include="BPTrees\StringPageAlloc.h" />
+    <ClInclude Include="BPTrees\StringVal.h" />
     <ClInclude Include="crypto\PageCipher.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="storage\CacheStorage.h" />
@@ -339,11 +348,15 @@
     <ClInclude Include="utils\WriteStreamPage.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BPTrees\AllocsSet.cpp" />
     <ClCompile Include="BPTrees\BPBaseTreeNode.cpp" />
     <ClInclude Include="BPTrees\BPTreeNodeHolder.h" />
     <ClInclude Include="BPTrees\Compressor\ZlibCompressor\ZEncoderBase.h" />
+    <ClCompile Include="BPTrees\BPTreeContext.cpp" />
     <ClCompile Include="BPTrees\Compressor\CompressorParams.cpp" />
     <ClCompile Include="BPTrees\Compressor\EntropyEncoder\BaseNumLenEncoder.cpp" />
+    <ClCompile Include="BPTrees\Compressor\StringCompressor\ZLibStringEncoder.cpp" />
+    <ClCompile Include="BPTrees\StringPageAlloc.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">Create</PrecompiledHeader>

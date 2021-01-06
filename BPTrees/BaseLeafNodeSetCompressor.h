@@ -7,6 +7,7 @@
 #include "../../CommonLib/alloc/simpleAlloc.h"
 #include "../../CommonLib/alloc/stl_alloc.h"
 #include "EmptyEncoder.h"
+#include "AllocsSet.h"
 
 namespace bptreedb
 {
@@ -20,9 +21,9 @@ namespace bptreedb
 			typedef std::vector<TKey, TKeyAlloc> TKeyMemSet;
 
 
-			TBaseLeafNodeSetCompressor(uint32_t nPageSize, CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr  pParams, ECompressNodeType type) : m_nCount(0),
+			TBaseLeafNodeSetCompressor(uint32_t nPageSize, TAllocsSetPtr pAllocsSet, TCompressorParamsBasePtr  pParams, ECompressNodeType type) : m_nCount(0),
 				m_nPageSize(nPageSize),
-				m_KeyEncoder(pAlloc, pParams, eLeafKey)
+				m_KeyEncoder(pAllocsSet, pParams, eLeafKey)
 			{}
 
 

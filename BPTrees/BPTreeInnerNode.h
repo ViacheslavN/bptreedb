@@ -7,6 +7,7 @@
 #include "../../CommonLib/alloc/stl_alloc.h"
 
 #include "BPBaseTreeNode.h"
+#include "AllocsSet.h"
 
 namespace bptreedb
 {
@@ -26,9 +27,9 @@ public:
 	typedef std::vector<TLink, TLinkAlloc> TLinkMemSet;
 
 
-	BPTreeInnerNode(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr pParams) :
-		m_nLess(-1), m_innerKeyMemSet(TKeyAlloc(pAlloc)), m_innerLinkMemSet(TLinkAlloc(pAlloc)), m_bMulti(bMulti),
-		m_pAlloc(pAlloc), m_nPageSize(nPageSize), m_Compressor(nPageSize - sizeof(TLink), pAlloc, pParams, eInnerNode)
+	BPTreeInnerNode(TAllocsSetPtr pAllocsSet, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr pParams) :
+		m_nLess(-1), m_innerKeyMemSet(TKeyAlloc(pAllocsSet->GetCommonAlloc())), m_innerLinkMemSet(TLinkAlloc(pAllocsSet->GetCommonAlloc())), m_bMulti(bMulti),
+		m_nPageSize(nPageSize), m_Compressor(nPageSize - sizeof(TLink), pAllocsSet, pParams, eInnerNode)
 	{
 
 	}
@@ -545,7 +546,6 @@ public:
 	TLinkMemSet m_innerLinkMemSet;
 	bool m_bMulti;
 	TCompressor  m_Compressor;
-	CommonLib::IAllocPtr m_pAlloc;
 	uint32_t m_nPageSize;
 };
 }

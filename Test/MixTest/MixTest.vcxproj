@@ -160,6 +160,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="MixTest.cpp" />
+    <ClCompile Include="TestStringCompressor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\bptreedb.vcxproj">

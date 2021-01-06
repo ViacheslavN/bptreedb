@@ -6,6 +6,8 @@
 #include "../../../../CommonLib/alloc/simpleAlloc.h"
 #include "../../../../CommonLib/alloc/stl_alloc.h"
 #include "ZEncoderBase.h"
+#include "../../AllocsSet.h"
+
 namespace bptreedb
 {
 
@@ -27,7 +29,7 @@ namespace bptreedb
 		typedef _TDecoder  TDecoder;
 
 
-		ZEncoderDiffBase(CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr  pParamsBase, ECompressParams type) : m_nCount(0),  m_pAlloc(pAlloc)
+		ZEncoderDiffBase(TAllocsSetPtr pAllocsSet, TCompressorParamsBasePtr  pParamsBase, ECompressParams type) : m_nCount(0),  m_pAlloc(pAllocsSet->GetCommonAlloc())
 		{
 			
 			TCompressorParamsPtr pParams = pParamsBase->GetCompressParams(type);

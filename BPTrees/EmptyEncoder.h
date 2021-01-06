@@ -5,6 +5,7 @@
 #include "../../CommonLib/alloc/alloc.h"
 #include "../../CommonLib/alloc/simpleAlloc.h"
 #include "../../CommonLib/alloc/stl_alloc.h"
+#include "AllocsSet.h"
 
 namespace bptreedb
 {
@@ -18,7 +19,7 @@ namespace bptreedb
 		typedef std::vector<TValue, TAlloc> TValueMemSet;
 
 
-		TEmptyValueEncoder(CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr pParams, ECompressParams type) : m_nCount(0)
+		TEmptyValueEncoder(TAllocsSetPtr pAllocsSet, TCompressorParamsBasePtr pParams, ECompressParams type) : m_nCount(0)
 		{
 
 		}

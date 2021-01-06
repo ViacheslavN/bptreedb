@@ -21,8 +21,8 @@ namespace bptreedb
 		typedef _TEncoder TEncoder;
 
 
-		TBaseValueEncoder(uint32_t nPageSize, CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr pParams, ECompressParams type) :
-			m_encoder(pAlloc, pParams, type)
+		TBaseValueEncoder(uint32_t nPageSize, TAllocsSetPtr pAllocsSet, TCompressorParamsBasePtr pParams, ECompressParams type) :
+			m_encoder(pAllocsSet, pParams, type)
 		{}
 
 		~TBaseValueEncoder()

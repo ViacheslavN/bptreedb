@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AllocsSet.h"
 #include "../../CommonLib/CommonLib.h"
 #include "../../CommonLib/exception/exc_base.h"
 #include "../../CommonLib/alloc/alloc.h"
@@ -22,9 +23,9 @@ namespace bptreedb
 		typedef std::vector<TKey, TAlloc> TKeyMemSet;
  
 
-		BPTreeLeafNodeSetBase(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr pParams) :
-			m_KeyMemSet(TAlloc(pAlloc)), m_Compressor(nPageSize - 2 * sizeof(TLink), pAlloc, pParams, eLeafNode), m_nNext(-1), m_nPrev(-1), m_bMulti(bMulti),
-			m_pAlloc(pAlloc), m_nPageSize(nPageSize)
+		BPTreeLeafNodeSetBase(TAllocsSetPtr pAllocsSet, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr pParams) :
+			m_KeyMemSet(TAlloc(pAllocsSet->GetCommonAlloc())), m_Compressor(nPageSize - 2 * sizeof(TLink), pAllocsSet, pParams, eLeafNode), m_nNext(-1), m_nPrev(-1), m_bMulti(bMulti),
+			m_nPageSize(nPageSize)
 
 		{
 
@@ -425,7 +426,6 @@ namespace bptreedb
 		TLink m_nNext;
 		TLink m_nPrev;
 		bool m_bMulti;
-		CommonLib::IAllocPtr m_pAlloc;
 		uint32_t m_nPageSize;
 	};
 
@@ -443,8 +443,8 @@ namespace bptreedb
 		typedef typename TBase::TKeyMemSet TLeafMemSet;
 
 
-		BPTreeLeafNode(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr leafCompParams) :
-			TBase(pAlloc, bMulti, nPageSize, leafCompParams)
+		BPTreeLeafNode(TAllocsSetPtr pAllocsSet, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr leafCompParams) :
+			TBase(pAllocsSet, bMulti, nPageSize, leafCompParams)
 		{}
 
 		virtual ~BPTreeLeafNode()

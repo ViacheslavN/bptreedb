@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AllocsSet.h"
 #include "../../CommonLib/stream/MemoryStream.h"
 #include "Compressor/CompressorParams.h"
 
@@ -21,7 +22,7 @@ namespace bptreedb
  
 
 	public:
-		TBPNodeHolder(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, bool bLeaf, int64_t nAddr, TCompressorParamsBasePtr pCompressParams) :
+		TBPNodeHolder(TAllocsSetPtr pAllocSet, bool bMulti, uint32_t nPageSize, bool bLeaf, int64_t nAddr, TCompressorParamsBasePtr pCompressParams) :
 			m_IsLeaf(bLeaf),
 			m_nAddr(nAddr),
 			m_nParentAddr(-1),
@@ -30,31 +31,22 @@ namespace bptreedb
 
 			if (m_IsLeaf)
 			{
-				m_pLeafNode.reset(new TLeafNode(pAlloc, bMulti, nPageSize, pCompressParams));
+				m_pLeafNode.reset(new TLeafNode(pAllocSet, bMulti, nPageSize, pCompressParams));
 				m_pCurNode = m_pLeafNode.get();
 			}
 			else
 			{
-				m_pInnerNode.reset(new TInnerNode(pAlloc, bMulti, nPageSize, pCompressParams));
+				m_pInnerNode.reset(new TInnerNode(pAllocSet, bMulti, nPageSize, pCompressParams));
 				m_pCurNode = m_pInnerNode.get();
 			}
 
-		}
- 
+		} 
 
 		void Load(CommonLib::IReadStream* pStream, CBPTreeContext *pContext)
 		{
 			m_pCurNode->Load(pStream, pContext);
 		}
 
-	/*	void InitCopmressor(TInnerCompressorParamsPtr& innerComp, TLeafCompressorParamsPtr& leafComp)
-		{
-			if (IsLeaf())
-				m_pLeafNode->Init(leafComp);
-			else
-				m_pInnerNode->Init(innerComp);
-		}
-		*/
 		uint32_t Save(CommonLib::IWriteStream *pStream, CBPTreeContext *pContext)
 		{
 			try
@@ -347,14 +339,14 @@ namespace bptreedb
 			return m_pLeafNode->AlignmentOf(pNode->m_pLeafNode.get(), bLeft);
 		}
 
-		void TransformToInner(CommonLib::IAllocPtr pAlloc, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr pCompressParams)
+		void TransformToInner(TAllocsSetPtr pAllocsSet, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr pCompressParams)
 		{
 			try
 			{
 				if (!IsLeaf())
 					throw CommonLib::CExcBase(" Node addr %1 isn't a leaf node", m_nAddr);
 
-				m_pInnerNode.reset(new TInnerNode(pAlloc, bMulti, nPageSize, pCompressParams));
+				m_pInnerNode.reset(new TInnerNode(pAllocsSet, bMulti, nPageSize, pCompressParams));
 			//	m_pInnerNode->Init(innerComp);
 				m_IsLeaf = false;
 				m_pLeafNode.reset();
@@ -368,14 +360,14 @@ namespace bptreedb
 		}
 
 
-		void TransformToLeaf(CommonLib::IAllocPtr pAlloc, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr pCompressParams)
+		void TransformToLeaf(TAllocsSetPtr pAllocsSet, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr pCompressParams)
 		{
 			try
 			{
 				if (IsLeaf())
 					throw CommonLib::CExcBase(" Node addr %1 isn't a inner node", m_nAddr);
 
-				m_pLeafNode.reset(new TLeafNode(pAlloc, bMulti, nPageSize, pCompressParams));
+				m_pLeafNode.reset(new TLeafNode(pAllocsSet, bMulti, nPageSize, pCompressParams));
 				//	m_pInnerNode->Init(innerComp);
 				m_IsLeaf = true;
 				m_pInnerNode.reset();

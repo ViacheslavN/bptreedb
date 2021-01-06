@@ -6,7 +6,7 @@
 #include "BPTreeNodeHolder.h"
 #include "Compressor/CompressorParams.h"
 #include "BPTreePerfCounter.h"
-
+#include "AllocsSet.h"
 
 
 namespace bptreedb
@@ -34,7 +34,7 @@ namespace bptreedb
  
 
 		TBPlusTreeSetBase(int64_t nPageBTreeInfo, std::shared_ptr<TStorage> pStorage, CommonLib::IAllocPtr pAlloc, uint32_t nChacheSize, uint32_t nNodesPageSize, bool bMulti = false) :
-			m_nPageBTreeInfo(nPageBTreeInfo), m_pStorage(pStorage), m_pAlloc(pAlloc), m_nChacheSize(nChacheSize)
+			m_nPageBTreeInfo(nPageBTreeInfo), m_pStorage(pStorage),  m_nChacheSize(nChacheSize)
 			, m_nRootAddr(-1)
 			, m_bMulti(bMulti)
 			, m_NodeCache(pAlloc)
@@ -45,6 +45,8 @@ namespace bptreedb
 			, m_bLockRemoveItemFromCache(false)
 			, m_Context(pAlloc)
 		{
+
+			m_pAllocsSet.reset(new CAllocsSet(pAlloc));
 
 		}
 
@@ -115,6 +117,8 @@ namespace bptreedb
 		TBPTreeNodePtr GetNodeAndCheckParent(int64_t nAddr);
 		TBPTreeNodePtr LoadNodeFromStorage(int64_t nAddr);
 		TBPTreeNodePtr CreateNode(int64_t nAddr, bool isLeaf, bool addToChache);
+
+
 		TBPTreeNodePtr NewNode(bool isLeaf, bool addToChache);
 		void AddToCache(TBPTreeNodePtr& node);
 	
@@ -127,13 +131,13 @@ namespace bptreedb
 		TBPTreeNodePtr GetMinimumNode(TBPTreeNodePtr pNode);
 
 		template <class TNodeHolder>
-		std::shared_ptr<TNodeHolder> LoadNode(CommonLib::IReadStream *pStream, CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, int64_t nAddr, TCompressorParamsBasePtr pCompressParams, CBPTreeContext *pContext)
+		std::shared_ptr<TNodeHolder> LoadNode(CommonLib::IReadStream *pStream, TAllocsSetPtr pAllocsSet, bool bMulti, uint32_t nPageSize, int64_t nAddr, TCompressorParamsBasePtr pCompressParams, CBPTreeContext *pContext)
 		{
 			try
 			{
 				bool isLeaf = pStream->ReadBool();
 
-				std::shared_ptr<TNodeHolder> pNode(new TNodeHolder(pAlloc, bMulti, nPageSize, isLeaf, nAddr, pCompressParams));
+				std::shared_ptr<TNodeHolder> pNode(new TNodeHolder(pAllocsSet, bMulti, nPageSize, isLeaf, nAddr, pCompressParams));
 				pNode->Load(pStream, pContext);
 
 				return pNode;
@@ -147,24 +151,9 @@ namespace bptreedb
 
 		}
 
-		template <class TNodeHolder>
-		std::shared_ptr<TNodeHolder> CreateNode(CommonLib::IAllocPtr& pAlloc, bool bMulti, uint32_t nPageSize, int64_t nAddr, bool bLeaf, TCompressorParamsBasePtr pCompressParams)
-		{
-			try
-			{
-				std::shared_ptr<TNodeHolder> pNode(new TNodeHolder(pAlloc, bMulti, nPageSize, bLeaf, nAddr, pCompressParams));
-				return pNode;
-
-			}
-			catch (std::exception& exc)
-			{
-				CommonLib::CExcBase::RegenExcT("TBPNodeHolder failed to load ", exc);
-				throw;
-			}
-
-		}
-
-
+ 
+		virtual TBPTreeNodePtr AllocateNewNode(int64_t nAddr, bool bLeaf) = 0;
+		
 		//insert
 		TBPTreeNodePtr findLeafNodeForInsert(const TKey& key);
 		void CheckLeafNode(TBPTreeNodePtr &pNode);
@@ -195,7 +184,8 @@ namespace bptreedb
 		TLink m_nRootAddr;
 		TLink m_nPageBTreeInfo;
 		uint32_t m_nNodePageSize;
-		CommonLib::IAllocPtr m_pAlloc;
+	//	CommonLib::IAllocPtr m_pAlloc;
+		TAllocsSetPtr m_pAllocsSet;
 		std::shared_ptr<TStorage> m_pStorage;
 		uint32_t m_nChacheSize;
 		uint64_t m_nPageInnerCompInfo;

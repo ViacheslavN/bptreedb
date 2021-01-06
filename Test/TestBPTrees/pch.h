@@ -31,6 +31,11 @@
 #include "../../BPTrees/BPTreeNodeMapHolder.h"
 
 
+#include "../../BPTrees/BPSMap.h"
+#include "../../BPTrees/BPTStringMapInnerNode.h"
+#include "../../BPTrees/BPTStringMapLeafNode.h"
+#include "../../BPTrees/Compressor/StringCompressor/ZLibStringEncoder.h"
+
 
 #ifdef _WIN32
 	#include "../../BPTrees/Compressor/ZlibCompressor/zstdencoder.h"

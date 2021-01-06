@@ -5,40 +5,11 @@
 #include "../../../../CommonLib/alloc/alloc.h"
 #include "../../../../CommonLib/alloc/simpleAlloc.h"
 #include "../../../../CommonLib/alloc/stl_alloc.h"
+#include "../../AllocsSet.h"
 
 namespace bptreedb
 {
 
-	/*class CZCompParams
-	{
-		public:
-			enum ECodeType
-			{
-				SingleValue = 0,
-				UsingContextBuffer = 1,
-				UsingValueBuffer = 2
-			};
-
-			uint16_t m_compressLevel{ 9 };
-			uint16_t m_compressRate{ 5 };
-			uint16_t m_codeType{ UsingValueBuffer };
-
-
-			virtual void Load(CommonLib::IReadStream *pStream)
-			{
-				m_compressLevel = pStream->Readint16();
-				m_compressRate = pStream->Readint16();
-				m_codeType = pStream->Readint16();
-			}
-
-			virtual void Save(CommonLib::IWriteStream *pStream)
-			{
-				pStream->Write(m_compressLevel);
-				pStream->Write(m_compressRate);
-				pStream->Write(m_codeType);
-			}
-	};
-	*/
 
 	template <class _TValue, class _TEncoder, class _TDecoder>
 	class TZEncoder
@@ -59,7 +30,7 @@ namespace bptreedb
 		};
 
 
-		TZEncoder(CommonLib::IAllocPtr& pAlloc, TCompressorParamsBasePtr pParamsBase, ECompressParams type) : m_nCount(0),  m_pAlloc(pAlloc)
+		TZEncoder(TAllocsSetPtr pAllocsSet, TCompressorParamsBasePtr pParamsBase, ECompressParams type) : m_nCount(0),  m_pAlloc(pAllocsSet->GetCommonAlloc())
 		{	
 			 
 			TCompressorParamsPtr pParams = pParamsBase->GetCompressParams(type);
@@ -327,14 +298,14 @@ namespace bptreedb
 					{
 						readCount += 1;
 						if (readCount > nCount)
-							throw CommonLib::CExcBase("Error decompress");
+							throw CommonLib::CExcBase("wrong size");
 
 						vecValues.push_back(value);
 					}
 				}
 
 				if (readCount != nCount)
-					throw CommonLib::CExcBase("Error decompress");
+					throw CommonLib::CExcBase("wrong size");
 			}
 			catch (std::exception& exc)
 			{
