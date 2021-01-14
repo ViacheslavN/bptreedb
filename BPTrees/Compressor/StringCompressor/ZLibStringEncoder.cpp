@@ -28,19 +28,19 @@ namespace bptreedb
 	void CZlibStringComp::AddSymbol(uint32_t nSize, int nIndex, const StringValue& value, const TValueMemSet& vecValues)
 	{
 		m_nCount += 1;
-		m_nRowSize += value.m_nLen;
+		m_nRowSize += value.Length();
 	}
 
 	void CZlibStringComp::RemoveSymbol(uint32_t nSize, int nIndex, const StringValue& value, const TValueMemSet& vecValues)
 	{
 		m_nCount -= 1;
-		m_nRowSize -= value.m_nLen;
+		m_nRowSize -= value.Length();
 	}
 
 	void CZlibStringComp::UpdateSymbol(int nIndex, StringValue& newValue, const StringValue& oldValue, const TValueMemSet& vecValues)
 	{
-		m_nRowSize -= oldValue.m_nLen;
-		m_nRowSize -= newValue.m_nLen;
+		m_nRowSize -= oldValue.Length();
+		m_nRowSize -= newValue.Length();
 	}
 
 	uint32_t CZlibStringComp::GetCompressSize() const
@@ -58,7 +58,7 @@ namespace bptreedb
 		try
 		{
 			if (m_nCount != vecValues.size())
-				throw CommonLib::CExcBase("Empty encoder wrong size, count: %1, values size: %2", m_nCount, vecValues.size());
+				throw CommonLib::CExcBase("CZlibStringComp encoder wrong size, count: %1, values size: %2", m_nCount, vecValues.size());
 
 			CommonLib::IMemoryStream *pMemStream = dynamic_cast<CommonLib::IMemoryStream *>(pStream);
 			if (!pMemStream)
@@ -72,7 +72,7 @@ namespace bptreedb
 
 			for (uint32_t i = 0, sz = (uint32_t)vecValues.size(); i < sz; ++i)
 			{
-				zStream.AttachIn((Bytef*)vecValues[i].m_utf8, (uInt)vecValues[i].m_nLen);
+				zStream.AttachIn((Bytef*)vecValues[i].CStr(), (uInt)vecValues[i].Length());
 
 				while (zStream.GetAvailIn() != 0)
 				{
@@ -162,12 +162,12 @@ namespace bptreedb
 					throw CommonLib::CExcBase("wrong read size");
 
 
-				StringValue value;
-				value.m_nLen = i + (uint32_t)strPart.size() + 1 - beginpos;
-				value.m_utf8 = (byte_t*)m_pAlloc->Alloc(value.m_nLen);
+				size_t len =  i + (uint32_t)strPart.size() + 1  - beginpos;;
 
-				byte_t *pStrBuf = value.m_utf8;
-				uint32_t copySize = value.m_nLen;
+				StringValue value((uint32_t)len, m_pAlloc);
+	
+				byte_t *pStrBuf = value.Str();
+				uint32_t copySize = value.Length();
 
 				if (!strPart.empty())
 				{

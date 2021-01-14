@@ -162,7 +162,7 @@ namespace bptreedb
 		void SplitRootInnerNode();
 		void SetParentInChildCacheOnly(TBPTreeNodePtr& pNode);
 		void SplitInnerNode(TBPTreeNodePtr&pNode, TBPTreeNodePtr& pNodeNewRight, TBPTreeNodePtr& pParentNode, int32_t nCount);
-
+ 
 
 		//remove
  

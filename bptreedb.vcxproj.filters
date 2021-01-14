@@ -255,5 +255,8 @@
     <ClCompile Include="BPTrees\AllocsSet.cpp">
       <Filter>BPTrees</Filter>
     </ClCompile>
+    <ClCompile Include="BPTrees\StringVal.cpp">
+      <Filter>BPTrees\BPTreeMap\StringBPMap</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

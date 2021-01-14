@@ -22,25 +22,25 @@ namespace bptreedb
 
 		TBPTreeStringMapLeafNode(TAllocsSetPtr pAllocsSet, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr pParams) : TBase(pAllocsSet, bMulti, nPageSize, pParams)
 		{
-			m_pAllocsSet = pAllocsSet;
+	//		m_pAllocsSet = pAllocsSet;
 		}
 
 		~TBPTreeStringMapLeafNode()
 		{
 
-			CommonLib::IAllocPtr pAlloc = m_pAllocsSet->GetAlloc(eStringAlloc);
+		/*	CommonLib::IAllocPtr pAlloc = m_pAllocsSet->GetAlloc(eStringAlloc);
 
 			for (size_t i = 0, sz = this->m_KeyMemSet.size(); i < sz; ++i)
 			{
 				pAlloc->Free(this->m_KeyMemSet[i].m_utf8);
 			}
 
-			this->m_KeyMemSet.clear();
+			this->m_KeyMemSet.clear();*/
 		}
 
 
 	private:
-		TAllocsSetPtr m_pAllocsSet;
+	//	TAllocsSetPtr m_pAllocsSet;
 
 	};
 

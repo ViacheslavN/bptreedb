@@ -15,7 +15,7 @@ namespace bptreedb
 		class _TNodeHolder = TBPMapNodeHolder<_TInnerNode, _TLeafNode>
 	>
 
-	class TBPSMap : public TBPlusTreeSetBase<StringValue, CompStringValue, _TStorage, _TInnerNode, _TLeafNode, _TNodeHolder>
+	class TBPSMap : public TBPlusTreeSetBase<StringValue, _TComp, _TStorage, _TInnerNode, _TLeafNode, _TNodeHolder>
 	{
 	public:
 
@@ -56,25 +56,17 @@ namespace bptreedb
 			m_StringAlloc = this->m_pAllocsSet->GetAlloc(eStringAlloc);
 		}
 
-		void insert(const char *pszUtf8, const TValue& value)
+	 
+
+		void insert(const char *pszUtf8, uint32_t strLen, const TValue& value)
 		{
 			try
 			{
 				CommonLib::CPrefCounterHolder holder(this->m_pBPTreePerfCounter, eInsertValue);
-
-
-
-				size_t strLen = strnlen_s(pszUtf8, m_nMaxStr + 1);
 				if (strLen > m_nMaxStr)
 					throw CommonLib::CExcBase("exceeding the maximum size %1", m_nMaxStr);
 
-				StringValue strVal;
-				strVal.m_utf8 = m_StringAlloc->Alloc(strLen);
-				strVal.m_nLen = strLen;
-
-				memcpy(strVal.m_utf8, pszUtf8, strLen);
-
-
+				StringValue strVal ((const byte_t*)pszUtf8, (uint32_t)strLen, m_StringAlloc);
 				TBPTreeNodePtr pNode = this->findLeafNodeForInsert(strVal);
 
 
@@ -111,35 +103,69 @@ namespace bptreedb
 			return TBase::template begin<iterator>();
 		}
 
-		iterator find(const TKey& key, iterator *pFromIterator = NULL, bool bFindNext = true)
+		iterator find(const char *pszUtf8, uint32_t strLen, iterator *pFromIterator = NULL, bool bFindNext = true)
 		{
+			// TO DO wrap in method  create StringValue from pszUtf8
+			if (strLen > m_nMaxStr)
+				throw CommonLib::CExcBase("exceeding the maximum size %1", m_nMaxStr);
+
+			StringValue key((const byte_t*)pszUtf8, (uint32_t)strLen, m_StringAlloc);
+
 			return TBase::template find<iterator, TComp>(this->m_comp, key, pFromIterator, bFindNext);
 		}
 
 		template<class _TCustComp>
-		iterator find(_TCustComp& comp, const TKey& key, iterator *pFromIterator = NULL, bool bFindNext = true)
+		iterator find(_TCustComp& comp, const char *pszUtf8, uint32_t strLen, iterator *pFromIterator = NULL, bool bFindNext = true)
 		{
+			if (strLen > m_nMaxStr)
+				throw CommonLib::CExcBase("exceeding the maximum size %1", m_nMaxStr);
+
+			StringValue key((const byte_t*)pszUtf8, (uint32_t)strLen, m_StringAlloc);
+
 			return TBase::template find<iterator, _TCustComp>(comp, key, pFromIterator, bFindNext);
 		}
 
-		iterator upper_bound(const TKey& key, iterator *pFromIterator = NULL, bool bFindNext = true)
+		iterator upper_bound(const char *pszUtf8, uint32_t strLen, iterator *pFromIterator = NULL, bool bFindNext = true)
 		{
+			if (strLen > m_nMaxStr)
+				throw CommonLib::CExcBase("exceeding the maximum size %1", m_nMaxStr);
+
+			StringValue key((const byte_t*)pszUtf8, (uint32_t)strLen, m_StringAlloc);
+
 			return TBase::template upper_bound<iterator>(this->m_comp, key, pFromIterator, bFindNext);
 		}
-		iterator lower_bound(const TKey& key, iterator *pFromIterator = NULL, bool bFindNext = true)
+		iterator lower_bound(const char *pszUtf8, uint32_t strLen, iterator *pFromIterator = NULL, bool bFindNext = true)
 		{
+			//size_t strLen = strnlen_s(pszUtf8, m_nMaxStr + 1);
+			if (strLen > m_nMaxStr)
+				throw CommonLib::CExcBase("exceeding the maximum size %1", m_nMaxStr);
+
+			StringValue key((const byte_t*)pszUtf8, (uint32_t)strLen, m_StringAlloc);
+
 			return TBase::template lower_bound<iterator>(this->m_comp, key, pFromIterator, bFindNext);
 		}
 
 		template<class _Comp>
-		iterator upper_bound(const _Comp& comp, const TKey& key, iterator *pFromIterator = NULL, bool bFindNext = true)
+		iterator upper_bound(const _Comp& comp, const char *pszUtf8, uint32_t strLen, iterator *pFromIterator = NULL, bool bFindNext = true)
 		{
+
+			if (strLen > m_nMaxStr)
+				throw CommonLib::CExcBase("exceeding the maximum size %1", m_nMaxStr);
+
+			StringValue key((const byte_t*)pszUtf8, (uint32_t)strLen, m_StringAlloc);
+
 			return TBase::template upper_bound<iterator, _Comp>(comp, key, pFromIterator, bFindNext);
 		}
 
 		template<class _Comp>
-		iterator lower_bound(const _Comp& comp, const TKey& key, iterator *pFromIterator = NULL, bool bFindNext = true)
+		iterator lower_bound(const _Comp& comp, const char *pszUtf8, uint32_t strLen, iterator *pFromIterator = NULL, bool bFindNext = true)
 		{
+
+			if (strLen > m_nMaxStr)
+				throw CommonLib::CExcBase("exceeding the maximum size %1", m_nMaxStr);
+
+			StringValue key((const byte_t*)pszUtf8, (uint32_t)strLen, m_StringAlloc);
+
 			return TBase::template lower_bound<iterator, _Comp>(comp, key, pFromIterator, bFindNext);
 		}
 

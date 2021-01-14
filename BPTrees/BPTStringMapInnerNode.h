@@ -11,27 +11,27 @@ namespace bptreedb
 			typedef BPTreeInnerNode<StringValue, _TCompressor> TBase;
 
 
-			TBPTreeStringMapInnerNode(TAllocsSetPtr pAllocsSet, CommonLib::IAllocPtr pStringAlloc, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr pParams) : TBase (pAllocsSet, bMulti, nPageSize, pParams)
+			TBPTreeStringMapInnerNode(TAllocsSetPtr pAllocsSet, bool bMulti, uint32_t nPageSize, TCompressorParamsBasePtr pParams) : TBase (pAllocsSet, bMulti, nPageSize, pParams)
 			{
-				m_pAllocsSet = pAllocsSet;
+			//	m_pAllocsSet = pAllocsSet;
 			}
 
 
 			virtual ~TBPTreeStringMapInnerNode()
 			{
 
-				CommonLib::IAllocPtr pAlloc = m_pAllocsSet->GetAlloc(eStringAlloc);
+		/*		CommonLib::IAllocPtr pAlloc = m_pAllocsSet->GetAlloc(eStringAlloc);
 
 				for (size_t i = 0, sz = this->m_innerKeyMemSet.size(); i < sz; ++i)
 				{
 					pAlloc->Free(this->m_innerKeyMemSet[i].m_utf8);
 				}
 
-				this->m_innerKeyMemSet.clear();
+				this->m_innerKeyMemSet.clear();*/
 
 			}
 
 		protected:
-			TAllocsSetPtr m_pAllocsSet;
+			//TAllocsSetPtr m_pAllocsSet;
 	};
 }

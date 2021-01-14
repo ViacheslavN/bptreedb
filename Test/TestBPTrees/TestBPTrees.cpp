@@ -6,6 +6,7 @@
 
 void TestBPTreeSet();
 void TestBPTreeMap();
+void TestBPTString();
  
 int main()
 {
@@ -17,7 +18,9 @@ int main()
 
 	//TestBPTreeSet(); 
 
-	TestBPTreeMap();
+	//TestBPTreeMap();
+
+	TestBPTString();
 
 	return 0;
 }
