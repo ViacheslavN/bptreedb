@@ -46,6 +46,7 @@ namespace bptreedb
 
 		virtual void Flush();
 		virtual void SetStoragePerformer(CommonLib::TPrefCounterPtr pStoragePerformer);
+
 	private:
 
 		CommonLib::file::CFile m_file;

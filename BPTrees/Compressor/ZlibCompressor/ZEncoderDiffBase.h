@@ -84,17 +84,17 @@ namespace bptreedb
 					throw CommonLib::CExcBase(L"IStream isn't memstream");
 
 				pStream->Write(vecValues[0]);
-
-
-				uint32_t streamSize = uint32_t(pStream->Size() - pStream->Pos());
-				streamSize = streamSize > maxCompSize ? maxCompSize : streamSize;
-
-				TEncoder zStream(m_compressLevel);
-				zStream.AttachOut((Bytef*)pMemStream->Buffer() + pStream->Pos(), streamSize);
-
-				uint32_t count = 0;
-				switch (m_codeType)
+				if (vecValues.size() > 1)
 				{
+					uint32_t streamSize = uint32_t(pStream->Size() - pStream->Pos());
+					streamSize = streamSize > maxCompSize ? maxCompSize : streamSize;
+
+					TEncoder zStream(m_compressLevel);
+					zStream.AttachOut((Bytef*)pMemStream->Buffer() + pStream->Pos(), streamSize);
+
+					uint32_t count = 0;
+					switch (m_codeType)
+					{
 
 					case SingleValue:
 						count = EncodeSingleValue(vecValues, zStream);
@@ -105,20 +105,23 @@ namespace bptreedb
 					default:
 						throw CommonLib::CExcBase("Unknown type %1", m_codeType);
 						break;
+					}
+
+					if (count != 0)
+						return count;
+
+					if (zStream.GetAvailOut() == 0)
+						return (uint32_t)(vecValues.size()) / 2;
+
+					zStream.FinishCompress();
+
+					if (zStream.GetAvailOut() == 0)
+						return (uint32_t)(vecValues.size()) / 2;
+
+					pStream->Seek(streamSize - zStream.GetAvailOut(), CommonLib::soFromCurrent);
+
 				}
 
-				if (count != 0)
-					return count;
-
-				if (zStream.GetAvailOut() == 0)
-					return (uint32_t)(vecValues.size()) / 2;
-
-				zStream.FinishCompress();
-
-				if (zStream.GetAvailOut() == 0)
-					return (uint32_t)(vecValues.size()) / 2;
-
-				pStream->Seek(streamSize - zStream.GetAvailOut(), CommonLib::soFromCurrent);
 				return 0;
 
 			}
@@ -227,27 +230,28 @@ namespace bptreedb
 				pStream->Read(value);
 
 				vecValues.push_back(value);
-
-				TDecoder zStream;
-				zStream.AttachIn(pMemStream->Buffer() + pStream->Pos(), nCompSize - sizeof(TValue));
-
-				switch (m_codeType)
+				if (nCount > 1)
 				{
+					TDecoder zStream;
+					zStream.AttachIn(pMemStream->Buffer() + pStream->Pos(), nCompSize - sizeof(TValue));
 
-				case SingleValue:
-					DecodeBySingleValue(nCount, vecValues, zStream);
-					break;
-				case UsingContextBuffer:
-					DecodeWithContextBuffer(nCount, vecValues, zStream, pContext);
-					break;
-				default:
-					throw CommonLib::CExcBase("Unknown type %1", m_codeType);
-					break;
+					switch (m_codeType)
+					{
+
+					case SingleValue:
+						DecodeBySingleValue(nCount, vecValues, zStream);
+						break;
+					case UsingContextBuffer:
+						DecodeWithContextBuffer(nCount, vecValues, zStream, pContext);
+						break;
+					default:
+						throw CommonLib::CExcBase("Unknown type %1", m_codeType);
+						break;
+					}
+					pStream->Seek(nCompSize - sizeof(TValue), CommonLib::soFromCurrent);
 				}
-
-
 				m_nCount = nCount;
-				pStream->Seek(nCompSize - sizeof(TValue), CommonLib::soFromCurrent);
+
 			}
 			catch (std::exception& exc)
 			{

@@ -24,19 +24,18 @@ namespace bptreedb
 	public:
 		TBPNodeHolder(TAllocsSetPtr pAllocSet, bool bMulti, uint32_t nPageSize, bool bLeaf, int64_t nAddr, TCompressorParamsBasePtr pCompressParams) :
 			m_IsLeaf(bLeaf),
-			m_nAddr(nAddr),
-			m_nParentAddr(-1),
-			m_nFoundIndex(-1)
+			m_nAddr(nAddr)
+
 		{
 
 			if (m_IsLeaf)
 			{
-				m_pLeafNode.reset(new TLeafNode(pAllocSet, bMulti, nPageSize, pCompressParams));
+				m_pLeafNode.reset(new TLeafNode(pAllocSet, bMulti, nPageSize - sizeof(byte_t) -sizeof(uint32_t) , pCompressParams));
 				m_pCurNode = m_pLeafNode.get();
 			}
 			else
 			{
-				m_pInnerNode.reset(new TInnerNode(pAllocSet, bMulti, nPageSize, pCompressParams));
+				m_pInnerNode.reset(new TInnerNode(pAllocSet, bMulti, nPageSize - sizeof(byte_t) - sizeof(uint32_t), pCompressParams));  //to fix  -sizeof(uint32_t)
 				m_pCurNode = m_pInnerNode.get();
 			}
 
@@ -63,38 +62,6 @@ namespace bptreedb
 
 
 		bool IsLeaf() const { return m_IsLeaf; }
-
-
-		void SetParent(std::shared_ptr<TBPNodeHolder> pNode, int32_t nFoundIndex)
-		{
-			m_pParent = pNode;
-			m_nFoundIndex = nFoundIndex;
-
-			if (pNode.get())
-				m_nParentAddr = pNode->GetAddr();
-			else
-				m_nParentAddr = -1;
-		}
-
-		std::shared_ptr<TBPNodeHolder> GetParentNodePtr()
-		{ 
-			return m_pParent.lock(); 
-		}
-
-		int64_t GetParentAddr() const
-		{
-			return m_nParentAddr;
-		}
-
-		int32_t GetFoundIndex() const
-		{
-			return m_nFoundIndex;
-		}
-
-		void SetFoundIndex(int32_t nFoundIndex)
-		{
-			m_nFoundIndex = nFoundIndex;
-		}
 
 		uint64_t GetAddr() const
 		{
@@ -447,10 +414,6 @@ namespace bptreedb
 	protected:
 		bool m_IsLeaf;
 		int64_t m_nAddr;
-		std::weak_ptr<TBPNodeHolder> m_pParent;
-		int32_t m_nFoundIndex;
-		int64_t m_nParentAddr;
-
 		TInnerNodePtr m_pInnerNode;
 		TLeafNodePtr m_pLeafNode;
 

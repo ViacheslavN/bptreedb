@@ -13,11 +13,7 @@ namespace bptreedb
 	StringValue::StringValue(const byte_t *pStr, uint32_t len, CommonLib::IAllocPtr pAlloc)
 	{
 		m_pAlloc = pAlloc;
-		m_nLen = len;
-
-		m_utf8 = (byte_t*)m_pAlloc->Alloc(len);
-		memcpy(m_utf8, pStr, len);
-
+		CopyStr(pStr, len);
 	}
 
 	StringValue::StringValue(uint32_t len, CommonLib::IAllocPtr pAlloc)
@@ -44,6 +40,24 @@ namespace bptreedb
 		}
 	}
 
+	void  StringValue::CopyStr(const byte_t *pStr, uint32_t len)
+	{
+		m_nLen = len;
+		uint32_t copyLen = len;
+		if (m_nLen != 0 && m_pAlloc.get() != nullptr)
+		{
+			if (pStr[len - 1] != '\0')
+			{
+				m_nLen = len + 1;
+			}
+
+			m_utf8 = (byte_t*)m_pAlloc->Alloc(m_nLen);
+			memcpy(m_utf8, pStr, copyLen);
+			m_utf8[m_nLen - 1] = '\0';
+
+		}
+	}
+
 	uint32_t StringValue::Length() const
 	{
 		return m_nLen;
@@ -62,12 +76,7 @@ namespace bptreedb
 	StringValue::StringValue(const StringValue& val)
 	{
 		m_pAlloc = val.m_pAlloc;
-		m_nLen = val.m_nLen;
-		if (m_nLen != 0 && m_pAlloc.get() != nullptr)
-		{
-			m_utf8 = (byte_t *)m_pAlloc->Alloc(m_nLen);
-			memcpy(m_utf8, val.m_utf8, m_nLen);
-		}
+		CopyStr(val.m_utf8, val.m_nLen);
 		
 	}
 
@@ -85,13 +94,7 @@ namespace bptreedb
 	{
 		Clear();
 		m_pAlloc = val.m_pAlloc;
-		m_nLen = val.m_nLen;
-		if (m_nLen != 0 && m_pAlloc.get() != nullptr)
-		{
-			m_utf8 = (byte_t *)m_pAlloc->Alloc(m_nLen + 1);
-			memcpy(m_utf8, val.m_utf8, m_nLen);
-			m_utf8[m_nLen] = '\0';
-		}
+		CopyStr(val.m_utf8, val.m_nLen);
 
 		return *this;
 	}

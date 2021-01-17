@@ -47,7 +47,6 @@ namespace bptreedb
 		{
 
 			m_pAllocsSet.reset(new CAllocsSet(pAlloc));
-
 		}
 
 		~TBPlusTreeSetBase()
@@ -102,9 +101,7 @@ namespace bptreedb
 			return m_pRoot; 
 		}
 		TBPTreeNodePtr GetNode(int64_t nAddr);
-		void SetParentForNextNode(TBPTreeNodePtr& pNode, TBPTreeNodePtr& pNextNode);
-		void SetParentForPrevNode(TBPTreeNodePtr& pNode, TBPTreeNodePtr& pPrevNode);
-
+		void CheckCache();
 	protected:
 
 		void LoadTree();
@@ -120,11 +117,13 @@ namespace bptreedb
 
 
 		TBPTreeNodePtr NewNode(bool isLeaf, bool addToChache);
-		void AddToCache(TBPTreeNodePtr& node);
+		void AddToCache(TBPTreeNodePtr node);
+
+
+		TBPTreeNodePtr GetNodeFromCache(int64_t nAddr, bool bNotMove = false);
 	
 
-		TBPTreeNodePtr GetParentNode(TBPTreeNodePtr& pNode);
-		TBPTreeNodePtr FindAndSetParent(TBPTreeNodePtr& pNode);
+		TBPTreeNodePtr GetParentNode(TBPTreeNodePtr pNode, int32_t* nElementPos = nullptr);
 		void DropNode(TBPTreeNodePtr& pNode);
 		void SaveNode(TBPTreeNodePtr& pNode);
 	
@@ -160,7 +159,6 @@ namespace bptreedb
 		void TransformRootToInner();
 		void SplitLeafNode(TBPTreeNodePtr &pNode, TBPTreeNodePtr &pNewNode, TBPTreeNodePtr &pParentNode, int32_t nCount);
 		void SplitRootInnerNode();
-		void SetParentInChildCacheOnly(TBPTreeNodePtr& pNode);
 		void SplitInnerNode(TBPTreeNodePtr&pNode, TBPTreeNodePtr& pNodeNewRight, TBPTreeNodePtr& pParentNode, int32_t nCount);
  
 
@@ -169,11 +167,11 @@ namespace bptreedb
 		TBPTreeNodePtr FindLeafNodeForDelete(const TKey& key);
 		void RemoveFromLeafNode(TBPTreeNodePtr pNode, int32_t nIndex, const TKey& key);
 		void RemoveFromInnerNode(TBPTreeNodePtr pNode, const TKey& key);
-		void UnionLeafNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pLeafNode, TBPTreeNodePtr pDonorNode, bool bLeft);
+		void UnionLeafNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pLeafNode, TBPTreeNodePtr pDonorNode, int32_t nDonorFoundIndex);
 		void DeleteNode(TBPTreeNodePtr pNode);
-		void AlignmentLeafNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pLeafNode, TBPTreeNodePtr pDonorNode, bool bLeft);
-		void UnionInnerNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pNode, TBPTreeNodePtr pDonorNode, bool bLeft);
-		void AlignmentInnerNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pNode, TBPTreeNodePtr pDonorNode, bool bLeft);
+		void AlignmentLeafNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pLeafNode, int32_t nFoundIndex, TBPTreeNodePtr pDonorNode, int32_t nDonorIndex, bool bLeft);
+		void UnionInnerNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pNode, TBPTreeNodePtr pDonorNode, int32_t nDonorFoundIndex);
+		void AlignmentInnerNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pNode, int32_t nFoundIndex,  TBPTreeNodePtr pDonorNode, int32_t nDonorFoundIndex, bool bLeft);
 
 	protected:
 
@@ -194,6 +192,8 @@ namespace bptreedb
 		bool m_bMinSplit;
 		bool m_bLockRemoveItemFromCache;
 		CommonLib::TPrefCounterPtr m_pBPTreePerfCounter;
+		typedef std::map<TLink, TBPTreeNodePtr> TTempCache;
+		TTempCache m_TempCache;
 
 
 		TCompressorParamsBasePtr m_pCompressParams;
@@ -203,7 +203,7 @@ namespace bptreedb
 		{
 			bool IsFree(TBPTreeNodePtr& pObj)
 			{
-				return  true;//pObj.use_count() == 1;
+				return  !(pObj->GetFlags() & LOCK_FROM_REMOVE);
 			}
 		};
 

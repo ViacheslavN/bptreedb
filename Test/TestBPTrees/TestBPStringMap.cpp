@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "PerfLog.h"
+#include "StringVectorFile.h"
 
 
 
@@ -7,29 +8,12 @@
 typedef bptreedb::TZLibEncoder<double> TValueEncoder;
 typedef bptreedb::TZLibEncoder<int64_t> TLinkEncoder;
 typedef bptreedb::BPTreeLeafNodeMap<bptreedb::StringValue, double, bptreedb::TBaseNodeCompressor<bptreedb::StringValue, double, bptreedb::CZlibStringComp, TValueEncoder > > TLeafNode;
-
-
 typedef bptreedb::BPTreeInnerNode<bptreedb::StringValue, bptreedb::TBaseNodeCompressor<bptreedb::StringValue, int64_t, bptreedb::CZlibStringComp, TLinkEncoder > > TInnerNode;
+ 
+
 typedef bptreedb::TBPSMap< double, bptreedb::CompStringValue, bptreedb::IStorage, TInnerNode, TLeafNode> TBPStringMap;
 
 
-void GetRandomValues(byte *pData, uint32_t nSize)
-{
-	if (!nSize)
-		return;
-
-
-	for (uint32_t i = 0; i < nSize; ++i)
-	{
-		uint32_t val = (rand() % 10 + 1);
-
-		if (val > 9)
-			pData[i] = byte_t(val) + 'a';
-		else
-			pData[i] = byte_t(val) + '0';
-	}
-
-}
 
 
 
@@ -50,17 +34,17 @@ uint64_t CreateBPTreeStringMap(CommonLib::IAllocPtr pAlloc, TStorage pStorage)
 		bptreedb::TCompressorParamsPtr pCompLeafKey(new bptreedb::CompressorParams());
 
 		pCompInnerKey->SetIntParam("compressLevel", 9);
-		pCompInnerKey->SetIntParam("compressRate", 10);
+		pCompInnerKey->SetIntParam("compressRate", 5);
 
 		pCompParmas->AddCompressParams(pCompInnerKey, bptreedb::eInnerKey);
 
 		pCompInnerValue->SetIntParam("compressLevel", 9);
-		pCompInnerValue->SetIntParam("compressRate", 3);
+		pCompInnerValue->SetIntParam("compressRate", 5);
 
 		pCompParmas->AddCompressParams(pCompInnerValue, bptreedb::eInnerValue);
 
 		pCompLeafKey->SetIntParam("compressLevel", 9);
-		pCompLeafKey->SetIntParam("compressRate", 10);
+		pCompLeafKey->SetIntParam("compressRate", 5);
 
 		pCompParmas->AddCompressParams(pCompLeafKey, bptreedb::eLeafKey);
 
@@ -82,7 +66,7 @@ uint64_t CreateBPTreeStringMap(CommonLib::IAllocPtr pAlloc, TStorage pStorage)
 
 
 template <class TBPTree, class TStorage>
-void InsertBPTreeStringMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage, const std::vector<astr>& vecStrs)
+void InsertBPTreeStringMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage, uint32_t nCacheSize, const std::vector<astr>& vecStrs)
 {
 	try
 	{
@@ -94,19 +78,39 @@ void InsertBPTreeStringMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterP
 
 		CommonLib::CLogInfo info(Log, "InsertBPTreeStringMap size %1", nCount);
 
-		TBPTree tree(nBPTreePage, pStorage, pAlloc, 10, nPageSize, 25);
+		TBPTree tree(nBPTreePage, pStorage, pAlloc, nCacheSize, nPageSize, 25);
 		tree.SetBPTreePerfCounter(pPerf);
 		for (size_t i = 0; i < vecStrs.size(); ++i)
 		{
 			 
 			size_t len = vecStrs[i].length();
 			size_t size = vecStrs[i].size();
+
+			if (i == vecStrs.size() -1)
+			{
+				int dd = 0;
+				dd++;
+			}
+
 			tree.insert(vecStrs[i].c_str(), (uint32_t)len, (double)i);
+		/*	auto it = tree.find(vecStrs[i].c_str(), (uint32_t)len);
+
+			if (it.IsNull())
+				throw CommonLib::CExcBase("Error find after1 insert %1, num %2", vecStrs[i], i);*/
  
 			if (i%nStep == 0)
 			{
 				std::cout << i << "  " << (i * 100) / nCount << " %" << '\r';
 			}
+		}
+
+		for (size_t i = 0; i < vecStrs.size(); ++i)
+		{
+			size_t len = vecStrs[i].length();
+			auto it = tree.find(vecStrs[i].c_str(), (uint32_t)len);
+
+			if (it.IsNull())
+				throw CommonLib::CExcBase("Error find after insert %1, num %2", vecStrs[i], i);
 		}
 
 		tree.Flush();
@@ -122,7 +126,7 @@ void InsertBPTreeStringMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterP
 
 
 template <class TBPTree, class TStorage>
-void FindBPTreeStringMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage, const std::vector<astr>& vecStrs)
+void FindBPTreeStringMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage, uint32_t nCacheSize, const std::vector<astr>& vecStrs)
 {
 	try
 	{
@@ -134,7 +138,7 @@ void FindBPTreeStringMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr
 
 		CommonLib::CLogInfo info(Log, "FindBPTreeStringMap size %1", nCount);
 
-		TBPTree tree(nBPTreePage, pStorage, pAlloc, 10, nPageSize, 25);
+		TBPTree tree(nBPTreePage, pStorage, pAlloc, nCacheSize, nPageSize, 25);
 		tree.SetBPTreePerfCounter(pPerf);
 		for (size_t i = 0; i < vecStrs.size(); ++i)
 		{
@@ -142,7 +146,7 @@ void FindBPTreeStringMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr
 			auto it = tree.find(vecStrs[i].c_str(), (uint32_t)len);
 
 			if (it.IsNull())
-				throw CommonLib::CExcBase("Error find %1", vecStrs[i]);
+				throw CommonLib::CExcBase("Error find %1, num %2", vecStrs[i], i);
 
 			const bptreedb::StringValue& str = it.Key();
 			astr key((const char*)it.Key().CStr());
@@ -153,7 +157,7 @@ void FindBPTreeStringMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr
 
 
 			if (strcmp((const char*)str.CStr(), keyVal.c_str()) != 0)
-				throw CommonLib::CExcBase("Error find key %1", key, i);
+				throw CommonLib::CExcBase("Error find key %1, vecValue %2, %3", key, keyVal, i);
 
 			if (it.Value() != (double)i)
 				throw CommonLib::CExcBase("Error find value %1", it.Value(), i);
@@ -180,34 +184,84 @@ void FindBPTreeStringMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr
 	}
 }
 
+template <class TBPTree, class TStorage>
+void InfoBPStringTree(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage, uint32_t nCacheSize)
+{
+
+	Log.Info("InfoBPTree");
+
+
+	TBPTree tree(nBPTreePage, pStorage, pAlloc, nCacheSize, nPageSize, 25);
+	tree.SetBPTreePerfCounter(pPerf);
+
+
+	auto treeStat = tree.GetStatistics();
+	treeStat->CalcNodesInTree();
+
+	Log.InfoT("Inner Nodes: %1, Leaf Nodes: %2, Keys: %3", treeStat->m_nInnerNodeCount, treeStat->m_nLeafNodeCount, treeStat->m_nKeyCount);
+
+
+	if (treeStat->m_setHeights.size() == 1)
+		Log.InfoT("Height: %1, ", *treeStat->m_setHeights.begin());
+	else
+	{
+		Log.Info(" Heights:");
+		auto it = treeStat->m_setHeights.begin();
+		auto end = treeStat->m_setHeights.end();
+
+		for (; it != end; ++it)
+		{
+			Log.InfoT("%1", *it);
+		}
+	}
+}
+
+
+template <class TBPTree, class TStorage>
+void TravelTree(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage, uint32_t nCacheSize)
+{
+	try
+	{
+		CommonLib::CLogInfo info(Log, "Trave tree ");
+
+
+		TBPTree tree(nBPTreePage, pStorage, pAlloc, nCacheSize, nPageSize, 25);
+		tree.SetBPTreePerfCounter(pPerf);
+
+		auto it = tree.begin();
+
+		astr keyVal = "15115312543k671341";
+		uint64_t nCount = 0;
+		while (!it.IsNull())
+		{
+			const bptreedb::StringValue& str = it.Key();
+			if (strcmp((const char*)str.CStr(), keyVal.c_str()) == 0)
+			{
+				std::cout << "Find  Addr: " << it.Addr() <<" Pos: " <<it.Pos() << "  ParentAddr: " <<  "\n";
+			}
+			nCount += 1;
+			it.Next();
+		}
+
+		info.Complete("elements %1", nCount);
+	}
+	catch (std::exception& exe)
+	{
+		CommonLib::CExcBase::RegenExc("Failed to travel tree", exe);
+	}
+}
 
 void TestBPTString()
 {
 	try
 	{
-
+		
+		
 	std::vector<astr> vecString;
-	int count = 100000;
-	char rndstr[15];
-	memset(rndstr, 0, sizeof(rndstr));
-
-	srand((int)time(0));
-
-	for (int i = 0; i < count; ++i)
-	{
-		astr str = CommonLib::str_utils::AStrInt32(i);
-
-		GetRandomValues((byte *)rndstr, sizeof(rndstr));
-
-		rndstr[sizeof(rndstr) - 1] = '\0';
-
-		str += rndstr;
-
-		astr utf8 = CommonLib::StringEncoding::str_a2utf8(str);
-		vecString.push_back(utf8);
-	}
-
-
+	CStringVectorFile vecFile(L"F:\\StringTestData.strdata", 10000000);
+	vecFile.ReadData(vecString, 10000000);
+	//vecFile.ReadData(vecString, 1509730);
+	//vecFile.ReadData(vecString, 492979);
 #ifdef _WIN32
 	wstr storagePath = L"F:\\BPMapTest.btdb";
 #else
@@ -221,6 +275,7 @@ void TestBPTString()
 	wstr storagePath = L"/home/slava/BPMapTest";
 #endif
 	int64_t nBPTreePage = -1;
+	uint32_t nCacheSize = 10;
 	CommonLib::IAllocPtr pAlloc(new CommonLib::CSimpleAlloc(true));
 	CommonLib::TPrefCounterPtr pStoragePerformer(new CommonLib::CPerfCounter(10));
 	CommonLib::TPrefCounterPtr pBPTreePerf(new CommonLib::CPerfCounter(10));
@@ -236,7 +291,24 @@ void TestBPTString()
 		bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
 		pStorage->Open(storagePath.c_str(), false, nPageSize);
 		pStorage->SetStoragePerformer(pStoragePerformer);
-		InsertBPTreeStringMap<TBPStringMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, vecString);
+		InsertBPTreeStringMap<TBPStringMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nCacheSize, vecString);
+	}
+	
+	{
+		bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
+		pStorage->Open(storagePath.c_str(), false, nPageSize);
+		pStoragePerformer->Reset();
+		pBPTreePerf->Reset();
+		pStorage->SetStoragePerformer(pStoragePerformer);
+		InfoBPStringTree<TBPStringMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nCacheSize);
+	}
+	{
+		//nBPTreePage = 0;
+		bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
+		pStorage->Open(storagePath.c_str(), false, nPageSize);
+		pStorage->SetStoragePerformer(pStoragePerformer);
+
+		TravelTree<TBPStringMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nCacheSize);
 	}
 
 	{
@@ -244,8 +316,11 @@ void TestBPTString()
 		bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
 		pStorage->Open(storagePath.c_str(), false, nPageSize);
 		pStorage->SetStoragePerformer(pStoragePerformer);
-		FindBPTreeStringMap<TBPStringMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, vecString);
+
+		FindBPTreeStringMap<TBPStringMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nCacheSize, vecString);
 	}
+
+	
 
 	
 

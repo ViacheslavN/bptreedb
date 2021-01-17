@@ -23,6 +23,7 @@ namespace bptreedb
 		byte_t * Str();
 	private:
 		void Clear();
+		void CopyStr(const byte_t *pStr, uint32_t len);
 		byte_t *m_utf8{ nullptr };
 		uint32_t m_nLen{ 0 };
 		CommonLib::IAllocPtr m_pAlloc;

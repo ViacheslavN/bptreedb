@@ -298,14 +298,14 @@ namespace bptreedb
 					{
 						readCount += 1;
 						if (readCount > nCount)
-							throw CommonLib::CExcBase("wrong size");
+							throw CommonLib::CExcBase("wrong size, read: %1, count %2", readCount, nCount);
 
 						vecValues.push_back(value);
 					}
 				}
 
 				if (readCount != nCount)
-					throw CommonLib::CExcBase("wrong size");
+					throw CommonLib::CExcBase("wrong size, read: %1, count %2", readCount, nCount);
 			}
 			catch (std::exception& exc)
 			{

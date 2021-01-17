@@ -35,7 +35,9 @@
 #include "../../BPTrees/BPTStringMapInnerNode.h"
 #include "../../BPTrees/BPTStringMapLeafNode.h"
 #include "../../BPTrees/Compressor/StringCompressor/ZLibStringEncoder.h"
-
+#include "../TestDataGeneratorLib/RandomIntegerValueGenerator.h"
+#include "../TestDataGeneratorLib/IntegerValueGenerator.h"
+#include "../TestDataGeneratorLib/TestDataGenerator.h"
 
 #ifdef _WIN32
 	#include "../../BPTrees/Compressor/ZlibCompressor/zstdencoder.h"

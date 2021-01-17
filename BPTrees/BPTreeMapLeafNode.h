@@ -104,16 +104,17 @@ namespace bptreedb
 					throw CommonLib::CExcBase("invalid count %1", count);
 
 				TKeyMemSet& newNodeMemSet = pNode->m_KeyMemSet;
+				TValueMemSet& newNodValueMemSet = pNode->m_ValueMemSet;
 				TCompressor& NewNodeComp = pNode->m_Compressor;
 
 
 				int32_t nBegin = (int32_t)this->m_KeyMemSet.size() - count;
 
 				int32_t nSplitIndex = this->SplitInVec(this->m_KeyMemSet, newNodeMemSet, pSplitKey, nBegin, (int32_t)this->m_KeyMemSet.size());
-				this->SplitInVec(this->m_ValueMemSet, pNode->m_ValueMemSet, (TValue*)NULL, nBegin, (int32_t)m_ValueMemSet.size());
+				this->SplitInVec(this->m_ValueMemSet, newNodValueMemSet, (TValue*)NULL, nBegin, (int32_t)this->m_ValueMemSet.size());
 
 				this->m_Compressor.Recalc(this->m_KeyMemSet, this->m_ValueMemSet);
-				NewNodeComp.Recalc(newNodeMemSet, this->m_ValueMemSet);
+				NewNodeComp.Recalc(newNodeMemSet, newNodValueMemSet);
 				return nSplitIndex;
 				//	}
 			}

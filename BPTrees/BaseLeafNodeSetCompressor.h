@@ -41,7 +41,7 @@ namespace bptreedb
 					if (!m_nCount)
 						return;
 
-					if(m_nCount > 1000000)
+					if(m_nCount > m_nPageSize * 8)
 						throw CommonLib::CExcBase(L"Wrong size %1", m_nCount);
 
 					vecKeys.reserve(m_nCount);

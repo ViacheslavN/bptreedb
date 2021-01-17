@@ -13,7 +13,8 @@ namespace bptreedb
 		CHANGE_NODE = 2,
 		BUSY_NODE = 4,
 		REMOVE_NODE = 8,
-		CHECK_REM_NODE = 16
+		CHECK_REM_NODE = 16,
+		LOCK_FROM_REMOVE = 32
 	};
 
 

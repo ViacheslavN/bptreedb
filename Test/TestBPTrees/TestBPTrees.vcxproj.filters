@@ -33,6 +33,9 @@
     <ClCompile Include="TestBPStringMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="StringVectorFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -40,6 +43,9 @@
     </ClInclude>
     <ClInclude Include="PerfLog.h">
       <Filter>Source Files\PerfLog</Filter>
+    </ClInclude>
+    <ClInclude Include="StringVectorFile.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

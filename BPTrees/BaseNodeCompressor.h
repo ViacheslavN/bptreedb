@@ -31,7 +31,12 @@ namespace bptreedb
 				m_nPageSize(nPageSize), 
 				m_KeyEncoder(pAllocsSet, pParams, type == eInnerNode ? eInnerKey : eLeafKey),
 				m_ValueEncoder(pAllocsSet, pParams, type == eInnerNode ? eInnerValue : eLeafValue)
-			{}
+			{
+			
+				TCompressorParamsPtr pCompParams =pParams->GetCompressParams(type == eInnerNode ? eInnerKey : eLeafKey);
+				m_nMaxCount = pCompParams->GetIntParam("MaxCount", 8 * m_nPageSize); //bit for element
+			
+			}
 
 			
 			virtual ~TBaseNodeCompressor() {}
@@ -50,7 +55,7 @@ namespace bptreedb
 					if (!m_nCount)
 						return;
 
-					if (m_nCount > 1000000)
+					if (m_nCount > m_nPageSize *8)
 						throw CommonLib::CExcBase(L"Wrong size %1", m_nCount);
 
 					vecKeys.reserve(m_nCount);
@@ -92,7 +97,7 @@ namespace bptreedb
 					if (!nSize)
 						return 0;
 
-					uint32_t maxCompSize = (m_nPageSize - HeadSize()) / 2;
+					uint32_t maxCompSize = (m_nPageSize - (uint32_t)pStream->Pos() - HeadSize()) / 2;
 
 	
 					m_KeyEncoder.BeginEncoding(vecKeys);
@@ -199,7 +204,7 @@ namespace bptreedb
 
 			virtual bool IsNeedSplit() const
 			{
-				if (m_nCount > m_nPageSize * 8) //max bits for elem
+				if (m_nCount > m_nMaxCount) //max bits for elem
 					return true;
 
 				return !(m_nPageSize > Size());
@@ -270,6 +275,7 @@ namespace bptreedb
 			TValueEncoder m_ValueEncoder;
 
 			uint32_t m_nPageSize;
+			uint32_t m_nMaxCount;
 
 		};
 }

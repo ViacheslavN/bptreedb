@@ -74,7 +74,7 @@ namespace bptreedb
 				pNode->SetFlags(CHANGE_NODE, true);
 
 				this->CheckLeafNode(pNode);
-
+				this->CheckCache();
 			}
 			catch (std::exception& exc)
 			{
@@ -110,7 +110,6 @@ namespace bptreedb
 				throw CommonLib::CExcBase("exceeding the maximum size %1", m_nMaxStr);
 
 			StringValue key((const byte_t*)pszUtf8, (uint32_t)strLen, m_StringAlloc);
-
 			return TBase::template find<iterator, TComp>(this->m_comp, key, pFromIterator, bFindNext);
 		}
 

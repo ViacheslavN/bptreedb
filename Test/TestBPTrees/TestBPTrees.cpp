@@ -18,9 +18,9 @@ int main()
 
 	//TestBPTreeSet(); 
 
-	//TestBPTreeMap();
+	TestBPTreeMap();
 
-	TestBPTString();
+	//TestBPTString();
 
 	return 0;
 }

@@ -22,8 +22,6 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::FindLeafNo
 		{
 
 			TBPTreeNodePtr pNode = GetNode(nNextAddr);
-			pNode->SetParent(pParent, nIndex);
-
 			if (pNode->IsLeaf())
 			{
 				return pNode;
@@ -87,8 +85,8 @@ void BPSETBASE_DECLARATION::RemoveFromLeafNode(TBPTreeNodePtr pNode, int32_t nIn
 		if (pNode->GetAddr() == m_nRootAddr)
 			return;
 
-		int32_t nFoundIndex = pNode->GetFoundIndex();
-		TBPTreeNodePtr pParentNode = GetParentNode(pNode);
+		int32_t nFoundIndex;
+		TBPTreeNodePtr pParentNode = GetParentNode(pNode, &nFoundIndex);
 		if (!pParentNode.get())
 			return;
 
@@ -110,12 +108,11 @@ void BPSETBASE_DECLARATION::RemoveFromLeafNode(TBPTreeNodePtr pNode, int32_t nIn
 		bool bLeft = false; //The position of the donor node relative to the node
 		bool bUnion = false;
 		bool bAlignment = false;
+		int32_t nDonorFoundIndex = 0;
 
 		if (pParentNode->Less() == pNode->GetAddr())
 		{
 			pDonorNode = GetNode(pParentNode->Link(0));
-			pDonorNode->SetParent(pParentNode, 0);
-
 			bUnion = pNode->PossibleUnion(pDonorNode);
 			if (!bUnion)
 				bAlignment = pNode->PossibleAlignment(pDonorNode);
@@ -124,28 +121,29 @@ void BPSETBASE_DECLARATION::RemoveFromLeafNode(TBPTreeNodePtr pNode, int32_t nIn
 		{
 
 			TBPTreeNodePtr pLeafNodeRight;
+			int32_t nRightFoundIndex = 0;
+
 			TBPTreeNodePtr pLeafNodeLeft;
+			int32_t nLeftFoundIndex = 0;
 
 			if (nFoundIndex == 0)
 			{
 				pLeafNodeLeft = GetNode(pParentNode->Less());
-				pLeafNodeLeft->SetParent(pParentNode, LESS_INDEX);
-
+				nLeftFoundIndex = -1;
 				if (pParentNode->Count() > 1)
 				{
 					pLeafNodeRight = GetNode(pParentNode->Link(1));
-					pLeafNodeRight->SetParent(pParentNode, 1);
+					nRightFoundIndex = 1;
 				}
 			}
 			else
 			{
 				pLeafNodeLeft = GetNode(pParentNode->Link(nFoundIndex - 1));
-				pLeafNodeLeft->SetParent(pParentNode, nFoundIndex - 1);
-
+				nLeftFoundIndex = nFoundIndex - 1;
 				if ((int32_t)pParentNode->Count() > nFoundIndex + 1)
 				{
 					pLeafNodeRight = GetNode(pParentNode->Link(nFoundIndex + 1));
-					pLeafNodeRight->SetParent(pParentNode, nFoundIndex + 1);
+					nRightFoundIndex = nFoundIndex + 1;
 				}
 			}
 
@@ -155,12 +153,14 @@ void BPSETBASE_DECLARATION::RemoveFromLeafNode(TBPTreeNodePtr pNode, int32_t nIn
 				if (bUnion)
 				{
 					pDonorNode = pLeafNodeLeft;
+					nDonorFoundIndex = nLeftFoundIndex;
 					bLeft = true;
 				}
 				else
 				{
 					bAlignment = pNode->PossibleAlignment(pLeafNodeLeft);
 					pDonorNode = pLeafNodeLeft;
+					nDonorFoundIndex = nLeftFoundIndex;
 					bLeft = true;
 				}
 			}
@@ -170,45 +170,41 @@ void BPSETBASE_DECLARATION::RemoveFromLeafNode(TBPTreeNodePtr pNode, int32_t nIn
 				bUnion = pNode->PossibleUnion(pLeafNodeRight);
 				if (bUnion)
 				{
-					pDonorNode = pLeafNodeLeft;
+					pDonorNode = pLeafNodeRight;
+					nDonorFoundIndex = nRightFoundIndex;
 					bLeft = false;
 				}
 				else
 				{
 					bAlignment = pNode->PossibleAlignment(pLeafNodeRight);
 					pDonorNode = pLeafNodeRight;
+					nDonorFoundIndex = nRightFoundIndex;
 					bLeft = false;
 				}
 			}
 		}
 
+
+		TBPTreeNodePtr pResultNode = pNode;
 		if (bUnion)
 		{
 
-			if (pDonorNode->GetFoundIndex() == -1)
+			if (nDonorFoundIndex == -1 || bLeft)
 			{
-				UnionLeafNode(pParentNode, pDonorNode, pNode, false); //union in less node
-				nFoundIndex = LESS_INDEX;
+				UnionLeafNode(pParentNode, pDonorNode, pNode, nFoundIndex);
 			}
 			else
 			{
-				UnionLeafNode(pParentNode, pNode, pDonorNode, bLeft);
-				nFoundIndex = pNode->GetFoundIndex();
+				UnionLeafNode(pParentNode, pNode, pDonorNode, nDonorFoundIndex);
 			}
 
 		}
 		else if (bAlignment)
 		{
-			AlignmentLeafNode(pParentNode, pNode, pDonorNode, bLeft);
-			nFoundIndex = pNode->GetFoundIndex();
+			AlignmentLeafNode(pParentNode, pNode, nFoundIndex, pDonorNode, nDonorFoundIndex, bLeft);
 		}
 
-		if (nFoundIndex != LESS_INDEX && pParentNode->IsKey(m_comp, key, nFoundIndex))
-		{
-			TBPTreeNodePtr pIndexNode = GetNode(pParentNode->Link(nFoundIndex));
-			pParentNode->UpdateKey(nFoundIndex, pIndexNode->Key(0));
-			pParentNode->SetFlags(CHANGE_NODE, true);
-		}
+	
 		RemoveFromInnerNode(pParentNode, key);
 	}
 	catch (std::exception& exc)
@@ -220,44 +216,23 @@ void BPSETBASE_DECLARATION::RemoveFromLeafNode(TBPTreeNodePtr pNode, int32_t nIn
 
 
 BPSETBASE_TEMPLATE_PARAMS
-void BPSETBASE_DECLARATION::UnionLeafNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pLeafNode, TBPTreeNodePtr pDonorNode, bool bLeft)
+void BPSETBASE_DECLARATION::UnionLeafNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pLeafNode, TBPTreeNodePtr pDonorNode, int32_t nDonorFoundIndex)
 {
 	try
 	{
-		pLeafNode->UnionWithLeafNode(pDonorNode, bLeft, nullptr);
+		pLeafNode->UnionWithLeafNode(pDonorNode, false, nullptr);
 		pLeafNode->SetFlags(CHANGE_NODE, true);
-		if (bLeft)
+		TBPTreeNodePtr pPrevNode = GetNode(pDonorNode->GetPrev());
+		if (pPrevNode.get())
 		{
-			TBPTreeNodePtr pPrevNode = GetNode(pDonorNode->GetPrev());
-			if (pPrevNode.get())
-			{
-				pLeafNode->SetPrev(pPrevNode->GetAddr());
-				pPrevNode->SetNext(pLeafNode->GetAddr());
-				pPrevNode->SetFlags(CHANGE_NODE, true);
-			}
-			else
-				pLeafNode->SetPrev(EMPTY_PAGE_ADDR);
+			pLeafNode->SetPrev(pPrevNode->GetAddr());
+			pPrevNode->SetNext(pLeafNode->GetAddr());
+			pPrevNode->SetFlags(CHANGE_NODE, true);
 		}
 		else
-		{
-			TBPTreeNodePtr pNextNode = GetNode(pDonorNode->GetNext());
-			if (pNextNode.get())
-			{
-				pLeafNode->SetNext(pNextNode->GetAddr());
-				pNextNode->SetPrev(pLeafNode->GetAddr());
-				pNextNode->SetFlags(CHANGE_NODE, true);
-			}
-			else
-				pLeafNode->SetNext(EMPTY_PAGE_ADDR);
-		}
+			pLeafNode->SetPrev(EMPTY_PAGE_ADDR);
 
-		pParentNode->RemoveByIndex(pDonorNode->GetFoundIndex());
-
-		if (bLeft && pLeafNode->GetFoundIndex() != -1)
-		{
-			pLeafNode->SetFoundIndex(pLeafNode->GetFoundIndex() - 1);
-			pParentNode->UpdateKey(pLeafNode->GetFoundIndex(), pLeafNode->Key(0));
-		}
+		pParentNode->RemoveByIndex(nDonorFoundIndex);				
 
 		DeleteNode(pDonorNode);
 		pParentNode->SetFlags(CHANGE_NODE | CHECK_REM_NODE, true);
@@ -279,7 +254,7 @@ void BPSETBASE_DECLARATION::DeleteNode(TBPTreeNodePtr pNode)
 }
 
 BPSETBASE_TEMPLATE_PARAMS
-void BPSETBASE_DECLARATION::AlignmentLeafNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pLeafNode, TBPTreeNodePtr pDonorNode, bool bLeft)
+void BPSETBASE_DECLARATION::AlignmentLeafNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pLeafNode, int32_t nFoundIndex, TBPTreeNodePtr pDonorNode, int32_t nDonorIndex, bool bLeft)
 {
 	try
 	{
@@ -287,9 +262,9 @@ void BPSETBASE_DECLARATION::AlignmentLeafNode(TBPTreeNodePtr pParentNode, TBPTre
 			return;
 
 		if (bLeft)
-			pParentNode->UpdateKey(pLeafNode->GetFoundIndex(), pLeafNode->Key(0));
+			pParentNode->UpdateKey(nFoundIndex, pLeafNode->Key(0));
 		else
-			pParentNode->UpdateKey(pDonorNode->GetFoundIndex(), pDonorNode->Key(0));
+			pParentNode->UpdateKey(nDonorIndex, pDonorNode->Key(0));
 
 		pLeafNode->SetFlags(CHANGE_NODE, true);
 		pDonorNode->SetFlags(CHANGE_NODE, true);
@@ -309,7 +284,8 @@ void BPSETBASE_DECLARATION::RemoveFromInnerNode(TBPTreeNodePtr pCheckNode, const
 	{
 		while (pCheckNode.get())
 		{
-			TBPTreeNodePtr  pParentNode = GetParentNode(pCheckNode);
+			int32_t nFoundIndex = 0;
+			TBPTreeNodePtr  pParentNode = GetParentNode(pCheckNode, &nFoundIndex);
 			if (!pParentNode.get())
 			{
 				if (!pCheckNode->Count())
@@ -335,11 +311,11 @@ void BPSETBASE_DECLARATION::RemoveFromInnerNode(TBPTreeNodePtr pCheckNode, const
 			}
 
 
-			if (pCheckNode->GetFoundIndex() != -1 && pParentNode->IsKey(m_comp, key, pCheckNode->GetFoundIndex()))
+			if (nFoundIndex != -1 && pParentNode->IsKey(m_comp, key, nFoundIndex))
 			{
-				TBPTreeNodePtr pIndexNode = GetNode(pParentNode->Link(pCheckNode->GetFoundIndex()));
+				TBPTreeNodePtr pIndexNode = GetNode(pParentNode->Link(nFoundIndex));
 				TBPTreeNodePtr pMinNode = GetMinimumNode(pIndexNode);
-				pParentNode->UpdateKey(pCheckNode->GetFoundIndex(), pMinNode->Key(0));
+				pParentNode->UpdateKey(nFoundIndex, pMinNode->Key(0));
 				pParentNode->SetFlags(CHANGE_NODE, true);
  
 			}
@@ -360,14 +336,11 @@ void BPSETBASE_DECLARATION::RemoveFromInnerNode(TBPTreeNodePtr pCheckNode, const
 			bool bLeft = false; //The position of the donor node relative to the node
 			bool bUnion = false;
 			bool bAlignment = false;
-
+			int32_t nDonorFoundIndex = 0;
 
 			if (pParentNode->Less() == pCheckNode->GetAddr())
 			{
 				pDonorNode = GetNode(pParentNode->Link(0));
-				pDonorNode->SetParent(pParentNode, 0);
-
-
 				bUnion = pCheckNode->PossibleUnion(pDonorNode);
 				if (!bUnion)
 					bAlignment = pCheckNode->PossibleAlignment(pDonorNode);
@@ -377,42 +350,52 @@ void BPSETBASE_DECLARATION::RemoveFromInnerNode(TBPTreeNodePtr pCheckNode, const
 
 				TBPTreeNodePtr pLeafNodeRight;
 				TBPTreeNodePtr pLeafNodeLeft;
+				int32_t nLeftFoundIndex = 0;
+				int32_t nRightFoundIndex = 0;
 
-				if (pCheckNode->GetFoundIndex() == 0)
+				if (nFoundIndex == 0)
 				{
 					pLeafNodeLeft = GetNode(pParentNode->Less());
-					pLeafNodeLeft->SetParent(pParentNode, LESS_INDEX);
+					nLeftFoundIndex = -1;
 					if (pParentNode->Count() > 1)
 					{
 						pLeafNodeRight = GetNode(pParentNode->Link(1));
-						pLeafNodeRight->SetParent(pParentNode, 1);
+						nRightFoundIndex = 1;
 					}
 				}
 				else
 				{
-					pLeafNodeLeft = GetNode(pParentNode->Link(pCheckNode->GetFoundIndex() - 1));
-					pLeafNodeLeft->SetParent(pParentNode, pCheckNode->GetFoundIndex() - 1);
+					pLeafNodeLeft = GetNode(pParentNode->Link(nFoundIndex - 1));
+					nLeftFoundIndex = nFoundIndex - 1;
 
-					if ((int32_t)pParentNode->Count() > pCheckNode->GetFoundIndex() + 1)
+					if ((int32_t)pParentNode->Count() > nFoundIndex + 1)
 					{
-						pLeafNodeRight = GetNode(pParentNode->Link(pCheckNode->GetFoundIndex() + 1));
-						pLeafNodeRight->SetParent(pParentNode, pCheckNode->GetFoundIndex() + 1);
+						pLeafNodeRight = GetNode(pParentNode->Link(nFoundIndex + 1));
+						nRightFoundIndex = nFoundIndex + 1;
 					}
 				}
  
 
 				uint32_t nLeftCount = pLeafNodeLeft.get() ? pLeafNodeLeft->Count() : 0;
 				uint32_t nRightCount = pLeafNodeRight.get() ? pLeafNodeRight->Count() : 0;
-				if (nLeftCount < nRightCount)
+				if (nLeftCount < nRightCount || pLeafNodeRight.get() == nullptr)
 				{
 					pDonorNode = pLeafNodeLeft;
 					bLeft = true;
+					nDonorFoundIndex = nLeftFoundIndex;
 				}
 				else
 				{
 					pDonorNode = pLeafNodeRight;
 					bLeft = false;
+					nDonorFoundIndex = nRightFoundIndex;
 				}
+			}
+
+			if (pDonorNode.get() == nullptr)
+			{
+				pCheckNode = pParentNode;
+				continue;
 			}
 
 			bUnion = pCheckNode->PossibleUnion(pDonorNode);
@@ -423,14 +406,14 @@ void BPSETBASE_DECLARATION::RemoveFromInnerNode(TBPTreeNodePtr pCheckNode, const
 
 			if (bUnion)
 			{
-				if (pDonorNode->GetAddr() == pParentNode->Less())
-					UnionInnerNode(pParentNode, pDonorNode, pCheckNode, false);
+				if (pDonorNode->GetAddr() == pParentNode->Less() || bLeft)
+					UnionInnerNode(pParentNode, pDonorNode, pCheckNode, nFoundIndex);
 				else
-					UnionInnerNode(pParentNode, pCheckNode, pDonorNode, bLeft);
+					UnionInnerNode(pParentNode, pCheckNode, pDonorNode, nDonorFoundIndex);
 			}
 			else if (bAlignment)
 			{
-				AlignmentInnerNode(pParentNode, pCheckNode, pDonorNode, bLeft);
+				AlignmentInnerNode(pParentNode, pCheckNode, nFoundIndex, pDonorNode, nDonorFoundIndex, bLeft);
 			}
 
 			pCheckNode = pParentNode;
@@ -447,26 +430,16 @@ void BPSETBASE_DECLARATION::RemoveFromInnerNode(TBPTreeNodePtr pCheckNode, const
 
 
 BPSETBASE_TEMPLATE_PARAMS
-void BPSETBASE_DECLARATION::UnionInnerNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pNode, TBPTreeNodePtr pDonorNode, bool bLeft)
+void BPSETBASE_DECLARATION::UnionInnerNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pNode, TBPTreeNodePtr pDonorNode, int32_t nDonorFoundIndex)
 {
 	try
 	{
-		TBPTreeNodePtr pMinNode = bLeft ? GetMinimumNode(GetNode(pNode->Less())) : GetMinimumNode(GetNode(pDonorNode->Less()));
-		pNode->UnionWithInnerNode(pDonorNode, &pMinNode->Key(0), bLeft);
-		pNode->SetFlags(CHANGE_NODE, true);
-
-		pParentNode->RemoveByIndex(pDonorNode->GetFoundIndex());
-		if (bLeft && pNode->GetFoundIndex() != -1)
-		{
-			pNode->SetFoundIndex(pNode->GetFoundIndex() - 1);
- 
-			pMinNode = GetMinimumNode(GetNode(pNode->Less()));
-			pParentNode->UpdateKey(pNode->GetFoundIndex(), pMinNode->Key(0));
-		}
-
+		TBPTreeNodePtr pMinNode = GetMinimumNode(GetNode(pDonorNode->Less()));
+		pNode->UnionWithInnerNode(pDonorNode, &pMinNode->Key(0), false);
+		pNode->SetFlags(CHANGE_NODE, true);		
+		pParentNode->RemoveByIndex(nDonorFoundIndex);
 		DeleteNode(pDonorNode);
-		SetParentInChildCacheOnly(pNode);
- 
+
 		pParentNode->SetFlags(CHANGE_NODE | CHECK_REM_NODE, true);
 	}
 	catch (std::exception& exc)
@@ -479,7 +452,7 @@ void BPSETBASE_DECLARATION::UnionInnerNode(TBPTreeNodePtr pParentNode, TBPTreeNo
 
 
 BPSETBASE_TEMPLATE_PARAMS
-void BPSETBASE_DECLARATION::AlignmentInnerNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pNode, TBPTreeNodePtr pDonorNode, bool bLeft)
+void BPSETBASE_DECLARATION::AlignmentInnerNode(TBPTreeNodePtr pParentNode, TBPTreeNodePtr pNode, int32_t nFoundIndex, TBPTreeNodePtr pDonorNode, int32_t nDonorFoundIndex, bool bLeft)
 {
 
 	TBPTreeNodePtr pMinNode = bLeft ? GetMinimumNode(GetNode(pNode->Less())) : GetMinimumNode(GetNode(pDonorNode->Less()));
@@ -489,18 +462,15 @@ void BPSETBASE_DECLARATION::AlignmentInnerNode(TBPTreeNodePtr pParentNode, TBPTr
 	if (!bLeft) // Node donor is on the right
 	{
 		pMinNode = GetMinimumNode(GetNode(pDonorNode->Less()));
-		pParentNode->UpdateKey(pDonorNode->GetFoundIndex(), pMinNode->Key(0));
+		pParentNode->UpdateKey(nDonorFoundIndex, pMinNode->Key(0));
 		pParentNode->SetFlags(CHANGE_NODE, true);
 	}
 	else
 	{
 		pMinNode = GetMinimumNode(GetNode(pNode->Less()));
-		pParentNode->UpdateKey(pNode->GetFoundIndex(), pMinNode->Key(0));
+		pParentNode->UpdateKey(nFoundIndex, pMinNode->Key(0));
 		pParentNode->SetFlags(CHANGE_NODE, true);
 	}
-
-	SetParentInChildCacheOnly(pNode);
-	SetParentInChildCacheOnly(pDonorNode);
 
 	pParentNode->SetFlags(CHANGE_NODE, true);
 	pNode->SetFlags(CHANGE_NODE, true);

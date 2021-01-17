@@ -325,6 +325,7 @@
     <ClInclude Include="BPTrees\Compressor\CompressUtils.h" />
     <ClInclude Include="BPTrees\Compressor\EntropyEncoder\BaseNumLenEncoder.h" />
     <ClInclude Include="BPTrees\Compressor\EntropyEncoder\UnsignedNumLenEncoderAC.h" />
+    <ClInclude Include="BPTrees\Compressor\StringCompressor\EmptyStringEncoder.h" />
     <ClInclude Include="BPTrees\Compressor\StringCompressor\ZLibStringEncoder.h" />
     <ClInclude Include="BPTrees\Compressor\ZlibCompressor\ZEncoderDiffBase.h" />
     <ClInclude Include="BPTrees\Compressor\ZlibCompressor\ZLibEncoder.h" />
@@ -355,6 +356,7 @@
     <ClCompile Include="BPTrees\BPTreeContext.cpp" />
     <ClCompile Include="BPTrees\Compressor\CompressorParams.cpp" />
     <ClCompile Include="BPTrees\Compressor\EntropyEncoder\BaseNumLenEncoder.cpp" />
+    <ClCompile Include="BPTrees\Compressor\StringCompressor\EmptyStringEncoder.cpp" />
     <ClCompile Include="BPTrees\Compressor\StringCompressor\ZLibStringEncoder.cpp" />
     <ClCompile Include="BPTrees\StringPageAlloc.cpp" />
     <ClCompile Include="BPTrees\StringVal.cpp" />

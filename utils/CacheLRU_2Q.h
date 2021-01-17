@@ -149,6 +149,9 @@ namespace utils
 		void AddElem(const TKey& key, TObj& pObj, bool bAddBack = true)
 		{
 
+			if (m_CacheMap.find(key) != m_CacheMap.end())
+				throw CommonLib::CExcBase("CacheRU_2Q:  element with key %1 exists", key);
+
 			TListIterator it;
 			if (bAddBack)
 				it = m_BackList.PushTop(TCacheVal(key, pObj, BACK));

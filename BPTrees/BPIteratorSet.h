@@ -77,9 +77,10 @@ namespace bptreedb
 					if (!pNode.get())
 						throw CommonLib::CExcBase("Failed to get node %1", m_pCurNode->GetNext());
 			
-					m_pTree->SetParentForNextNode(m_pCurNode, pNode);
+				//	m_pTree->SetParentForNextNode(m_pCurNode, pNode);
 					m_nIndex = 0;
 					m_pCurNode = pNode;
+					m_pTree->CheckCache();
 					return true;
 				}
 				m_pCurNode = NULL;
@@ -119,9 +120,9 @@ namespace bptreedb
 					if (!pNode.get())
 						throw CExcBase("Failed to get node %1", m_pCurNode->Prev());
 				
-					m_pTree->SetParentForPrevNode(m_pCurNode.get(), pNode.get());
 					m_pCurNode = pNode;
 					m_nIndex = m_pCurNode->Count() - 1;
+					m_pTree->CheckCache();
 					return true;
 				}
 				return false;
@@ -137,13 +138,29 @@ namespace bptreedb
 			if (IsNull())
 				return -1;
 
-			return m_pCurNode->addr();
+			return m_pCurNode->GetAddr();
 		}
 
 		int32_t Pos() const
 		{
 			return m_nIndex;
 		}
+
+	/*	int64_t GetParentAddr()
+		{
+			if (IsNull())
+				return -1;
+
+			return m_pCurNode->GetParentAddr();
+		}
+
+		int32_t GetFoundIndex()
+		{
+			if (IsNull())
+				return -1;
+
+			return m_pCurNode->GetFoundIndex();
+		}*/
 
 		void SetAddr(int64_t nAddr, int32_t  nPos)
 		{

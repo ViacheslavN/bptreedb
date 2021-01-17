@@ -220,6 +220,9 @@
     <ClInclude Include="BPTrees\AllocsSet.h">
       <Filter>BPTrees</Filter>
     </ClInclude>
+    <ClInclude Include="BPTrees\Compressor\StringCompressor\EmptyStringEncoder.h">
+      <Filter>BPTrees\Compressor\StringCompressor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -257,6 +260,9 @@
     </ClCompile>
     <ClCompile Include="BPTrees\StringVal.cpp">
       <Filter>BPTrees\BPTreeMap\StringBPMap</Filter>
+    </ClCompile>
+    <ClCompile Include="BPTrees\Compressor\StringCompressor\EmptyStringEncoder.cpp">
+      <Filter>BPTrees\Compressor\StringCompressor</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

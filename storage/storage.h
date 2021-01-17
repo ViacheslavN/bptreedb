@@ -84,7 +84,7 @@ namespace bptreedb
 		virtual void Flush() = 0;
 
 		virtual void SetStoragePerformer(CommonLib::TPrefCounterPtr pStoragePerformer) = 0;
-		
+	
 	};
 
 	typedef std::shared_ptr<IStorage> TStoragePtr;
