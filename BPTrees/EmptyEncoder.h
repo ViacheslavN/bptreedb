@@ -62,7 +62,7 @@ namespace bptreedb
 			for (uint32_t i = 0, sz = (uint32_t)vecValues.size(); i < sz; ++i)
 			{
 				if (!pStream->WriteSafe(vecValues[i]))
-					return i;
+					return sz/2;
 			}
 
 			return 0;

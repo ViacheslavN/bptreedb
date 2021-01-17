@@ -142,7 +142,14 @@ namespace bptreedb
 		void SetNext(TLink next)
 		{
 			if (IsLeaf())
-				 m_pLeafNode->m_nNext = next;
+			{
+				m_pLeafNode->m_nNext = next;
+				if (m_pLeafNode->m_nNext == m_nAddr)
+				{
+					throw CommonLib::CExcBase("BTNode holder SetPrev()  loop", m_nAddr);
+				}
+			}
+
 			else
 				throw CommonLib::CExcBase("BTNode holder SetNext()  Node addr %1 isn't a leaf node", m_nAddr);
 		}
@@ -150,7 +157,13 @@ namespace bptreedb
 		void SetPrev(TLink prev)
 		{
 			if (IsLeaf())
+			{
 				m_pLeafNode->m_nPrev = prev;
+				if (m_pLeafNode->m_nPrev == m_nAddr)
+				{
+					throw CommonLib::CExcBase("BTNode holder SetPrev()  loop", m_nAddr);
+				}
+			}
 			else
 				throw CommonLib::CExcBase("BTNode holder SetPrev()  Node addr %1 isn't a leaf node", m_nAddr);
 		}

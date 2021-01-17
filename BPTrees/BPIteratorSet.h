@@ -146,45 +146,6 @@ namespace bptreedb
 			return m_nIndex;
 		}
 
-	/*	int64_t GetParentAddr()
-		{
-			if (IsNull())
-				return -1;
-
-			return m_pCurNode->GetParentAddr();
-		}
-
-		int32_t GetFoundIndex()
-		{
-			if (IsNull())
-				return -1;
-
-			return m_pCurNode->GetFoundIndex();
-		}*/
-
-		void SetAddr(int64_t nAddr, int32_t  nPos)
-		{
-			try
-			{
-				if (nAddr == -1)
-				{
-					m_pCurNode = NULL;
-					return;
-				}
-
-				TBPTreeNodePtr pNode = m_pTree->GetNodeAndCheckParent(nAddr);
-				if (!pNode.get())
-					throw CExcBase("Failed to get node %1", m_pCurNode->Prev());
-				
-				m_pCurNode = pNode;
-				m_nIndex = nPos;
-			}
-			catch (std::exception& exc)
-			{
-				CommonLib::CExcBase::RegenExcT("[TBPSetIterator] failed SetAddr addr %1, pos %2", nAddr, nPos, exc);
-			}
-		}
-
 	public:
 		TBTree *m_pTree;
 		TBPTreeNodePtr m_pCurNode;

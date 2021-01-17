@@ -62,6 +62,7 @@ bool BPSETBASE_DECLARATION::remove(const TKey& key)
 
 
 		RemoveFromLeafNode(pNode, nIndex, key);
+		this->CheckCache();
 
 	}
 	catch (std::exception& exc)
@@ -79,17 +80,15 @@ void BPSETBASE_DECLARATION::RemoveFromLeafNode(TBPTreeNodePtr pNode, int32_t nIn
 {
 	try
 	{
-		pNode->RemoveByIndex(nIndex);
-		pNode->SetFlags(CHANGE_NODE, true);
-
-		if (pNode->GetAddr() == m_nRootAddr)
-			return;
 
 		int32_t nFoundIndex;
 		TBPTreeNodePtr pParentNode = GetParentNode(pNode, &nFoundIndex);
-		if (!pParentNode.get())
-			return;
 
+		pNode->RemoveByIndex(nIndex);
+		pNode->SetFlags(CHANGE_NODE, true);
+
+		if (pNode->GetAddr() == m_nRootAddr || !pParentNode.get())
+			return;
 
 		if (nFoundIndex != LESS_INDEX && nIndex == 0)
 		{
@@ -186,6 +185,8 @@ void BPSETBASE_DECLARATION::RemoveFromLeafNode(TBPTreeNodePtr pNode, int32_t nIn
 
 
 		TBPTreeNodePtr pResultNode = pNode;
+
+		bAlignment = false;
 		if (bUnion)
 		{
 
@@ -222,15 +223,15 @@ void BPSETBASE_DECLARATION::UnionLeafNode(TBPTreeNodePtr pParentNode, TBPTreeNod
 	{
 		pLeafNode->UnionWithLeafNode(pDonorNode, false, nullptr);
 		pLeafNode->SetFlags(CHANGE_NODE, true);
-		TBPTreeNodePtr pPrevNode = GetNode(pDonorNode->GetPrev());
-		if (pPrevNode.get())
+		TBPTreeNodePtr pNextNode = GetNode(pDonorNode->GetNext());
+		if (pNextNode.get())
 		{
-			pLeafNode->SetPrev(pPrevNode->GetAddr());
-			pPrevNode->SetNext(pLeafNode->GetAddr());
-			pPrevNode->SetFlags(CHANGE_NODE, true);
+			pLeafNode->SetNext(pNextNode->GetAddr());
+			pNextNode->SetPrev(pLeafNode->GetAddr());
+			pNextNode->SetFlags(CHANGE_NODE, true);
 		}
 		else
-			pLeafNode->SetPrev(EMPTY_PAGE_ADDR);
+			pLeafNode->SetNext(EMPTY_PAGE_ADDR);
 
 		pParentNode->RemoveByIndex(nDonorFoundIndex);				
 

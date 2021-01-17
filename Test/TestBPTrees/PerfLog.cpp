@@ -26,6 +26,8 @@ void CPerfLog::LogBPtreePerf(CommonLib::TPrefCounterPtr  pPerf)
 	Log.InfoT("load node %1, total time %2", pPerf->GetCountOperation(bptreedb::eLoadNode), pPerf->GetTimeOperation(bptreedb::eLoadNode));
 	Log.InfoT("get node %1, total time %2", pPerf->GetCountOperation(bptreedb::eGetNode), pPerf->GetTimeOperation(bptreedb::eGetNode));
 	Log.InfoT("get parent node %1, total time %2", pPerf->GetCountOperation(bptreedb::eGetParentNode), pPerf->GetTimeOperation(bptreedb::eGetParentNode));
+	Log.InfoT("add to cache  %1, total time %2", pPerf->GetCountOperation(bptreedb::eAddToCache), pPerf->GetTimeOperation(bptreedb::eAddToCache)); 
+		Log.InfoT("get node from cache  %1, total time %2", pPerf->GetCountOperation(bptreedb::eGetNodeFromCache), pPerf->GetTimeOperation(bptreedb::eGetNodeFromCache));
 }
 
 void CPerfLog::LogBPtreeRemovePerf(CommonLib::TPrefCounterPtr pPerf)

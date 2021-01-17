@@ -111,7 +111,6 @@ namespace bptreedb
 	
 		//common
 		
-		TBPTreeNodePtr GetNodeAndCheckParent(int64_t nAddr);
 		TBPTreeNodePtr LoadNodeFromStorage(int64_t nAddr);
 		TBPTreeNodePtr CreateNode(int64_t nAddr, bool isLeaf, bool addToChache);
 
@@ -192,8 +191,6 @@ namespace bptreedb
 		bool m_bMinSplit;
 		bool m_bLockRemoveItemFromCache;
 		CommonLib::TPrefCounterPtr m_pBPTreePerfCounter;
-		typedef std::map<TLink, TBPTreeNodePtr> TTempCache;
-		TTempCache m_TempCache;
 
 
 		TCompressorParamsBasePtr m_pCompressParams;

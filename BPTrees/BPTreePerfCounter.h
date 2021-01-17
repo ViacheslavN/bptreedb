@@ -13,7 +13,9 @@ namespace bptreedb
 		eRemoveValue,
 		eFlush,
 		eFindKey,
-		eGetParentNode
+		eGetParentNode,
+		eAddToCache,
+		eGetNodeFromCache
 	};
 
 

@@ -20,13 +20,10 @@ void BPSETBASE_DECLARATION::AddToCache(TBPTreeNodePtr pNode)
 BPSETBASE_TEMPLATE_PARAMS
 BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetNodeFromCache(int64_t nAddr, bool bNotMove)
 {
+	CommonLib::CPrefCounterHolder holder(m_pBPTreePerfCounter, eGetNodeFromCache);
 	TBPTreeNodePtr pNode = m_NodeCache.GetElem(nAddr, bNotMove);
 	if (pNode.get() != nullptr)
 		return pNode;
-	
-	auto it = m_TempCache.find(nAddr);
-	if (it != m_TempCache.end())
-		return it->second;
 
 	return TBPTreeNodePtr();
 }
@@ -47,6 +44,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetNode(in
 		 if (pNode.get() == nullptr)
 		 {
 			 pNode = LoadNodeFromStorage(nAddr);
+			 CommonLib::CPrefCounterHolder holder(m_pBPTreePerfCounter, eAddToCache);
 			 AddToCache(pNode);
 		 }
 
@@ -59,20 +57,6 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetNode(in
 	 }
 }
 
-BPSETBASE_TEMPLATE_PARAMS
-BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetNodeAndCheckParent(int64_t nAddr)
-{
-	try
-	{
-		TBPTreeNodePtr pNode = GetNode(nAddr);
-		if (pNode->GetParentAddr() == -1)
-			FindAndSetParent(pNode);
-	}
-	catch (std::exception& exc)
-	{
-		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed to get node with check parent addr %1", nAddr, exc);
-	}
-}
 
 BPSETBASE_TEMPLATE_PARAMS
 BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::LoadNodeFromStorage(int64_t nAddr)
@@ -95,50 +79,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::LoadNodeFr
 		throw;
 	}
 }
-/*
-BPSETBASE_TEMPLATE_PARAMS
-BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::FindAndSetParent(TBPTreeNodePtr& pCheckNode)
-{
-	try
-	{
-		const TKey& key = pCheckNode->Key(0);
-		int32_t nIndex = -1;
-		int64_t nNextAddr = m_pRoot->inner_lower_bound(m_comp, key, nIndex);
-		TBPTreeNodePtr pParent = m_pRoot;
 
-		for (;;)
-		{
-			if (nNextAddr == -1)
-			{
-				break;
-			}
-
-			if (pCheckNode->GetAddr() == nNextAddr)
-			{
-			//	pCheckNode->SetParent(pParent, nIndex);
-				return pParent;
-			}
-
-			TBPTreeNodePtr pNode = GetNode(nNextAddr);
-			if (!pNode.get())
-			{
-				throw CommonLib::CExcBase("FindParent failed to find parent for node addr %1", pCheckNode->GetAddr());
-			}
-
-			pNode->SetParent(pParent, nIndex);
-			nNextAddr = pNode->inner_lower_bound(m_comp, key, nIndex);
-			pParent = pNode;
-		}
-
-		throw CommonLib::CExcBase("FindParent failed to find parent for node addr %1", pCheckNode->GetAddr());
-	}
-	catch (std::exception& exc)
-	{
-		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] FindParent failed to find parent node", exc);
-		throw;
-	}
-}
-*/
 BPSETBASE_TEMPLATE_PARAMS
 BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetParentNode(TBPTreeNodePtr pNode, int32_t* nElementPos)
 {
@@ -314,6 +255,7 @@ void BPSETBASE_DECLARATION::SaveNode(TBPTreeNodePtr& pNode)
 	bool isLeaf = pNode.get() ? pNode->IsLeaf() : false;
 	try
 	{
+
 		FilePagePtr pPage = m_pStorage->GetEmptyFilePage(nAddr, m_nNodePageSize);
 		CommonLib::CFxMemoryWriteStream stream;
 		stream.AttachBuffer(pPage->GetData(), pPage->GetPageSize());
