@@ -91,6 +91,11 @@ namespace bptreedb
 			m_nFlags &= ~nFlag;
 	}
 
+	void CFilePage::SetAddr(int64_t nAddr)
+	{
+		m_nAddr = nAddr;
+	}
+
 	bool CFilePage::IsNeedEncrypt() const
 	{
 		return m_bIsNeedEncrypt;

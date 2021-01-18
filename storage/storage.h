@@ -33,6 +33,7 @@ namespace bptreedb
 		virtual void SetNeedEncrypt(bool bEncrypt) = 0;
 		virtual bool CheckCRC() const = 0;
 		virtual void WriteCRC() = 0;
+		virtual void SetAddr(int64_t nAddr) = 0;
 	};
 
 

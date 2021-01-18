@@ -185,8 +185,6 @@ void BPSETBASE_DECLARATION::RemoveFromLeafNode(TBPTreeNodePtr pNode, int32_t nIn
 
 
 		TBPTreeNodePtr pResultNode = pNode;
-
-		bAlignment = false;
 		if (bUnion)
 		{
 

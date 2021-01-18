@@ -245,7 +245,8 @@ namespace bptreedb
 	{
 		try
 		{
-			int64_t nAddr = GetNewFilePageAddr(nSize);
+
+			int64_t nAddr =	GetNewFilePageAddr(nSize);
 			FilePagePtr pPage(new CFilePage(m_pAlloc, nSize, nAddr, m_checkCRC));
 				
 			return pPage;

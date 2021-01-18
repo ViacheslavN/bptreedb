@@ -64,12 +64,12 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::LoadNodeFr
 	try
 	{
 
-		FilePagePtr pFilePage = m_pStorage->GetFilePage(nAddr, m_nNodePageSize, true);
+		m_pStorage->GetFilePage(m_cachePage, nAddr, m_nNodePageSize, true);
 		CommonLib::CReadMemoryStream stream;
-		stream.AttachBuffer(pFilePage->GetData(), pFilePage->GetPageSize());
+		stream.AttachBuffer(m_cachePage->GetData(), m_cachePage->GetPageSize());
 
 		CommonLib::CPrefCounterHolder holder(m_pBPTreePerfCounter, eLoadNode);
-		TBPTreeNodePtr node = LoadNode<TBPTreeNode>(&stream, m_pAllocsSet, m_bMulti, m_nNodePageSize, nAddr, m_pCompressParams, &m_Context);
+		TBPTreeNodePtr node = LoadNode<TBPTreeNode>(&stream, m_pAllocsSet, m_bMulti, m_cachePage->GetPageSize(), nAddr, m_pCompressParams, &m_Context);
 
 		return node;
 	}
@@ -256,10 +256,10 @@ void BPSETBASE_DECLARATION::SaveNode(TBPTreeNodePtr& pNode)
 	try
 	{
 
-		FilePagePtr pPage = m_pStorage->GetEmptyFilePage(nAddr, m_nNodePageSize);
+		//FilePagePtr pPage = m_pStorage->GetEmptyFilePage(nAddr, m_nNodePageSize);
 		CommonLib::CFxMemoryWriteStream stream;
-		stream.AttachBuffer(pPage->GetData(), pPage->GetPageSize());
-
+		stream.AttachBuffer(m_cachePage->GetData(), m_cachePage->GetPageSize());
+		m_cachePage->SetAddr(nAddr);
 		uint32_t nCount = 0;
 		
 		{
@@ -304,7 +304,7 @@ void BPSETBASE_DECLARATION::SaveNode(TBPTreeNodePtr& pNode)
 			}
 		}
 
-		m_pStorage->SaveFilePage(pPage);
+		m_pStorage->SaveFilePage(m_cachePage);
 
 		pNode->SetFlags(CHANGE_NODE, false);
 	}
@@ -385,7 +385,7 @@ void BPSETBASE_DECLARATION::CheckCache()
 {
 	m_bLockRemoveItemFromCache = true; // TO DO use RAII
 
-	while (m_NodeCache.Size() > m_nChacheSize)
+	while (m_NodeCache.Size() > m_nCacheSize)
 	{
 
 		TBPTreeNodePtr pBNode = m_NodeCache.RemoveBack();

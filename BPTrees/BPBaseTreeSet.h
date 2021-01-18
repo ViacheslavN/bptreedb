@@ -33,8 +33,8 @@ namespace bptreedb
 
  
 
-		TBPlusTreeSetBase(int64_t nPageBTreeInfo, std::shared_ptr<TStorage> pStorage, CommonLib::IAllocPtr pAlloc, uint32_t nChacheSize, uint32_t nNodesPageSize, bool bMulti = false) :
-			m_nPageBTreeInfo(nPageBTreeInfo), m_pStorage(pStorage),  m_nChacheSize(nChacheSize)
+		TBPlusTreeSetBase(int64_t nPageBTreeInfo, std::shared_ptr<TStorage> pStorage, CommonLib::IAllocPtr pAlloc, uint32_t nCacheize, uint32_t nNodesPageSize, bool bMulti = false) :
+			m_nPageBTreeInfo(nPageBTreeInfo), m_pStorage(pStorage),  m_nCacheSize(nCacheize)
 			, m_nRootAddr(-1)
 			, m_bMulti(bMulti)
 			, m_NodeCache(pAlloc)
@@ -47,6 +47,7 @@ namespace bptreedb
 		{
 
 			m_pAllocsSet.reset(new CAllocsSet(pAlloc));
+			m_cachePage = m_pStorage->GetEmptyFilePage(-1, m_nNodePageSize);
 		}
 
 		~TBPlusTreeSetBase()
@@ -184,7 +185,7 @@ namespace bptreedb
 	//	CommonLib::IAllocPtr m_pAlloc;
 		TAllocsSetPtr m_pAllocsSet;
 		std::shared_ptr<TStorage> m_pStorage;
-		uint32_t m_nChacheSize;
+		uint32_t m_nCacheSize;
 		uint64_t m_nPageInnerCompInfo;
 		uint64_t m_nPageLeafPageCompInfo;
 		bool m_bMulti;
@@ -194,7 +195,7 @@ namespace bptreedb
 
 
 		TCompressorParamsBasePtr m_pCompressParams;
- 
+		FilePagePtr m_cachePage;
 
 		struct TBPTreeFreeChecker
 		{

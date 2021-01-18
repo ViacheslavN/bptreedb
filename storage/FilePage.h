@@ -22,6 +22,8 @@ public:
 	virtual const byte_t* GetFullData() const;
 	virtual uint32_t GetFullPageSize() const;
 	virtual uint32_t GetFlags() const;
+	virtual void SetAddr(int64_t nAddr);
+
 	virtual void SetFlag(ePageFlags nFlag, bool bSet);
 	virtual bool IsNeedEncrypt() const;
 	virtual void SetNeedEncrypt(bool bEncrypt);

@@ -30,12 +30,12 @@ namespace bptreedb
 
 			if (m_IsLeaf)
 			{
-				m_pLeafNode.reset(new TLeafNode(pAllocSet, bMulti, nPageSize - sizeof(byte_t) -sizeof(uint32_t) , pCompressParams));
+				m_pLeafNode.reset(new TLeafNode(pAllocSet, bMulti, nPageSize - sizeof(byte_t), pCompressParams));
 				m_pCurNode = m_pLeafNode.get();
 			}
 			else
 			{
-				m_pInnerNode.reset(new TInnerNode(pAllocSet, bMulti, nPageSize - sizeof(byte_t) - sizeof(uint32_t), pCompressParams));  //to fix  -sizeof(uint32_t)
+				m_pInnerNode.reset(new TInnerNode(pAllocSet, bMulti, nPageSize - sizeof(byte_t), pCompressParams));
 				m_pCurNode = m_pInnerNode.get();
 			}
 

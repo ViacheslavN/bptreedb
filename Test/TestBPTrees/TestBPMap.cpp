@@ -3,11 +3,11 @@
 
 
 typedef bptreedb::TZLibEncoderDiff<int64_t> TKeyEncoder;
-//typedef bptreedb::TZLibEncoder<double> TValueEncoder;
+typedef bptreedb::TZLibEncoder<double> TValueEncoder;
 
 
 //typedef bptreedb::TEmptyValueEncoder<int64_t> TKeyEncoder;
-typedef bptreedb::TEmptyValueEncoder<double> TValueEncoder;
+//typedef bptreedb::TEmptyValueEncoder<double> TValueEncoder;
 
 
 typedef bptreedb::BPTreeLeafNodeMap<int64_t, double,  bptreedb::TBaseNodeCompressor<int64_t, double, TKeyEncoder, TValueEncoder > > TLeafNode;
@@ -291,19 +291,20 @@ void TestBPTreeMap()
 #endif
 
 		int64_t nBegin = 0;
-		int64_t nEnd = 1000000;
+		int64_t nEnd = 100000;
 		int64_t nBPTreePage = -1;
 		uint32_t nNodeCache = 10;
+		bool checkCRC = false;
 		
 		TTestDataGeneratorPtr pDataGenerator(new TTestDataGenerator((uint32_t)nEnd, dataPath));
 		pDataGenerator->Open();
 
 
 		CommonLib::IAllocPtr pAlloc(new CommonLib::CSimpleAlloc(true));
-		CommonLib::TPrefCounterPtr pStoragePerformer(new CommonLib::CPerfCounter(10));
-		CommonLib::TPrefCounterPtr pBPTreePerf(new CommonLib::CPerfCounter(10));
+		CommonLib::TPrefCounterPtr pStoragePerformer(new CommonLib::CPerfCounter(20));
+		CommonLib::TPrefCounterPtr pBPTreePerf(new CommonLib::CPerfCounter(20));
 		{
-			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
+			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, checkCRC));
 			pStorage->Open(storagePath.c_str(), true, nPageSize);
 			pStorage->SetStoragePerformer(pStoragePerformer);
 			nBPTreePage = CreateBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pStorage);
@@ -312,7 +313,7 @@ void TestBPTreeMap()
 
 		{
 
-			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
+			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, checkCRC));
 			pStorage->Open(storagePath.c_str(), false, nPageSize);
 			pStoragePerformer->Reset();
 			pBPTreePerf->Reset();
@@ -331,7 +332,7 @@ void TestBPTreeMap()
 
 
 		{
-			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
+			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, checkCRC));
 			pStorage->Open(storagePath.c_str(), false, nPageSize);
 			pStoragePerformer->Reset();
 			pBPTreePerf->Reset();
@@ -340,7 +341,7 @@ void TestBPTreeMap()
 		}
 
 		{
-			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
+			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, checkCRC));
 			pStorage->Open(storagePath.c_str(), false, nPageSize);
 			pStoragePerformer->Reset();
 			pBPTreePerf->Reset();
@@ -350,7 +351,7 @@ void TestBPTreeMap()
 
 
 		{
-			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
+			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, checkCRC));
 			pStorage->Open(storagePath.c_str(), false, nPageSize);
 			pStoragePerformer->Reset();
 			pBPTreePerf->Reset();
@@ -366,7 +367,7 @@ void TestBPTreeMap()
 
 
 		{
-			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
+			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, checkCRC));
 			pStorage->Open(storagePath.c_str(), false, nPageSize);
 			pStoragePerformer->Reset();
 			pBPTreePerf->Reset();
@@ -381,7 +382,7 @@ void TestBPTreeMap()
 			CPerfLog::LogPerfStorage(pStoragePerformer);
 		}
 		{
-			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
+			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, checkCRC));
 			pStorage->Open(storagePath.c_str(), false, nPageSize);
 			pStoragePerformer->Reset();
 			pBPTreePerf->Reset();
@@ -391,7 +392,7 @@ void TestBPTreeMap()
 
 
 		{
-			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc));
+			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, checkCRC));
 			pStorage->Open(storagePath.c_str(), false, nPageSize);
 			pStoragePerformer->Reset();
 			pBPTreePerf->Reset();
