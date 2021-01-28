@@ -24,11 +24,13 @@ public:
 	virtual uint32_t GetFlags() const;
 	virtual void SetAddr(int64_t nAddr);
 
+
 	virtual void SetFlag(ePageFlags nFlag, bool bSet);
 	virtual bool IsNeedEncrypt() const;
 	virtual void SetNeedEncrypt(bool bEncrypt);
 	virtual bool CheckCRC() const ;
 	virtual void WriteCRC();
+	virtual void Erase(byte_t val = 0);
 
 	static void WriteCRC(byte_t* pData, size_t nSize);
 	static bool CheckCRC(const byte_t* pData, size_t nSize);

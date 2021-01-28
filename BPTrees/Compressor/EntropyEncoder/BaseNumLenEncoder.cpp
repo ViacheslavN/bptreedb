@@ -2,13 +2,14 @@
 #include "BaseNumLenEncoder.h"
 #include "../../../utils/MathUtils.h"
 #include "../../../../CommonLib/exception/exc_base.h"
+#include "BitStream.h"
 
 namespace bptreedb
 {
 
 	CBaseNumLenEncoder::CBaseNumLenEncoder()
 	{
-
+		Clear();
 	}
 
 	CBaseNumLenEncoder::~CBaseNumLenEncoder()
@@ -16,7 +17,7 @@ namespace bptreedb
 
 	}
 
-	void CBaseNumLenEncoder::Reset()
+	void CBaseNumLenEncoder::Clear()
 	{
 		m_nFlags = 0;
 		m_nBitRowSize = 0;
@@ -28,10 +29,6 @@ namespace bptreedb
 
 	void CBaseNumLenEncoder::AddCalcBitsLen(uint32_t nBitsLen)
 	{
-		if(nBitsLen > 1)
-			m_nBitRowSize += (nBitsLen - 1);
-
-		m_nCount += 1;
 
 		if (!m_BitsLensFreq[nBitsLen])
 			m_nDiffsLen++;
@@ -46,27 +43,35 @@ namespace bptreedb
 			if (m_BitsLensFreq[nBitsLen] > 65535)
 				m_nTypeFreq = ectUInt32;
 		}
+
+		if (m_bOnlineRec)
+		{
+			uint32_t nNewCount = m_BitsLensFreq[nBitsLen];
+			uint32_t nOldCount = nNewCount - 1;
+
+
+			if (m_nDiffsLen > 1)
+			{
+				m_dBitRowSize += (nNewCount * utils::Log2((double)m_nCount / nNewCount));
+				if (nOldCount > 0)
+					m_dBitRowSize -= nOldCount * utils::Log2((double)(m_nCount - 1) / nOldCount);
+
+				m_dBitRowSize += (m_nCount - nNewCount) * utils::Log2((double)m_nCount / (m_nCount - 1));
+			}
+		}
 	}
 
 	void CBaseNumLenEncoder::RemoveCalcBitsLen(uint32_t nBitsLen)
 	{
-		try
-		{
-			if (nBitsLen > 1)
-			{
-				if (m_nBitRowSize < (nBitsLen - 1))
-					throw CommonLib::CExcBase("m_nBitRowSize < 0");
-
-				m_nBitRowSize -= (nBitsLen - 1);
-			}
-
+			
 			if (m_nCount == 0)
 				throw CommonLib::CExcBase("m_nCount < 0");
 
 			m_nCount--;
 
+
 			if(m_BitsLensFreq[nBitsLen] == 0)
-				throw CommonLib::CExcBase("m_BitsLensFreq < 0");
+				throw CommonLib::CExcBase("m_BitsLensFreq %1 = 0", nBitsLen);
 
 			m_BitsLensFreq[nBitsLen] -= 1;
 
@@ -80,23 +85,51 @@ namespace bptreedb
 						m_nTypeFreq = ectUInt32;
 						break;
 					}
-					if (m_nTypeFreq != ectUInt32)
-					{
-						if (m_BitsLensFreq[nBitsLen] > 255)
-							m_nTypeFreq = ectUInt16;
-					}
+					if (m_BitsLensFreq[i] > 255)
+							m_nTypeFreq = ectUInt16;				
 				}
 			}
+
 			if (!m_BitsLensFreq[nBitsLen])
 				m_nDiffsLen--;
 
-		}
-		catch (std::exception& exc )
-		{
-			CommonLib::CExcBase::RegenExcT("BaseNumLen failed to remove bitslen %1", nBitsLen, exc);
-		}
 
+			if (m_bOnlineRec)
+			{
+				uint32_t nNewCount = m_BitsLensFreq[nBitsLen];
+				uint32_t nOldCount = nNewCount + 1;
+
+				if (m_nDiffsLen > 1)
+				{
+
+					m_dBitRowSize -= (nOldCount* utils::Log2((double)(m_nCount + 1) / (nOldCount)));
+					if (nNewCount > 0)
+						m_dBitRowSize += (nNewCount* utils::Log2((double)(m_nCount) / (nNewCount)));
+
+					m_dBitRowSize -= (m_nCount - nNewCount) * utils::Log2((double)(m_nCount + 1) / (m_nCount));
+
+				}
+				else
+				{
+					m_dBitRowSize = 0;
+
+				}
+			}
 	}
+
+	uint32_t CBaseNumLenEncoder::GetCompressSize() const
+	{
+		double dRowBitsLen = 0;
+		if (m_bOnlineRec)
+			dRowBitsLen = m_dBitRowSize;
+		else
+			dRowBitsLen  = GetCodeBitSize();
+
+		uint32_t nByteSize = uint32_t((dRowBitsLen + 7) / 8);
+
+		return nByteSize + GetHeaderSize() + CBitBase::GetByteForBits(m_nBitRowSize);
+	}
+
 
 	double CBaseNumLenEncoder::GetCodeBitSize() const
 	{
@@ -146,10 +179,7 @@ namespace bptreedb
 		return (m_nBitRowSize + 7) / 8;
 	}
 	
-	uint32_t CBaseNumLenEncoder::EstimateCompressSize() const
-	{
-		return GetEncodeBitsSize() + GetHeaderSize() + GetRowBitsSize();
-	}
+ 
 
 	void CBaseNumLenEncoder::WriteHeader(CommonLib::IWriteStream* pStream)
 	{
@@ -196,6 +226,14 @@ namespace bptreedb
 				}
 
 			}
+
+			memset(m_FreqPrev, 0, sizeof(m_FreqPrev));
+			int32_t nPrevF = 0;
+			for (uint32_t  i = 0; i < _nMaxBitsLens + 1; ++i)
+			{
+				m_FreqPrev[i + 1] = m_BitsLensFreq[i] + nPrevF;
+				nPrevF = m_FreqPrev[i + 1];
+			}
 		}
 		catch (std::exception &exc)
 		{
@@ -208,7 +246,7 @@ namespace bptreedb
 	{
 		try
 		{
-			Reset();
+			Clear();
 
 			uint32_t nBitsLen = (uint32_t)pStream->ReadByte();
 			m_nTypeFreq = (eCompressDataType)pStream->ReadByte();
@@ -253,6 +291,18 @@ namespace bptreedb
 				if (i > 1)
 					m_nBitRowSize += m_BitsLensFreq[i] * (i - 1);
 			}
+
+
+			int32_t nPrevF = 0;
+			for (uint32_t i = 0; i < _nMaxBitsLens + 1; ++i)
+			{
+
+				m_FreqPrev[i + 1] = m_BitsLensFreq[i] + nPrevF;
+				nPrevF = m_FreqPrev[i + 1];
+			}
+
+			m_dBitRowSize = GetCodeBitSize();
+
 
 		}
 		catch (std::exception &exc)

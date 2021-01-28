@@ -22,7 +22,8 @@ void CPerfLog::LogBPtreeInsertPerf(CommonLib::TPrefCounterPtr pPerf)
 void CPerfLog::LogBPtreePerf(CommonLib::TPrefCounterPtr  pPerf)
 {
 	Log.Info("------BPTREE NODE------");
-	Log.InfoT("save node counts: %1, missed %2, total time %3", pPerf->GetCountOperation(bptreedb::eSaveNode), pPerf->GetCountOperation(bptreedb::eMissedNode), pPerf->GetTimeOperation(bptreedb::eSaveNode));
+	Log.InfoT("save inner node counts: %1, missed %2, total time %3", pPerf->GetCountOperation(bptreedb::eSaveInnerNode), pPerf->GetCountOperation(bptreedb::eMissedNode), pPerf->GetTimeOperation(bptreedb::eSaveInnerNode));
+	Log.InfoT("save leaf node counts: %1, missed %2, total time %3", pPerf->GetCountOperation(bptreedb::eSaveLeafNode), pPerf->GetCountOperation(bptreedb::eMissedNode), pPerf->GetTimeOperation(bptreedb::eSaveLeafNode));
 	Log.InfoT("load node %1, total time %2", pPerf->GetCountOperation(bptreedb::eLoadNode), pPerf->GetTimeOperation(bptreedb::eLoadNode));
 	Log.InfoT("get node %1, total time %2", pPerf->GetCountOperation(bptreedb::eGetNode), pPerf->GetTimeOperation(bptreedb::eGetNode));
 	Log.InfoT("get parent node %1, total time %2", pPerf->GetCountOperation(bptreedb::eGetParentNode), pPerf->GetTimeOperation(bptreedb::eGetParentNode));

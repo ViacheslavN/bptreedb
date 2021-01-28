@@ -59,9 +59,6 @@ namespace bptreedb
 	protected:
 		int64_t m_nAddr;
 		uint32_t m_nFlag;
-		TParentNodePtr m_pParent;
-		int32_t m_nFoundIndex;
-		int64_t m_nParent;
 		bool m_bMinSplit;
 	};
 

@@ -145,4 +145,9 @@ namespace bptreedb
 
 		return crc == calcCrc;
 	}
+
+	void CFilePage::Erase(byte_t val)
+	{
+		memset(m_pData, val, m_nSize);
+	}
 }

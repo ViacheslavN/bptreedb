@@ -10,20 +10,20 @@
 namespace bptreedb
 {
 	   
-	template<class _TValue, class _TSignValue, class _TEncoder, class _TCompressorParams = CompressorParamsBase>
+	template<class _TValue, class _TSignValue, class _TEncoder>
 	class TBaseValueDiffEncoder
 	{
 	public:
 
 		typedef _TValue TValue;
 		typedef _TSignValue TSignValue;
-		typedef STLAllocator<TValue> TAlloc;
+		typedef CommonLib::STLAllocator<TValue> TAlloc;
 		typedef std::vector<TValue, TAlloc> TValueMemSet;
 		typedef _TEncoder TEncoder;
 		
 
-		TBaseValueDiffEncoder(uint32_t nPageSize, TAllocsSetPtr pAllocsSet, TCompressorParamsBasePtr pParams, ECompressParams type) :
-			m_encoder(nPageSize, pAllocsSet, pParams, type)
+		TBaseValueDiffEncoder(TAllocsSetPtr pAllocsSet, TCompressorParamsBasePtr pParams, ECompressParams type) :
+			m_encoder( pAllocsSet, pParams, type)
 		{}
 
 		~TBaseValueDiffEncoder()
@@ -100,6 +100,7 @@ namespace bptreedb
 					}
 				}
 			}
+
 		}
 		void RemoveDiffSymbol(TSignValue nValue)
 		{
@@ -119,59 +120,97 @@ namespace bptreedb
 
 		void BeginEncoding(const TValueMemSet& vecValues)
 		{
+
 		}
 
-		uint32_t Encode(const TValueMemSet& vecValues, CommonLib::IWriteStream *pStream)
+		uint32_t Encode(const TValueMemSet& vecValues, CommonLib::IWriteStream *pStream, uint32_t maxCompSize, CBPTreeContext *pContext)
 		{
+
+			size_t i = 1;
 			try
 			{
-			
-				if (m_nCount != (vecValues.size() - 1))
-					throw CommonLib::CExcBase("wrong size, count: %1, values size: %2", m_nCount, vecValues.size());
 
-				Write(vecValues[0], pStream);
+				Write(vecValues[0], pStream, pContext);
 				m_encoder.BeginEncoding(pStream);
 		
-				for (size_t i = 1; i < vecValues.size(); ++i)
+				for (; i < vecValues.size(); ++i)
 				{
 					if (!m_encoder.EncodeSymbol(TSignValue(vecValues[i] - vecValues[i - 1])))
-						break;
+						return (uint32_t)vecValues.size() / 2;
 				}
 
-				return m_encoder.FinishEncoding(pStream);
+				if (!m_encoder.FinishEncoding(pStream))
+					return (uint32_t)vecValues.size() / 2;
 			}
 			catch (std::exception& exc_src)
 			{
-				CommonLib::CExcBase::RegenExcT("[BaseDiffEncoder]  failed encode", exc_src);
+				CommonLib::CExcBase::RegenExcT("[BaseDiffEncoder]  failed encode idx: %1, count: %2", i, vecValues.size(), exc_src);
+				throw;
 			}
+
+			return 0;
 		}
-		void Decode(uint32_t nCount, TValueMemSet& vecValues, CommonLib::IReadStream *pStream)
+
+		void Decode(uint32_t nCount, TValueMemSet& vecValues, CommonLib::IReadStream *pStream, uint32_t nCompSize, CBPTreeContext *pContext)
 		{
-			TValue val;
-			//pStream->read(val);
-			Read(val, pStream);
-			m_encoder.BeginDecoding(pStream);
 
-			assert(m_encoder.count() == nCount - 1);
-			vecValues.push_back(val);
-
-			TSignValue sym;
-			for (size_t i = 1; i < nCount; ++i)
+			size_t i = 1;
+			try
 			{
-				m_encoder.decodeSymbol(sym);
-				vecValues.push_back(sym + (TSignValue)vecValues[i - 1]);
-			}
+				TValue val;
+				Read(val, pStream, pContext);
+				m_encoder.BeginDecoding(pStream);
+				vecValues.push_back(val);
 
-			m_encoder.FinishDecoding();
+				TSignValue sym;
+				for (; i < nCount; ++i)
+				{
+					m_encoder.DecodeSymbol(sym);
+					vecValues.push_back(sym + vecValues[i - 1]);
+				}
+
+				m_encoder.FinishDecoding(pStream);
+			}
+			catch (std::exception& exc_src)
+			{
+				CommonLib::CExcBase::RegenExcT("[BaseDiffEncoder]  failed decode idx: %1, count: %2 ", i, nCount, exc_src);
+				throw;
+			}
 		}
-		void clear()
+
+		void Clear()
 		{
-			m_encoder.clear();
+			m_encoder.Clear();
 		}
+
 	protected:
 		TEncoder m_encoder;
 	};
 
 
-	 
+	template<class _TValue, class _TSignValue, class _TEncoder>
+	class TValueDiffEncoder : public TBaseValueDiffEncoder<_TValue, _TSignValue, _TEncoder>
+	{
+	public:
+		typedef TBaseValueDiffEncoder<_TValue, _TSignValue, _TEncoder> TBase;
+
+		typedef typename TBase::TValue TValue;
+
+		TValueDiffEncoder(TAllocsSetPtr pAllocsSet, TCompressorParamsBasePtr pParams, ECompressParams type) : TBase(pAllocsSet, pParams, type)
+		{}
+
+		virtual void Write(const TValue& value, CommonLib::IWriteStream *pStream, CBPTreeContext *pContext)
+		{
+			pStream->Write(value);
+		}
+
+		virtual void Read(TValue& value, CommonLib::IReadStream *pStream, CBPTreeContext *pContext)
+		{
+			pStream->Read(value);
+		}
+		virtual uint32_t GetValueSize() const
+		{
+			return sizeof(TValue);
+		}
+	};
 }

@@ -14,34 +14,62 @@ namespace bptreedb
 			CBaseNumLenEncoder();
 			~CBaseNumLenEncoder();
 
-			void Reset();
-			uint32_t EstimateCompressSize() const;
-
-
+			void Clear();
+ 
 			template <class TSymbol>
 			void AddSymbol(const TSymbol& symbol)
 			{
-				uint32_t nBitsLen = 0;
-				if (symbol < 2)
-					nBitsLen = (uint32_t)symbol;
-				else
-					nBitsLen = utils::log2(symbol);
+				try
+				{
+					uint32_t nBitsLen = 0;
+					if (symbol < 2)
+						nBitsLen = (uint32_t)symbol;
+					else
+					{
+						nBitsLen = utils::log2(symbol);
+						m_nBitRowSize += (nBitsLen);
 
-				AddCalcBitsLen(nBitsLen);
+						nBitsLen += 1; // for 0,1
+					}
+					m_nCount++;
+
+					AddCalcBitsLen(nBitsLen);
+				}
+				catch (std::exception& exc)
+				{
+					CommonLib::CExcBase::RegenExcT("BaseNumLen failed to add bitslen ", exc);
+				}
 			}
 
 
 			template <class TSymbol>
 			void RemoveSymbol(const TSymbol& symbol)
 			{
-				uint32_t nBitsLen = 0;
-				if (symbol < 2)
-					nBitsLen = (uint32_t)symbol;
-				else
-					nBitsLen = utils::log2(symbol);
+				try
+				{
+					uint32_t nBitsLen = 0;
+					if (symbol < 2)
+						nBitsLen = (uint32_t)symbol;
+					else
+					{
+						nBitsLen = utils::log2(symbol);
 
-				RemoveCalcBitsLen(nBitsLen);
+						if (m_nBitRowSize < (nBitsLen))
+							throw CommonLib::CExcBase("m_nBitRowSize < 0");
+
+						m_nBitRowSize -= (nBitsLen);
+						nBitsLen += 1;// for 0,1
+					}
+
+					RemoveCalcBitsLen(nBitsLen);
+				}
+				catch (std::exception& exc)
+				{
+					CommonLib::CExcBase::RegenExcT("BaseNumLen failed to remove bitslen", exc);
+				}
 			}
+
+			uint32_t GetCompressSize() const;
 
 		protected:
 			void AddCalcBitsLen(uint32_t nBitsLen);
@@ -66,6 +94,11 @@ namespace bptreedb
 			uint32_t m_nCount{ 0 };
 			uint32_t m_nDiffsLen{ 0 };
 			eCompressDataType m_nTypeFreq{ ectUInt32 };
+
+			bool m_bOnlineRec{ false };
+			double m_dBitRowSize{ 0.0 };
+
+			uint32_t m_estimateErr{ 1 };
 	};
 
 

@@ -172,9 +172,6 @@
     <ClInclude Include="BPTrees\BPTreePerfCounter.h">
       <Filter>BPTrees\BPTreeSet</Filter>
     </ClInclude>
-    <ClInclude Include="BPTrees\Compressor\EntropyEncoder\UnsignedNumLenEncoderAC.h">
-      <Filter>BPTrees\Compressor\EntropyEncoder</Filter>
-    </ClInclude>
     <ClInclude Include="BPTrees\BPBaseTreeDelete.h">
       <Filter>BPTrees\BPTreeSet</Filter>
     </ClInclude>
@@ -223,6 +220,15 @@
     <ClInclude Include="BPTrees\Compressor\StringCompressor\EmptyStringEncoder.h">
       <Filter>BPTrees\Compressor\StringCompressor</Filter>
     </ClInclude>
+    <ClInclude Include="BPTrees\Compressor\EntropyEncoder\UnsignedNumLenEncoder.h">
+      <Filter>BPTrees\Compressor\EntropyEncoder</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\algorithm.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BPTrees\Compressor\EntropyEncoder\BitStream.h">
+      <Filter>BPTrees\Compressor\EntropyEncoder</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -263,6 +269,12 @@
     </ClCompile>
     <ClCompile Include="BPTrees\Compressor\StringCompressor\EmptyStringEncoder.cpp">
       <Filter>BPTrees\Compressor\StringCompressor</Filter>
+    </ClCompile>
+    <ClCompile Include="BPTrees\Compressor\EntropyEncoder\UnsignedNumLenEncoder.cpp">
+      <Filter>BPTrees\Compressor\EntropyEncoder</Filter>
+    </ClCompile>
+    <ClCompile Include="BPTrees\Compressor\EntropyEncoder\BitStream.cpp">
+      <Filter>BPTrees\Compressor\EntropyEncoder</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

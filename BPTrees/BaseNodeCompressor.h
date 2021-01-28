@@ -119,7 +119,7 @@ namespace bptreedb
 					keySize = (uint32_t)(valueStartPos - keyStartPos);
 
 					maxCompSize = uint32_t(pStream->Size() - valueStartPos);
-					uint32_t values = m_ValueEncoder.Encode(vecValues, pStream, maxCompSize, pContext);
+					uint32_t values = (uint32_t)m_ValueEncoder.Encode(vecValues, pStream, maxCompSize, pContext);
 					if (values != 0)
 						return values;
 

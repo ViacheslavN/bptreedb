@@ -3,15 +3,78 @@
 
 #include "pch.h"
 
+#include "BitStream.h"
 
 void TestStringCompressor();
-
+void TestEntropyEncoder();
 
 int main()
 {
+	std::vector<byte_t> vecbitsBuffer;
+
+	vecbitsBuffer.resize(10000, 0);
+
+	CBitWriter writer;
+	CBitReader reader;
+
+	writer.AttachBuffer(vecbitsBuffer.data(), vecbitsBuffer.size());
+	reader.AttachBuffer(vecbitsBuffer.data(), vecbitsBuffer.size());
+
+	for (uint64_t i = 0xFFFFFFFFFFFFFFFE -300; i < 0xFFFFFFFFFFFFFFFF ; ++i)
+	{
+		uint32_t nBitLen = bptreedb::utils::log2(i);
+		writer.WriteBits(i, nBitLen);
+	}
+
+	for (uint64_t i = 0xFFFFFFFFFFFFFFFE - 300; i < 0xFFFFFFFFFFFFFFFF; ++i)
+	{
+		uint32_t nBitLen = bptreedb::utils::log2(i);
+		uint64_t dd = 0;
+		reader.ReadBits(dd, nBitLen);
+		dd |= ((uint64_t)1 << (nBitLen ));
+		if (dd != i)
+			std::cout << "not match\n";
+	}
 
 
-	TestStringCompressor();
+
+	uint32_t bit_pos = 30;
+	uint32_t dd = ~1;
+	unsigned int byte_offset = bit_pos >> 3;
+	byte_offset &= ~1;
+
+	uint16_t shift = (bit_pos & 0xf);
+
+	TestEntropyEncoder();
+
+	return 0;
+
+	uint32_t nVal = 2439055;
+	uint32_t nBitLen = bptreedb::utils::log2(nVal);
+
+	uint32_t nVal1 = 502345;
+	uint32_t nBitLen1 = bptreedb::utils::log2(nVal1);
+
+	//nBitLen += 1;
+	std::vector<byte_t> buf(100,0);
+
+	CommonLib::CFxBitWriteStream bitWStream;
+	bitWStream.AttachBuffer(buf.data(), buf.size());
+	bitWStream.WriteBits(nVal, nBitLen);
+	bitWStream.WriteBits(nVal1, nBitLen1);
+
+	CommonLib::CFxBitReadStream bitRStream;
+
+	bitRStream.AttachBuffer(buf.data(), buf.size());
+	uint32_t nVal1_1;
+	uint32_t nVal1_2;
+	bitRStream.ReadBits(nVal1_1, nBitLen);
+	nVal1_1 |= ((uint32_t)1 << (nBitLen));
+
+	bitRStream.ReadBits(nVal1_2, nBitLen1);
+	nVal1_2 |= ((uint32_t)1 << (nBitLen1));
+
+	//TestStringCompressor();
 	return 0;
 
 

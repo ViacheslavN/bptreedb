@@ -19,3 +19,11 @@
 #include "../../BPTrees/BaseLeafNodeSetCompressor.h"
 #include "../../BPTrees/Compressor/ZlibCompressor/ZLibEncoder.h"
 #include "../../BPTrees/Compressor/ZlibCompressor/ZstdEncoder.h"
+#include "../../BPTrees/Compressor/EntropyEncoder/BaseNumLenEncoder.h"
+#include "../../utils/BitUtils.h"
+#include "../../../CommonLib/stream/FixedBitStream.h"
+#include "../../../CommonLib/stream/MemoryStream.h"
+#include "../../../CommonLib/perf/PerfCount.h"
+#include "../../../CommonLib/filesystem/File.h"
+#include "../../../CommonLib/compress/EntropyCoders/RangeCoder.h"
+#pragma warning(disable:4146)

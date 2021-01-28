@@ -6,7 +6,8 @@ namespace bptreedb
 	enum EPrefOperation
 	{
 		eLoadNode,
-		eSaveNode,
+		eSaveLeafNode,
+		eSaveInnerNode,
 		eGetNode,
 		eMissedNode,
 		eInsertValue,

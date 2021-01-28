@@ -3,7 +3,7 @@
 
 namespace bptreedb
 {
-	IBPTreeNode::IBPTreeNode() : m_nFlag(0), m_nParent(-1), m_bMinSplit(false), m_nFoundIndex(-1), m_nAddr(-1)
+	IBPTreeNode::IBPTreeNode() : m_nFlag(0), m_nAddr(-1)
 	{}
 
 	IBPTreeNode::~IBPTreeNode() {}

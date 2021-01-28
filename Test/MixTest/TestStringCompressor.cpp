@@ -40,7 +40,7 @@ void TestStringCompressor()
 
 
 
-	bptreedb::CZlibStringComp comp(pAlloc, pCompParmas, bptreedb::eInnerKey);
+	bptreedb::CZlibStringComp comp(bptreedb::TAllocsSetPtr(), pCompParmas, bptreedb::eInnerKey);
 	typedef CommonLib::STLAllocator<bptreedb::StringValue> TAlloc;
 	typedef std::vector<bptreedb::StringValue, TAlloc> TValueMemSet;
 
@@ -103,7 +103,7 @@ void TestStringCompressor()
 
 	TValueMemSet valueDecSet;
 
-	bptreedb::CZlibStringComp decomp(pAlloc, pCompParmas, bptreedb::eInnerKey);
+	bptreedb::CZlibStringComp decomp(bptreedb::TAllocsSetPtr(), pCompParmas, bptreedb::eInnerKey);
 
 	decomp.Decode(valueSet.size(), valueDecSet, &readStream, writeStream.Pos(), &context);
 

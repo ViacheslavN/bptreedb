@@ -76,7 +76,7 @@ void CStringVectorFile::CreateFile(std::vector<astr>& vecString)
 	memset(rndstr, 0, sizeof(rndstr));
 	srand((int)time(0));
 
-	for (int i = 0; i < m_MaxSize; ++i)
+	for (uint32_t i = 0; i < m_MaxSize; ++i)
 	{
 		astr str = CommonLib::str_utils::AStrInt32(i);
 

@@ -159,15 +159,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BitStream.cpp" />
     <ClCompile Include="MixTest.cpp" />
-    <ClCompile Include="TestStringCompressor.cpp" />
+    <ClCompile Include="TestEncoder.cpp" />
+    <ClCompile Include="TestEntropyEncoder.cpp" />
+    <ClCompile Include="TestStringCompressor.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\bptreedb.vcxproj">
       <Project>{a30700f0-3ca3-42fc-8cd5-196378a8b8b0}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\TestDataGeneratorLib\TestDataGeneratorLib.vcxproj">
+      <Project>{3bf7d1ce-79ee-4865-8a89-90d3f1208efd}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BitStream.h" />
+    <ClInclude Include="TestEncoder.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

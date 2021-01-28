@@ -246,6 +246,7 @@ void BPSETBASE_DECLARATION::LoadTree()
 	}
 }
 
+ 
 
 BPSETBASE_TEMPLATE_PARAMS
 void BPSETBASE_DECLARATION::SaveNode(TBPTreeNodePtr& pNode)
@@ -253,23 +254,33 @@ void BPSETBASE_DECLARATION::SaveNode(TBPTreeNodePtr& pNode)
 	int64_t nAddr = pNode.get() ? pNode->GetAddr() : -1;
 	uint32_t nInCount = pNode.get() ? pNode->Count() : 0;
 	bool isLeaf = pNode.get() ? pNode->IsLeaf() : false;
+
+
 	try
 	{
 
-		//FilePagePtr pPage = m_pStorage->GetEmptyFilePage(nAddr, m_nNodePageSize);
+
+		/*FilePagePtr pPage = m_pStorage->GetEmptyFilePage(nAddr, m_nNodePageSize);
+		CommonLib::CFxMemoryWriteStream stream;
+		stream.AttachBuffer(pPage->GetData(), pPage->GetPageSize());*/
+
+		m_cachePage->Erase();
 		CommonLib::CFxMemoryWriteStream stream;
 		stream.AttachBuffer(m_cachePage->GetData(), m_cachePage->GetPageSize());
 		m_cachePage->SetAddr(nAddr);
 		uint32_t nCount = 0;
 		
 		{
-			CommonLib::CPrefCounterHolder holder(m_pBPTreePerfCounter, eSaveNode);
+			CommonLib::CPrefCounterHolder holder(m_pBPTreePerfCounter, isLeaf ? eSaveLeafNode : eSaveInnerNode);
 			nCount = pNode->Save(&stream, &m_Context);
 		}
 
+ 
+
 		while (nCount != 0)
 		{
-			if (m_pBPTreePerfCounter.get() != nullptr)
+
+		 	if (m_pBPTreePerfCounter.get() != nullptr)
 			{
 				m_pBPTreePerfCounter->StartOperation(eMissedNode);
 				m_pBPTreePerfCounter->StopOperation(eMissedNode);
@@ -297,9 +308,10 @@ void BPSETBASE_DECLARATION::SaveNode(TBPTreeNodePtr& pNode)
 				}
 			}
 
+			m_cachePage->Erase();
 			stream.Seek(0, CommonLib::soFromBegin);
 			{
-				CommonLib::CPrefCounterHolder holder(m_pBPTreePerfCounter, eSaveNode);
+				CommonLib::CPrefCounterHolder holder(m_pBPTreePerfCounter, isLeaf ? eSaveLeafNode : eSaveInnerNode);
 				nCount = pNode->Save(&stream, &m_Context);
 			}
 		}
@@ -310,8 +322,9 @@ void BPSETBASE_DECLARATION::SaveNode(TBPTreeNodePtr& pNode)
 	}
 	catch (std::exception& exc)
 	{
-		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed to save node addr: %1, parent: %2, count: %3, leaf: %4", nAddr,  nInCount, isLeaf, exc);
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] failed to save node addr: %1,  count: %2, leaf: %3", nAddr, nInCount, isLeaf, exc);
 	}
+
 }
 
 BPSETBASE_TEMPLATE_PARAMS

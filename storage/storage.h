@@ -34,6 +34,8 @@ namespace bptreedb
 		virtual bool CheckCRC() const = 0;
 		virtual void WriteCRC() = 0;
 		virtual void SetAddr(int64_t nAddr) = 0;
+		virtual void Erase(byte_t val = 0) = 0;
+
 	};
 
 

@@ -2,18 +2,21 @@
 #include "PerfLog.h"
 
 
-typedef bptreedb::TZLibEncoderDiff<int64_t> TKeyEncoder;
-typedef bptreedb::TZLibEncoder<double> TValueEncoder;
+//typedef bptreedb::TZLibEncoderDiff<int64_t> TKeyEncoder;
+//typedef bptreedb::TZLibEncoder<double> TValueEncoder;
+
+typedef bptreedb::TValueDiffEncoder<int64_t, int64_t, bptreedb::CUnsignedNumLenEncoder> TKeyEncoder;
+typedef bptreedb::TBaseValueEncoder<int64_t,  bptreedb::CUnsignedNumLenEncoder> TLinkEncoder;
 
 
 //typedef bptreedb::TEmptyValueEncoder<int64_t> TKeyEncoder;
-//typedef bptreedb::TEmptyValueEncoder<double> TValueEncoder;
-
+typedef bptreedb::TEmptyValueEncoder<double> TValueEncoder;
+//typedef bptreedb::TEmptyValueEncoder<int64_t> TLinkEncoder;
 
 typedef bptreedb::BPTreeLeafNodeMap<int64_t, double,  bptreedb::TBaseNodeCompressor<int64_t, double, TKeyEncoder, TValueEncoder > > TLeafNode;
 
 
-typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TKeyEncoder, TKeyEncoder > > TInnerNode;
+typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TKeyEncoder, TLinkEncoder > > TInnerNode;
 typedef bptreedb::TBPMap<int64_t, double, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPMap;
 
 
@@ -30,8 +33,8 @@ uint64_t CreateBPTreeMap(CommonLib::IAllocPtr pAlloc, TStorage pStorage)
 
 		TBPMap tree(-1, pStorage, pAlloc, 10, nPageSize);
 
-		int nMaxCount = 8192 * 8;;
-
+		int nMaxCount = 8192 * 8;
+	
 		bptreedb::TCompressorParamsBasePtr pCompParmas(new bptreedb::CompressorParamsBase());
 		bptreedb::TCompressorParamsPtr pCompInnerKey(new bptreedb::CompressorParams());
 		bptreedb::TCompressorParamsPtr pCompInnerValue(new bptreedb::CompressorParams());
@@ -223,13 +226,8 @@ void TravelTree(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, T
 	uint32_t nCount = 0;
 	while (!it.IsNull())
 	{
-		if (it.Key() == 4239185589)
-		{
-			Log.InfoT("found addr: %1, pos: %2", it.Addr(), it.Pos());
-		}
-		it.Next();
-		
 
+		it.Next();
 		nCount += 1;
 	}
 	info.Complete("elements %1", nCount);
@@ -291,7 +289,7 @@ void TestBPTreeMap()
 #endif
 
 		int64_t nBegin = 0;
-		int64_t nEnd = 100000;
+		int64_t nEnd = 1000000;
 		int64_t nBPTreePage = -1;
 		uint32_t nNodeCache = 10;
 		bool checkCRC = false;
@@ -365,6 +363,13 @@ void TestBPTreeMap()
 			CPerfLog::LogPerfStorage(pStoragePerformer);
 		}
 
+		
+
+
+	/*	wstr testbt = L"F:\\BPMapTest1.btdb";
+		nBPTreePage = 0;
+		::CopyFile(storagePath.c_str(), testbt.c_str(), FALSE);
+		storagePath = testbt;*/
 
 		{
 			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, checkCRC));
@@ -373,7 +378,7 @@ void TestBPTreeMap()
 			pBPTreePerf->Reset();
 			pStorage->SetStoragePerformer(pStoragePerformer);
 
-			DeleteFromBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nNodeCache, nBegin, nEnd / 2, pDataGenerator);
+			DeleteFromBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nNodeCache, nBegin, nEnd/2, pDataGenerator);
 
 
 			CPerfLog::LogBPtreeFindPerf(pBPTreePerf);

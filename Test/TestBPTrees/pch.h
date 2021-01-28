@@ -39,6 +39,12 @@
 #include "../TestDataGeneratorLib/IntegerValueGenerator.h"
 #include "../TestDataGeneratorLib/TestDataGenerator.h"
 
+#pragma warning(disable:4146)
+
+#include "../../BPTrees/BaseEncoder.h"
+#include "../../BPTrees/BaseDIffEncoder.h"
+#include "../../BPTrees/Compressor/EntropyEncoder/UnsignedNumLenEncoder.h"
+
 #ifdef _WIN32
 	#include "../../BPTrees/Compressor/ZlibCompressor/zstdencoder.h"
 #endif
