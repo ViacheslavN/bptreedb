@@ -6,7 +6,8 @@
 namespace testencoding
 {
 	TestEncoder::TestEncoder(CommonLib::TPrefCounterPtr pPerf) : m_pPerf(pPerf)
-	{}
+	{
+	}
 
 
 	void TestEncoder::BeginEncoding(CommonLib::IWriteStream *pStream)
@@ -48,5 +49,13 @@ namespace testencoding
 	void TestEncoder::FinishDecoding(CommonLib::IReadStream *pStream)
 	{
 
+	}
+
+	uint32_t TestEncoder::GetCompressSize() const
+	{
+		uint32_t size = CBaseNumLenEncoder::GetCompressSize();
+		size += m_encoder.GetAdditionalSize();
+
+		return size;
 	}
 }

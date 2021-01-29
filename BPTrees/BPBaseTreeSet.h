@@ -33,14 +33,14 @@ namespace bptreedb
 
  
 
-		TBPlusTreeSetBase(int64_t nPageBTreeInfo, std::shared_ptr<TStorage> pStorage, CommonLib::IAllocPtr pAlloc, uint32_t nCacheize, uint32_t nNodesPageSize, bool bMulti = false) :
+		TBPlusTreeSetBase(int64_t nPageBTreeInfo, std::shared_ptr<TStorage> pStorage, CommonLib::IAllocPtr pAlloc, uint32_t nCacheize, uint32_t nNodesPageSize, bool bMulti = false, bool bMinSplit = false) :
 			m_nPageBTreeInfo(nPageBTreeInfo), m_pStorage(pStorage),  m_nCacheSize(nCacheize)
 			, m_nRootAddr(-1)
 			, m_bMulti(bMulti)
 			, m_NodeCache(pAlloc)
 			, m_nPageInnerCompInfo(-1)
 			, m_nPageLeafPageCompInfo(-1)
-			, m_bMinSplit(false)
+			, m_bMinSplit(bMinSplit)
 			, m_nNodePageSize(nNodesPageSize)
 			, m_bLockRemoveItemFromCache(false)
 			, m_Context(pAlloc)
@@ -124,6 +124,7 @@ namespace bptreedb
 	
 
 		TBPTreeNodePtr GetParentNode(TBPTreeNodePtr pNode, int32_t* nElementPos = nullptr);
+		TBPTreeNodePtr GetParentNodeByKey(TBPTreeNodePtr pNode, const TKey& key, int32_t* nElementPos = nullptr);
 		void DropNode(TBPTreeNodePtr& pNode);
 		void SaveNode(TBPTreeNodePtr& pNode);
 	

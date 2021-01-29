@@ -26,7 +26,7 @@ uint64_t CreateBPTreeStringMap(CommonLib::IAllocPtr pAlloc, TStorage pStorage)
 	{
 		CommonLib::CLogInfo info(Log, "CreateBPStringTreeMap");
 
-		TBPTree tree(-1, pStorage, pAlloc, 10, nPageSize, 25);
+		TBPTree tree(-1, pStorage, pAlloc, 10, nPageSize, 25, false, false);
 
 		bptreedb::TCompressorParamsBasePtr pCompParmas(new bptreedb::CompressorParamsBase());
 		bptreedb::TCompressorParamsPtr pCompInnerKey(new bptreedb::CompressorParams());
@@ -78,7 +78,7 @@ void InsertBPTreeStringMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterP
 
 		CommonLib::CLogInfo info(Log, "InsertBPTreeStringMap size %1", nCount);
 
-		TBPTree tree(nBPTreePage, pStorage, pAlloc, nCacheSize, nPageSize, 25);
+		TBPTree tree(nBPTreePage, pStorage, pAlloc, nCacheSize, nPageSize, 25, false, false);
 		tree.SetBPTreePerfCounter(pPerf);
 		for (size_t i = 0; i < vecStrs.size(); ++i)
 		{
@@ -138,7 +138,7 @@ void FindBPTreeStringMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr
 
 		CommonLib::CLogInfo info(Log, "FindBPTreeStringMap size %1", nCount);
 
-		TBPTree tree(nBPTreePage, pStorage, pAlloc, nCacheSize, nPageSize, 25);
+		TBPTree tree(nBPTreePage, pStorage, pAlloc, nCacheSize, nPageSize, 25, false, false);
 		tree.SetBPTreePerfCounter(pPerf);
 		for (size_t i = 0; i < vecStrs.size(); ++i)
 		{
@@ -191,7 +191,7 @@ void InfoBPStringTree(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pP
 	Log.Info("InfoBPTree");
 
 
-	TBPTree tree(nBPTreePage, pStorage, pAlloc, nCacheSize, nPageSize, 25);
+	TBPTree tree(nBPTreePage, pStorage, pAlloc, nCacheSize, nPageSize, 25, false, false);
 	tree.SetBPTreePerfCounter(pPerf);
 
 
@@ -225,7 +225,7 @@ void TravelTree(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, T
 		CommonLib::CLogInfo info(Log, "Trave tree ");
 
 
-		TBPTree tree(nBPTreePage, pStorage, pAlloc, nCacheSize, nPageSize, 25);
+		TBPTree tree(nBPTreePage, pStorage, pAlloc, nCacheSize, nPageSize, 25, false, false);
 		tree.SetBPTreePerfCounter(pPerf);
 
 		auto it = tree.begin();

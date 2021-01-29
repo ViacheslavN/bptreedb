@@ -92,7 +92,14 @@ void BPSETBASE_DECLARATION::RemoveFromLeafNode(TBPTreeNodePtr pNode, int32_t nIn
 
 		if (nFoundIndex != LESS_INDEX && nIndex == 0)
 		{
-			pParentNode->UpdateKey(nFoundIndex, pNode->Key(0));
+			if (pNode->Count() != 0)
+				pParentNode->UpdateKey(nFoundIndex, pNode->Key(0));
+			else
+			{
+				pParentNode->RemoveByIndex(nFoundIndex);
+				pParentNode->SetFlags(CHECK_REM_NODE, true);
+			}
+				
 			pParentNode->SetFlags(CHANGE_NODE, true);
 		}
 
@@ -101,6 +108,27 @@ void BPSETBASE_DECLARATION::RemoveFromLeafNode(TBPTreeNodePtr pNode, int32_t nIn
 			return 	RemoveFromInnerNode(pParentNode, key);
 		}
 
+
+		if (pNode->Count() == 0)
+		{
+			TBPTreeNodePtr pNextNode = GetNode(pNode->GetNext());
+			TBPTreeNodePtr pPrevNode = GetNode(pNode->GetPrev());
+			 
+			if (pNextNode.get() != nullptr)
+			{
+				pNextNode->SetPrev(pNode->GetPrev());
+				pNextNode->SetFlags(CHANGE_NODE, true);
+			}
+
+			if (pPrevNode.get() != nullptr)
+			{
+				pPrevNode->SetNext(pNode->GetNext());
+				pPrevNode->SetFlags(CHANGE_NODE, true);
+			}
+
+			DropNode(pNode);
+			return 	RemoveFromInnerNode(pParentNode, key);
+		}
 
 
 		TBPTreeNodePtr pDonorNode;
@@ -284,7 +312,8 @@ void BPSETBASE_DECLARATION::RemoveFromInnerNode(TBPTreeNodePtr pCheckNode, const
 		while (pCheckNode.get())
 		{
 			int32_t nFoundIndex = 0;
-			TBPTreeNodePtr  pParentNode = GetParentNode(pCheckNode, &nFoundIndex);
+			TBPTreeNodePtr  pParentNode = pCheckNode->Count() != 0 ? GetParentNode(pCheckNode, &nFoundIndex) : GetParentNodeByKey(pCheckNode, key, &nFoundIndex);
+			 
 			if (!pParentNode.get())
 			{
 				if (!pCheckNode->Count())
@@ -327,9 +356,30 @@ void BPSETBASE_DECLARATION::RemoveFromInnerNode(TBPTreeNodePtr pCheckNode, const
 
 			if (!pCheckNode->IsHalfEmpty())
 			{
-				pCheckNode = GetParentNode(pCheckNode);
+				pCheckNode = pParentNode;//GetParentNode(pCheckNode);
 				continue;
 			}
+
+			if (pCheckNode->Count() == 0)
+			{
+				
+				if (nFoundIndex == LESS_INDEX)
+				{
+					pParentNode->SetLess(pCheckNode->Less());
+				}
+				else
+				{
+					TBPTreeNodePtr pMinNode = GetMinimumNode(pCheckNode);
+					pParentNode->UpdateKey(nFoundIndex, pMinNode->Key(0));
+				}
+
+				pParentNode->SetFlags(CHANGE_NODE, true);
+				DeleteNode(pCheckNode);
+
+				pCheckNode = pParentNode;//GetParentNode(pCheckNode);
+				continue;
+			}
+
 
 			TBPTreeNodePtr pDonorNode;
 			bool bLeft = false; //The position of the donor node relative to the node

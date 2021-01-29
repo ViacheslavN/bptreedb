@@ -131,7 +131,8 @@ namespace bptreedb
 			{
 
 				Write(vecValues[0], pStream, pContext);
-				m_encoder.BeginEncoding(pStream);
+				if(!m_encoder.BeginEncoding(pStream))
+					return (uint32_t)vecValues.size() / 2;
 		
 				for (; i < vecValues.size(); ++i)
 				{

@@ -46,8 +46,8 @@ namespace bptreedb
 
 
 
-		TBPSMap(int64_t nPageBTreeInfo, std::shared_ptr<TStorage> pStorage, CommonLib::IAllocPtr pAlloc, uint32_t nChacheSize, uint32_t nNodesPageSize, uint32_t nMaxStr, bool bMulti = false) :
-			TBase(nPageBTreeInfo, pStorage, pAlloc, nChacheSize, nNodesPageSize, bMulti),
+		TBPSMap(int64_t nPageBTreeInfo, std::shared_ptr<TStorage> pStorage, CommonLib::IAllocPtr pAlloc, uint32_t nChacheSize, uint32_t nNodesPageSize, uint32_t nMaxStr, bool bMulti, bool bMinSplit) :
+			TBase(nPageBTreeInfo, pStorage, pAlloc, nChacheSize, nNodesPageSize, bMulti, bMinSplit),
 			m_nMaxStr(nMaxStr)
 		{
 			 

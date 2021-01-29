@@ -22,7 +22,7 @@ void TestEncoder(CommonLib::TPrefCounterPtr pPerf, std::vector<uint64_t>& vecDat
 
 	CommonLib::CPrefCounterHolder holder(pPerf, testencoding::TestEncoder::Operations::eEncoding);
 	encoder.BeginEncoding(pStream);
-
+	pStream->Write(vecData[0]);
 	for (size_t i = 1; i < vecData.size(); ++i)
 	{
 		encoder.EncodeSymbol(vecData[i] - vecData[i - 1]);
@@ -37,7 +37,7 @@ void TestEntropyEncoder()
 
 	std::vector<uint64_t> vecData;
 	wstr dataPath = L"F:\\BPMapTestData.data";
-	uint32_t nCount = 800;
+	uint32_t nCount = 737;
 
 	TTestDataGeneratorPtr pDataGenerator(new TTestDataGenerator((uint32_t)800, dataPath));
 	pDataGenerator->Open();
@@ -53,6 +53,8 @@ void TestEntropyEncoder()
 	testencoding::TestEncoder encoder(pPerf);
 
 	SetNumLenEncoder(vecData, encoder);
+
+	uint32_t size = encoder.GetCompressSize();
 
 	std::vector<byte_t> vec;
 	vec.resize(20000);

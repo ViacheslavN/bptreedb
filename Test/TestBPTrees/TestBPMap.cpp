@@ -24,6 +24,13 @@ typedef TDataGenerator<int64_t, TRandomInegerGenerator<int64_t> > TTestDataGener
 typedef std::shared_ptr<TTestDataGenerator> TTestDataGeneratorPtr;
 
 
+typedef TDataGenerator<int64_t, TInegerGenerator<int64_t> > TOrderTestDataGenerator;
+typedef std::shared_ptr<TOrderTestDataGenerator> TOrderTestDataGeneratorPtr;
+
+
+typedef std::shared_ptr<IDataGenerator<int64_t>> TDataGeneratorPtr;
+
+
 template <class TBPTree, class TStorage>
 uint64_t CreateBPTreeMap(CommonLib::IAllocPtr pAlloc, TStorage pStorage)
 {
@@ -31,7 +38,7 @@ uint64_t CreateBPTreeMap(CommonLib::IAllocPtr pAlloc, TStorage pStorage)
 	{
 		CommonLib::CLogInfo info(Log, "CreateBPTreeMap");
 
-		TBPMap tree(-1, pStorage, pAlloc, 10, nPageSize);
+		TBPMap tree(-1, pStorage, pAlloc, 10, nPageSize, false, false);
 
 		int nMaxCount = 8192 * 8;
 	
@@ -76,7 +83,7 @@ uint64_t CreateBPTreeMap(CommonLib::IAllocPtr pAlloc, TStorage pStorage)
 
 
 template <class TBPTree, class TStorage>
-void InsertBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage, uint32_t nNodeCache, int64_t nBegin, int64_t nEnd, TTestDataGeneratorPtr pDataGenerator)
+void InsertBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage, uint32_t nNodeCache, int64_t nBegin, int64_t nEnd, bool minSplit, TDataGeneratorPtr pDataGenerator)
 {
 	try
 	{
@@ -88,7 +95,7 @@ void InsertBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPe
 
 		CommonLib::CLogInfo info(Log, "InsertBPTreeMap count: %1", nCount);
 
-		TBPTree tree(nBPTreePage, pStorage, pAlloc, nNodeCache, nPageSize);
+		TBPTree tree(nBPTreePage, pStorage, pAlloc, nNodeCache, nPageSize, false, minSplit);
 		tree.SetBPTreePerfCounter(pPerf);
 
 
@@ -118,7 +125,7 @@ void InsertBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPe
 
 
 template <class TBPTree, class TStorage>
-void FindBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage, int64_t nBegin, int64_t nEnd, TTestDataGeneratorPtr pDataGenerator)
+void FindBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage, int64_t nBegin, int64_t nEnd, TDataGeneratorPtr pDataGenerator)
 {
 	try
 	{
@@ -128,7 +135,7 @@ void FindBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf
 			nStep = 1;
 
 		CommonLib::CLogInfo info(Log, "FindBPTreeMap begin count: %1", nCount);
-		TBPTree tree(nBPTreePage, pStorage, pAlloc, 10, nPageSize);
+		TBPTree tree(nBPTreePage, pStorage, pAlloc, 10, nPageSize, false, false);
 		tree.SetBPTreePerfCounter(pPerf);
 
 		for (int64_t i = nBegin; i < nEnd; ++i)
@@ -164,7 +171,7 @@ void FindBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf
 
 
 template <class TBPTree, class TStorage>
-void DeleteFromBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage, uint32_t nNodeCache, int64_t nBegin, int64_t nEnd, TTestDataGeneratorPtr pDataGenerator)
+void DeleteFromBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, TStorage pStorage, int64_t nBPTreePage, uint32_t nNodeCache, int64_t nBegin, int64_t nEnd, bool minSplit, TDataGeneratorPtr pDataGenerator)
 {
 	try
 	{
@@ -176,7 +183,7 @@ void DeleteFromBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr
 
 		CommonLib::CLogInfo info(Log, "DeleteFromBPTreeMap start, count %1", nCount);
 
-		TBPTree tree(nBPTreePage, pStorage, pAlloc, nNodeCache, nPageSize);
+		TBPTree tree(nBPTreePage, pStorage, pAlloc, nNodeCache, nPageSize, false, minSplit);
 		tree.SetBPTreePerfCounter(pPerf);
 
 		for (int64_t i = nBegin; i < nEnd; ++i)
@@ -219,7 +226,7 @@ void TravelTree(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, T
 	CommonLib::CLogInfo info(Log, "Trave tree ");
 
 
-	TBPTree tree(nBPTreePage, pStorage, pAlloc, 10, nPageSize);
+	TBPTree tree(nBPTreePage, pStorage, pAlloc, 10, nPageSize, false, false);
 	tree.SetBPTreePerfCounter(pPerf);
 
 	auto it = tree.begin();
@@ -241,7 +248,7 @@ void InfoBPTree(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf, T
 	Log.Info("InfoBPTree");
 
 
-	TBPTree tree(nBPTreePage, pStorage, pAlloc, 10, nPageSize);
+	TBPTree tree(nBPTreePage, pStorage, pAlloc, 10, nPageSize, false, false);
 	tree.SetBPTreePerfCounter(pPerf);
 
 
@@ -277,6 +284,7 @@ void TestBPTreeMap()
 #ifdef _WIN32
 		wstr storagePath = L"F:\\BPMapTest.btdb";
 		wstr dataPath = L"F:\\BPMapTestData.data";
+		wstr dataOrderPath = L"F:\\BPMapTestOrderData.data";
 #else
 		bool bCycle = false;
 		while (bCycle)
@@ -289,13 +297,19 @@ void TestBPTreeMap()
 #endif
 
 		int64_t nBegin = 0;
-		int64_t nEnd = 1000000;
+		int64_t nEnd = 10000000;
 		int64_t nBPTreePage = -1;
-		uint32_t nNodeCache = 10;
+		uint32_t nNodeCache =	100;
 		bool checkCRC = false;
+		bool minSplit = true;
 		
-		TTestDataGeneratorPtr pDataGenerator(new TTestDataGenerator((uint32_t)nEnd, dataPath));
+		//TDataGeneratorPtr pDataGenerator(new TTestDataGenerator((uint32_t)nEnd, dataPath));
+		//pDataGenerator->Open();
+
+
+		TDataGeneratorPtr pDataGenerator(new TOrderTestDataGenerator((uint32_t)nEnd, dataOrderPath));
 		pDataGenerator->Open();
+
 
 
 		CommonLib::IAllocPtr pAlloc(new CommonLib::CSimpleAlloc(true));
@@ -316,7 +330,7 @@ void TestBPTreeMap()
 			pStoragePerformer->Reset();
 			pBPTreePerf->Reset();
 			pStorage->SetStoragePerformer(pStoragePerformer);
-			InsertBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nNodeCache, nBegin, nEnd, pDataGenerator);
+			InsertBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nNodeCache, nBegin, nEnd, minSplit, pDataGenerator);
 
 			pStorage->Close();
 
@@ -363,7 +377,7 @@ void TestBPTreeMap()
 			CPerfLog::LogPerfStorage(pStoragePerformer);
 		}
 
-		
+
 
 
 	/*	wstr testbt = L"F:\\BPMapTest1.btdb";
@@ -378,7 +392,7 @@ void TestBPTreeMap()
 			pBPTreePerf->Reset();
 			pStorage->SetStoragePerformer(pStoragePerformer);
 
-			DeleteFromBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nNodeCache, nBegin, nEnd/2, pDataGenerator);
+			DeleteFromBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nNodeCache, nBegin, nEnd/2, minSplit, pDataGenerator);
 
 
 			CPerfLog::LogBPtreeFindPerf(pBPTreePerf);

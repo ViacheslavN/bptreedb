@@ -1,7 +1,20 @@
 #pragma once
 
+
+template<class _TValue>
+class IDataGenerator
+{
+public:
+	IDataGenerator(){}
+	virtual ~IDataGenerator(){}
+
+	virtual _TValue GetValue(uint32_t idx) = 0;
+	virtual void Open() = 0;
+};
+
+
 template<class _TValue, class _TValueCreator, int nMaxElemenInBuffer = 100000>
-class TDataGenerator
+class TDataGenerator : public IDataGenerator<_TValue>
 {
 public:
 
@@ -40,7 +53,7 @@ public:
 			m_DataBuf.resize(nSize);
 		}
 
-		TValue GetValue(uint32_t idx)
+		virtual TValue GetValue(uint32_t idx)
 		{
 			return m_DataBuf[idx - m_startIdx];
 		}
@@ -52,7 +65,7 @@ public:
 		return sizeof(uint32_t) + TValueCreator::GetHeaderSize();
 	}
 
-	void Open()
+	virtual void Open()
 	{
 
 		if (!CommonLib::CFileUtils::IsFileExist(m_fileName))

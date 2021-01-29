@@ -128,6 +128,52 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetParentN
 
 
 BPSETBASE_TEMPLATE_PARAMS
+BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetParentNodeByKey(TBPTreeNodePtr pNode, const TKey& key, int32_t* nElementPos)
+{
+	try
+	{
+
+		CommonLib::CPrefCounterHolder holder(m_pBPTreePerfCounter, eGetParentNode);
+
+
+		if (pNode->GetAddr() == m_nRootAddr)
+			return TBPTreeNodePtr();
+		 
+		int32_t nIndex = -1;
+		int64_t nNextAddr = m_pRoot->inner_lower_bound(m_comp, key, nIndex);
+		TBPTreeNodePtr pParent = m_pRoot;
+
+		for (;;)
+		{
+			if (pNode->GetAddr() == nNextAddr)
+			{
+				if (nElementPos)
+					*nElementPos = nIndex;
+
+				return pParent;
+			}
+
+			TBPTreeNodePtr pNode = GetNode(nNextAddr);
+			if (!pNode.get())
+			{
+				throw CommonLib::CExcBase("FindParent failed to find parent for node addr %1", pNode->GetAddr());
+			}
+
+			nNextAddr = pNode->inner_lower_bound(m_comp, key, nIndex);
+			pParent = pNode;
+		}
+
+		throw CommonLib::CExcBase("FindParent failed to find parent for node addr %1", pNode->GetAddr());
+	}
+	catch (std::exception& exc)
+	{
+		CommonLib::CExcBase::RegenExcT("[TBPlusTreeSetBase] GetParentNode by key ailed to find parent node", exc);
+		throw;
+	}
+}
+
+
+BPSETBASE_TEMPLATE_PARAMS
 void BPSETBASE_DECLARATION::DropNode(TBPTreeNodePtr& pNode)
 {
 	try

@@ -24,7 +24,7 @@ namespace bptreedb
 		~CUnsignedNumLenEncoder();
 
 	
-		void BeginEncoding(CommonLib::IWriteStream *pStream);
+		bool BeginEncoding(CommonLib::IWriteStream *pStream);
 		bool FinishEncoding(CommonLib::IWriteStream *pStream);
 
 		void BeginDecoding(CommonLib::IReadStream *pStream);

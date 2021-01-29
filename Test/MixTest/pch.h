@@ -26,4 +26,5 @@
 #include "../../../CommonLib/perf/PerfCount.h"
 #include "../../../CommonLib/filesystem/File.h"
 #include "../../../CommonLib/compress/EntropyCoders/RangeCoder.h"
+#include "../../../CommonLib/compress/EntropyCoders/ArithmeticCoder.h"
 #pragma warning(disable:4146)

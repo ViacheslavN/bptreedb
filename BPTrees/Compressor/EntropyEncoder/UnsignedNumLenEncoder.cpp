@@ -8,7 +8,7 @@ namespace bptreedb
 	{
 
 		 TCompressorParamsPtr pCompParams = pParams->GetCompressParams(type);
-		 m_procError = pCompParams->GetIntParam("error", 1);
+		 m_estimateErr = pCompParams->GetIntParam("error", 1);
 	}
 
 	CUnsignedNumLenEncoder::~CUnsignedNumLenEncoder()
@@ -16,7 +16,7 @@ namespace bptreedb
 
 	}
 
-	void CUnsignedNumLenEncoder::BeginEncoding(CommonLib::IWriteStream *pStream)
+	bool CUnsignedNumLenEncoder::BeginEncoding(CommonLib::IWriteStream *pStream)
 	{
 		WriteHeader(pStream);
 
@@ -26,9 +26,12 @@ namespace bptreedb
 			throw CommonLib::CExcBase(L"IStream isn't memstream");
 
 		m_bitWStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos(), nBitSize);
-		pStream->Seek(nBitSize, CommonLib::soFromCurrent);
+		if (!pStream->SeekSafe(nBitSize, CommonLib::soFromCurrent))
+			return false;
 
 		m_encoder.SetStream(pStream);
+
+		return true;
  
 	}
 
@@ -61,9 +64,7 @@ namespace bptreedb
 
 	uint32_t CUnsignedNumLenEncoder::GetCompressSize() const
 	{
-		uint32_t size = CBaseNumLenEncoder::GetCompressSize();
-		uint32_t err = (size * m_procError) / 100;
-
-		return size + err;
+		uint32_t size = CBaseNumLenEncoder::GetCompressSize() + m_encoder.GetAdditionalSize();
+		return size;
 	}
 }

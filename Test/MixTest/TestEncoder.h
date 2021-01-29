@@ -69,8 +69,9 @@ namespace testencoding
 			else
 				symbol = nBitLen;
 		}
-
+		uint32_t GetCompressSize() const;
 	private:
+
 		CommonLib::TPrefCounterPtr m_pPerf;
 	//	CommonLib::CFxBitWriteStream m_bitWStream;
 	//	CommonLib::CFxBitReadStream m_bitRStream;
@@ -80,6 +81,9 @@ namespace testencoding
 
 		CommonLib::TRangeEncoder64 m_encoder;
 		CommonLib::TRangeDecoder64 m_decoder;
+
+		//CommonLib::TACEncoder64 m_encoder;
+		//CommonLib::TACDecoder64 m_decoder;
 	};
 	
 }

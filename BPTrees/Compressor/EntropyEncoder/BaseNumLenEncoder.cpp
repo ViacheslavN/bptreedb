@@ -126,8 +126,9 @@ namespace bptreedb
 			dRowBitsLen  = GetCodeBitSize();
 
 		uint32_t nByteSize = uint32_t((dRowBitsLen + 7) / 8);
+		uint32_t encodeErr = (nByteSize * m_estimateErr) / 100;
 
-		return nByteSize + GetHeaderSize() + CBitBase::GetByteForBits(m_nBitRowSize);
+		return nByteSize + encodeErr + GetHeaderSize() + CBitBase::GetByteForBits(m_nBitRowSize);
 	}
 
 
@@ -301,8 +302,8 @@ namespace bptreedb
 				nPrevF = m_FreqPrev[i + 1];
 			}
 
-			m_dBitRowSize = GetCodeBitSize();
-
+			if (m_bOnlineRec)
+				m_dBitRowSize = GetCodeBitSize();
 
 		}
 		catch (std::exception &exc)

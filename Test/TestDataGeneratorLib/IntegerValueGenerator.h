@@ -17,13 +17,13 @@ public:
 	void WriteValue(uint32_t idx, CommonLib::file::TFilePtr  pFile)
 	{
 		TValue value = (TValue)idx;
-		pFile->Write(&value, sizeof(value));
+		pFile->Write((byte_t*)&value, sizeof(value));
 	}
 
 	TValue ReadValue(CommonLib::file::TFilePtr  pFile)
 	{
 		TValue value;
-		pFile->Read(&value, sizeof(value));
+		pFile->Read((byte_t*)&value, sizeof(value));
 		return value;
 	}
 };

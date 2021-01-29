@@ -60,7 +60,8 @@ namespace bptreedb
 			try
 			{
 
-				m_encoder.BeginEncoding(pStream);
+				if(!m_encoder.BeginEncoding(pStream))
+					return vecValues.size() / 2;
 
 				for (; i < vecValues.size(); ++i)
 				{

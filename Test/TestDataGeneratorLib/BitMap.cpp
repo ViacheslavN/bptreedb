@@ -11,7 +11,7 @@ namespace randomGen
 
 	uint32_t CBitMap::GetBitSize() const
 	{
-		return m_bitsBuf.size() * 8;
+		return (uint32_t)m_bitsBuf.size() * 8;
 	}
 
 
