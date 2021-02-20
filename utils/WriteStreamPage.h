@@ -4,6 +4,7 @@
 #include "../../CommonLib/stream/FixedMemoryStream.h"
 #include "../../CommonLib/stream/MemoryStream.h"
 #include "../../CommonLib/stream/StreamBaseEmpty.h"
+#include "../storage/PageObject.h"
 
 namespace bptreedb
 {
@@ -17,8 +18,8 @@ namespace bptreedb
 				typedef _TStorage TStorage;
 				typedef std::shared_ptr<TStorage> TStoragePtr;
 
-				TWriteStreamPage(TStoragePtr& pStorage) :
-					m_pStorage(pStorage)
+				TWriteStreamPage(TStoragePtr& pStorage, uint32_t objectID,  uint32_t parentID, uint32_t parenttype) :
+					m_pStorage(pStorage), m_objectID(objectID), m_parentID(parentID), m_parentType(parenttype)
 				{
 
 				}
@@ -133,7 +134,7 @@ namespace bptreedb
 					FilePagePtr pPage;
 
 					if (bCreate)
-						pPage = m_pStorage->GetEmptyFilePage(nPageAddr, m_nPageSize);
+						pPage = m_pStorage->GetEmptyFilePage(nPageAddr, m_nPageSize, m_objectID, (ObjectPageType)m_objectType, m_parentID,(ObjectPageType)m_parentType);
 					else
 						pPage = m_pStorage->GetFilePage(nPageAddr, m_nPageSize, m_NeedDecrypt);
 
@@ -187,6 +188,11 @@ namespace bptreedb
 			FilePagePtr m_pCurrentPage;
 			CommonLib::CFxMemoryWriteStream m_stream;
 			bool m_NeedDecrypt{false};
+
+			uint32_t m_objectType{ eWritePageStream};
+			uint32_t m_objectID{ 0 };
+			uint32_t m_parentID{ 0 };
+			uint32_t m_parentType{ 0 };
  
 		};
 

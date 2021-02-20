@@ -32,7 +32,7 @@ typedef std::shared_ptr<IDataGenerator<int64_t>> TDataGeneratorPtr;
 
 
 template <class TBPTree, class TStorage>
-uint64_t CreateBPTreeMap(CommonLib::IAllocPtr pAlloc, TStorage pStorage)
+uint64_t CreateBPTreeMap(CommonLib::IAllocPtr pAlloc, TStorage pStorage, bool minSplit)
 {
 	try
 	{
@@ -65,7 +65,7 @@ uint64_t CreateBPTreeMap(CommonLib::IAllocPtr pAlloc, TStorage pStorage)
 
 		pCompParmas->AddCompressParams(pCompLeafKey, bptreedb::eLeafKey);
 
-		tree.InnitTree(pCompParmas, false);
+		tree.InnitTree(pCompParmas, minSplit, 0, bptreedb::eEmptyType, 0, bptreedb::eEmptyType);
 		tree.Flush();
 
 		info.Complete();
@@ -297,19 +297,19 @@ void TestBPTreeMap()
 #endif
 
 		int64_t nBegin = 0;
-		int64_t nEnd = 10000000;
+		int64_t nEnd = 1000000;
 		int64_t nBPTreePage = -1;
 		uint32_t nNodeCache =	100;
 		bool checkCRC = false;
-		bool minSplit = true;
 		
-		//TDataGeneratorPtr pDataGenerator(new TTestDataGenerator((uint32_t)nEnd, dataPath));
-		//pDataGenerator->Open();
-
-
-		TDataGeneratorPtr pDataGenerator(new TOrderTestDataGenerator((uint32_t)nEnd, dataOrderPath));
+		
+		TDataGeneratorPtr pDataGenerator(new TTestDataGenerator((uint32_t)nEnd, dataPath));
 		pDataGenerator->Open();
+		bool minSplit = false;
 
+	//	TDataGeneratorPtr pDataGenerator(new TOrderTestDataGenerator((uint32_t)nEnd, dataOrderPath));
+	//	pDataGenerator->Open();
+	//	bool minSplit = true;
 
 
 		CommonLib::IAllocPtr pAlloc(new CommonLib::CSimpleAlloc(true));
@@ -319,7 +319,7 @@ void TestBPTreeMap()
 			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, checkCRC));
 			pStorage->Open(storagePath.c_str(), true, nPageSize);
 			pStorage->SetStoragePerformer(pStoragePerformer);
-			nBPTreePage = CreateBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pStorage);
+			nBPTreePage = CreateBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pStorage, minSplit);
 			//LogPerf(pStoragePerformer);
 		}
 

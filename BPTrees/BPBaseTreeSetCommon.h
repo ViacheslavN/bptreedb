@@ -69,7 +69,7 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::LoadNodeFr
 		stream.AttachBuffer(m_cachePage->GetData(), m_cachePage->GetPageSize());
 
 		CommonLib::CPrefCounterHolder holder(m_pBPTreePerfCounter, eLoadNode);
-		TBPTreeNodePtr node = LoadNode<TBPTreeNode>(&stream, m_pAllocsSet, m_bMulti, m_cachePage->GetPageSize(), nAddr, m_pCompressParams, &m_Context);
+		TBPTreeNodePtr node = LoadNode<TBPTreeNode>(&stream, m_pAllocsSet, m_bMulti, GetNodePageSize(), nAddr, m_pCompressParams, &m_Context);
 
 		return node;
 	}
@@ -225,7 +225,7 @@ bool BPSETBASE_DECLARATION::IsTreeInit()
 
 
 BPSETBASE_TEMPLATE_PARAMS
-void  BPSETBASE_DECLARATION::InnitTree(TCompressorParamsBasePtr pParams, bool bMinSplit)
+void  BPSETBASE_DECLARATION::InnitTree(TCompressorParamsBasePtr pParams, bool bMinSplit, uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype)
 {
 	try
 	{
@@ -236,7 +236,7 @@ void  BPSETBASE_DECLARATION::InnitTree(TCompressorParamsBasePtr pParams, bool bM
 		if (m_nPageBTreeInfo == -1)
 			m_nPageBTreeInfo = m_pStorage->GetNewFilePageAddr(m_nNodePageSize);
 
-		utils::TWriteStreamPage<TStorage> stream(m_pStorage);
+		utils::TWriteStreamPage<TStorage> stream(m_pStorage, 0, objectID, objecttype);
 		stream.Open(m_nPageBTreeInfo, m_nNodePageSize, true, true);
 
 		m_nRootAddr = m_pStorage->GetNewFilePageAddr(m_nNodePageSize);
@@ -249,8 +249,21 @@ void  BPSETBASE_DECLARATION::InnitTree(TCompressorParamsBasePtr pParams, bool bM
 
 		if (bParams)
 			pParams->Save(&stream);
+
+		m_objectType = objecttype;
+		m_objectID = objectID;
+		m_parentID = parentID;
+		m_parentType = parenttype;
+
+		stream.Write(objectID);
+		stream.Write(objecttype);
+		stream.Write(parentID);
+		stream.Write(parenttype);
+
 	
 		stream.Close();
+
+		m_cachePage = m_pStorage->GetEmptyFilePage(-1, m_nNodePageSize, objectID, objecttype,  parentID,  parenttype);
 
 		m_pRoot = CreateNode(m_nRootAddr, true, false); 
 		m_pRoot->SetFlags(ROOT_NODE, true);
@@ -283,6 +296,13 @@ void BPSETBASE_DECLARATION::LoadTree()
 			m_pCompressParams->Load(&stream);
 		}
  		
+		m_objectID = stream.ReadIntu32();
+		m_objectType = stream.ReadIntu32();
+		m_parentID = stream.ReadIntu32();
+		m_parentType = stream.ReadIntu32();
+
+
+		m_cachePage = m_pStorage->GetEmptyFilePage(-1, m_nNodePageSize, m_objectID, (ObjectPageType)m_objectType, m_parentID, (ObjectPageType)m_parentType);
 		m_pRoot = LoadNodeFromStorage(m_nRootAddr);
 		m_pRoot->SetFlags(ROOT_NODE, true);
 	}
@@ -477,3 +497,9 @@ BPSETBASE_TYPENAME_DECLARATION::TBPTreeNodePtr BPSETBASE_DECLARATION::GetMinimum
 
 	return pMinNode;
  }
+
+BPSETBASE_TEMPLATE_PARAMS
+uint32_t BPSETBASE_DECLARATION::GetNodePageSize() const
+{
+	return m_cachePage->GetPageSize();
+}

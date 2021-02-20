@@ -48,7 +48,7 @@ uint64_t CreateBPTreeStringMap(CommonLib::IAllocPtr pAlloc, TStorage pStorage)
 
 		pCompParmas->AddCompressParams(pCompLeafKey, bptreedb::eLeafKey);
 
-		tree.InnitTree(pCompParmas, false);
+		tree.InnitTree(pCompParmas,false, 0, bptreedb::eEmptyType, 0, bptreedb::eEmptyType);
 		tree.Flush();
 
 		info.Complete();

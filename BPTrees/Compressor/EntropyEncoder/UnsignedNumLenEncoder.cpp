@@ -25,7 +25,7 @@ namespace bptreedb
 		if (!pMemStream)
 			throw CommonLib::CExcBase(L"IStream isn't memstream");
 
-		m_bitWStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos(), nBitSize);
+		m_bitWStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos());
 		if (!pStream->SeekSafe(nBitSize, CommonLib::soFromCurrent))
 			return false;
 
@@ -50,7 +50,7 @@ namespace bptreedb
 		if (!pMemStream)
 			throw CommonLib::CExcBase(L"IStream isn't memstream");
 
-		m_bitRStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos(), nBitSize);
+		m_bitRStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos());
 		pStream->Seek(nBitSize, CommonLib::soFromCurrent);
 
 		m_decoder.SetStream(pStream);

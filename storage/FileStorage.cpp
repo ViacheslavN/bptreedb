@@ -66,28 +66,37 @@ namespace bptreedb
 			if (nSize == 0)
 				nSize = m_minPageSize;
 
-			//uint32_t nCount = nSize / m_minPageSize;
+			byte_t* data = 0;		 
+			bool reload = true;
 
 			if (pPage.get() == nullptr)
-				pPage.reset(new CFilePage(m_pAlloc, nSize, nAddr, m_checkCRC));
+			{
+				data = (byte_t*)m_pAlloc->Alloc(sizeof(byte_t) * nSize);
+				reload = false;
+			}
+			else
+			{
+				data = pPage->GetFullData();
+				nSize = pPage->GetFullPageSize();
+			}
 
-			ReadData(nAddr, pPage->GetFullData(), pPage->GetFullPageSize(), decrypt);
+			ReadData(nAddr, data, nSize, decrypt);
+
+			if (pPage.get() == nullptr)
+			{
+				pPage.reset(new CFilePage(m_pAlloc, data, nSize, nAddr, m_checkCRC));
+			}
+			else
+			{
+				pPage->ReloadHeader();
+			}
+			
 
 			if (m_pageCipher.get() && decrypt)
 			{
 				pPage->SetNeedEncrypt(true);
 			}
-
-			/*m_file.SetFilePos64(m_offset + (nAddr * m_minPageSize), CommonLib::soFromBegin);
-			uint32_t nWCnt = m_file.ReadFile((void*)pPage->GetFullData(), nSize);
-			if (nWCnt != nSize)
-				throw CommonLib::CExcBase(L"can't read the requested size, page size: %1, returned size: %2", nSize, nWCnt);
-
-			if (m_pageCipher.get() && decrypt)
-			{
-				m_pageCipher->decrypt(pPage.get());
-				pPage->SetNeedEncrypt(true);
-			}*/
+						 
 
 			if (m_checkCRC)
 			{
@@ -112,7 +121,7 @@ namespace bptreedb
 		return pPage;
 	}
 
-	FilePagePtr CFileStorage::GetEmptyFilePage(int64_t nAddr, uint32_t nSize)
+	FilePagePtr CFileStorage::GetEmptyFilePage(int64_t nAddr, uint32_t nSize, uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype)
 	{
 		try
 		{
@@ -120,7 +129,7 @@ namespace bptreedb
 			if ((nSize % m_minPageSize) != 0)
 				throw CommonLib::CExcBase("Wrong size");
 
-			FilePagePtr  pPage(new CFilePage(m_pAlloc, nSize, nAddr, m_checkCRC));
+			FilePagePtr  pPage(new CFilePage(m_pAlloc, nSize, nAddr, m_checkCRC,  objectID,  objecttype,  parentID,  parenttype));
 			return pPage;
 
 		}
@@ -241,13 +250,13 @@ namespace bptreedb
 	}
 
 
-	FilePagePtr CFileStorage::GetNewFilePage(uint32_t nSize)
+	FilePagePtr CFileStorage::GetNewFilePage(uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype, uint32_t nSize)
 	{
 		try
 		{
 
 			int64_t nAddr =	GetNewFilePageAddr(nSize);
-			FilePagePtr pPage(new CFilePage(m_pAlloc, nSize, nAddr, m_checkCRC));
+			FilePagePtr pPage(new CFilePage(m_pAlloc, nSize, nAddr, m_checkCRC, objectID, objecttype, parentID, parenttype));
 				
 			return pPage;
 		}

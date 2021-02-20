@@ -229,6 +229,12 @@
     <ClInclude Include="BPTrees\Compressor\EntropyEncoder\BitStream.h">
       <Filter>BPTrees\Compressor\EntropyEncoder</Filter>
     </ClInclude>
+    <ClInclude Include="BPTrees\Compressor\EntropyEncoder\BoolEncoder.h">
+      <Filter>BPTrees\Compressor\EntropyEncoder</Filter>
+    </ClInclude>
+    <ClInclude Include="storage\PageObject.h">
+      <Filter>storage</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -274,6 +280,9 @@
       <Filter>BPTrees\Compressor\EntropyEncoder</Filter>
     </ClCompile>
     <ClCompile Include="BPTrees\Compressor\EntropyEncoder\BitStream.cpp">
+      <Filter>BPTrees\Compressor\EntropyEncoder</Filter>
+    </ClCompile>
+    <ClCompile Include="BPTrees\Compressor\EntropyEncoder\BoolEncoder.cpp">
       <Filter>BPTrees\Compressor\EntropyEncoder</Filter>
     </ClCompile>
   </ItemGroup>

@@ -80,7 +80,11 @@ void BPSETBASE_DECLARATION::RemoveFromLeafNode(TBPTreeNodePtr pNode, int32_t nIn
 {
 	try
 	{
-
+		if (key == 1698769370)
+		{
+			int dd = 0;
+			dd++;
+		}
 		int32_t nFoundIndex;
 		TBPTreeNodePtr pParentNode = GetParentNode(pNode, &nFoundIndex);
 
@@ -90,18 +94,38 @@ void BPSETBASE_DECLARATION::RemoveFromLeafNode(TBPTreeNodePtr pNode, int32_t nIn
 		if (pNode->GetAddr() == m_nRootAddr || !pParentNode.get())
 			return;
 
-		if (nFoundIndex != LESS_INDEX && nIndex == 0)
+		if (nFoundIndex != LESS_INDEX)
 		{
-			if (pNode->Count() != 0)
-				pParentNode->UpdateKey(nFoundIndex, pNode->Key(0));
-			else
+			if (pNode->Count() == 0)
 			{
 				pParentNode->RemoveByIndex(nFoundIndex);
 				pParentNode->SetFlags(CHECK_REM_NODE, true);
 			}
-				
-			pParentNode->SetFlags(CHANGE_NODE, true);
+			else if (nIndex == 0)
+			{
+				pParentNode->UpdateKey(nFoundIndex, pNode->Key(0));
+				pParentNode->SetFlags(CHECK_REM_NODE, true);
+			}
+
 		}
+		else
+		{
+			if (pNode->Count() == 0)
+			{
+
+			//	if (pParentNode->Count() > 0)
+				{
+					TLink link = pParentNode->Link(0);
+					pParentNode->SetLess(link);
+					pParentNode->RemoveByIndex(0);
+									   
+					pParentNode->SetFlags(CHECK_REM_NODE, true);
+				}
+
+			}
+		}
+
+	 
 
 		if (!pNode->IsHalfEmpty())
 		{

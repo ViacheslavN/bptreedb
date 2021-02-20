@@ -52,7 +52,7 @@ namespace bptreedb
 		{
 			try
 			{
-				TBPTreeNodePtr pNode(new TBPTreeNode(this->m_pAllocsSet, this->m_bMulti, this->m_nNodePageSize, bLeaf, nAddr, this->m_pCompressParams));
+				TBPTreeNodePtr pNode(new TBPTreeNode(this->m_pAllocsSet, this->m_bMulti, this->GetNodePageSize(), bLeaf, nAddr, this->m_pCompressParams));
 				return pNode;
 
 			}

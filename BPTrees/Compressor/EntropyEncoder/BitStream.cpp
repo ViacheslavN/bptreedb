@@ -9,10 +9,9 @@ namespace bptreedb
 	CBitBase::~CBitBase()
 	{}
 
-	void CBitBase::AttachBuffer(byte_t* buffer, uint32_t size)
+	void CBitBase::AttachBuffer(byte_t* buffer)
 	{
 		m_buffer = buffer;
-		m_size = size;
 		m_bit_pos = 0;
 	}
 

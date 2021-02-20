@@ -39,10 +39,10 @@ namespace bptreedb
 		virtual FilePagePtr GetFilePage(int64_t nAddr, uint32_t nSize, bool decrypt);
 		virtual void SaveFilePage(FilePagePtr& pPage);
 		virtual void DropFilePage(int64_t nAddr);
-		virtual FilePagePtr GetNewFilePage(uint32_t nSize = 0);
+		virtual FilePagePtr GetNewFilePage(uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype, uint32_t nSize = 0);
 		virtual int64_t GetNewFilePageAddr(uint32_t nSize = 0);
 
-		virtual FilePagePtr GetEmptyFilePage(int64_t nAddr, uint32_t nSize);
+		virtual FilePagePtr GetEmptyFilePage(int64_t nAddr, uint32_t nSize, uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype);
 
 		virtual void Flush();
 		virtual void SetStoragePerformer(CommonLib::TPrefCounterPtr pStoragePerformer);

@@ -38,6 +38,19 @@ namespace bptreedb
 		return 0;
 	}
 
+	template<class TValue>
+	eCompressDataType GetCompressType(TValue nValue)
+	{
+		if (nValue < 0xFF + 1)
+			return ectByte;
+		else if (nValue - 1 < 0xFFFF)
+			return ectUInt16;
+		else if (nValue - 1 < 0xFFFFFFFF)
+			return ectUInt32;
+
+		return ectUInt64;
+	}
+
 
 	static uint32_t GetLenForDiffLen(eCompressDataType nTypeFreq, uint32_t nDiffsLen)
 	{
@@ -86,16 +99,16 @@ namespace bptreedb
 		switch (nType)
 		{
 		case ectByte:
-			pStream->ReadByte(value);
+			value = pStream->ReadByte();
 			break;
 		case ectUInt16:
-			pStream->Readintu16(value);
+			value = pStream->Readint16();
 			break;
 		case ectUInt32:
-			pStream->ReadIntu32(value);
+			value = pStream->ReadIntu32();
 			break;
 		case ectUInt64:
-			pStream->ReadIntu64(value);
+			value = pStream->ReadIntu64();
 			break;
 		}
 	}

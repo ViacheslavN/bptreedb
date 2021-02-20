@@ -38,8 +38,6 @@ namespace bptreedb
 			, m_nRootAddr(-1)
 			, m_bMulti(bMulti)
 			, m_NodeCache(pAlloc)
-			, m_nPageInnerCompInfo(-1)
-			, m_nPageLeafPageCompInfo(-1)
 			, m_bMinSplit(bMinSplit)
 			, m_nNodePageSize(nNodesPageSize)
 			, m_bLockRemoveItemFromCache(false)
@@ -47,7 +45,6 @@ namespace bptreedb
 		{
 
 			m_pAllocsSet.reset(new CAllocsSet(pAlloc));
-			m_cachePage = m_pStorage->GetEmptyFilePage(-1, m_nNodePageSize);
 		}
 
 		~TBPlusTreeSetBase()
@@ -56,7 +53,7 @@ namespace bptreedb
 		}
 
 		/*common*/
-		void InnitTree(TCompressorParamsBasePtr pParams, bool bMinSplit);
+		void InnitTree(TCompressorParamsBasePtr pParams, bool bMinSplit, uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype);
 		bool IsTreeInit();
 		void Flush();
 		void SetBPTreePerfCounter(CommonLib::TPrefCounterPtr pBPTreePerfCounter);
@@ -114,6 +111,7 @@ namespace bptreedb
 		
 		TBPTreeNodePtr LoadNodeFromStorage(int64_t nAddr);
 		TBPTreeNodePtr CreateNode(int64_t nAddr, bool isLeaf, bool addToChache);
+		uint32_t GetNodePageSize() const;
 
 
 		TBPTreeNodePtr NewNode(bool isLeaf, bool addToChache);
@@ -178,21 +176,23 @@ namespace bptreedb
 
 
 
-		TComp		 m_comp;
+		TComp	m_comp;
 		TBPTreeNodePtr m_pRoot;
-		TLink m_nRootAddr;
-		TLink m_nPageBTreeInfo;
-		uint32_t m_nNodePageSize;
+		TLink m_nRootAddr{ -1 };
+		TLink m_nPageBTreeInfo{ -1 };
+		uint32_t m_nNodePageSize{ 0 };
 	//	CommonLib::IAllocPtr m_pAlloc;
 		TAllocsSetPtr m_pAllocsSet;
 		std::shared_ptr<TStorage> m_pStorage;
-		uint32_t m_nCacheSize;
-		uint64_t m_nPageInnerCompInfo;
-		uint64_t m_nPageLeafPageCompInfo;
-		bool m_bMulti;
-		bool m_bMinSplit;
-		bool m_bLockRemoveItemFromCache;
+		uint32_t m_nCacheSize{ 0 };
+		bool m_bMulti{ false };
+		bool m_bMinSplit{ false };
+		bool m_bLockRemoveItemFromCache{ false };
 		CommonLib::TPrefCounterPtr m_pBPTreePerfCounter;
+		uint32_t m_objectType{ 0 };
+		uint32_t m_objectID{ 0 };
+		uint32_t m_parentID{ 0 };
+		uint32_t m_parentType{ 0 };
 
 
 		TCompressorParamsBasePtr m_pCompressParams;

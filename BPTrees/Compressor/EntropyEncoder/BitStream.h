@@ -12,12 +12,11 @@ namespace bptreedb
 		CBitBase();
 		~CBitBase();
 
-		void AttachBuffer(byte_t* buffer, uint32_t size);
+		void AttachBuffer(byte_t* buffer);
 		static uint32_t GetByteForBits(uint32_t nBits);
 
 	protected:
 		byte_t* m_buffer{ 0 };
-		uint32_t m_size{ 0 };
 		uint32_t m_bit_pos{ 0 };
 
 		const uint32_t n_max_bits_for_ops = 31;

@@ -325,6 +325,7 @@
     <ClInclude Include="BPTrees\Compressor\CompressUtils.h" />
     <ClInclude Include="BPTrees\Compressor\EntropyEncoder\BaseNumLenEncoder.h" />
     <ClInclude Include="BPTrees\Compressor\EntropyEncoder\BitStream.h" />
+    <ClInclude Include="BPTrees\Compressor\EntropyEncoder\BoolEncoder.h" />
     <ClInclude Include="BPTrees\Compressor\EntropyEncoder\UnsignedNumLenEncoder.h" />
     <ClInclude Include="BPTrees\Compressor\StringCompressor\EmptyStringEncoder.h" />
     <ClInclude Include="BPTrees\Compressor\StringCompressor\ZLibStringEncoder.h" />
@@ -339,6 +340,7 @@
     <ClInclude Include="storage\CacheStorage.h" />
     <ClInclude Include="storage\FilePage.h" />
     <ClInclude Include="storage\FileStorage.h" />
+    <ClInclude Include="storage\PageObject.h" />
     <ClInclude Include="storage\storage.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="utils\algorithm.h" />
@@ -359,6 +361,7 @@
     <ClCompile Include="BPTrees\Compressor\CompressorParams.cpp" />
     <ClCompile Include="BPTrees\Compressor\EntropyEncoder\BaseNumLenEncoder.cpp" />
     <ClCompile Include="BPTrees\Compressor\EntropyEncoder\BitStream.cpp" />
+    <ClCompile Include="BPTrees\Compressor\EntropyEncoder\BoolEncoder.cpp" />
     <ClCompile Include="BPTrees\Compressor\EntropyEncoder\UnsignedNumLenEncoder.cpp" />
     <ClCompile Include="BPTrees\Compressor\StringCompressor\EmptyStringEncoder.cpp" />
     <ClCompile Include="BPTrees\Compressor\StringCompressor\ZLibStringEncoder.cpp" />

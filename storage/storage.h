@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../CommonLib/CommonLib.h"
+#include "PageObject.h"
 
 namespace bptreedb
 {
@@ -36,6 +37,11 @@ namespace bptreedb
 		virtual void SetAddr(int64_t nAddr) = 0;
 		virtual void Erase(byte_t val = 0) = 0;
 
+		virtual void ReloadHeader() = 0;
+		virtual ObjectPageType GetObjectType() const = 0;
+		virtual uint32_t GetObjectID() const = 0;
+		virtual ObjectPageType GetParentType() const = 0;
+		virtual uint32_t GetParentObjectID() const = 0;
 	};
 
 
@@ -79,10 +85,10 @@ namespace bptreedb
 		virtual void GetFilePage(FilePagePtr& pPage, int64_t nAddr, uint32_t nSize, bool decrypt) = 0;
 		virtual void SaveFilePage(FilePagePtr& pPage) = 0;
 		virtual void DropFilePage(int64_t nAddr) = 0;
-		virtual FilePagePtr GetNewFilePage(uint32_t nSize = 0) = 0;
+		virtual FilePagePtr GetNewFilePage(uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype, uint32_t nSize = 0) = 0;
 		virtual int64_t GetNewFilePageAddr(uint32_t nSize = 0) = 0;
 		virtual void SetOffset(uint64_t offset) = 0;
-		virtual FilePagePtr GetEmptyFilePage(int64_t nAddr, uint32_t nSize) = 0;
+		virtual FilePagePtr GetEmptyFilePage(int64_t nAddr, uint32_t nSize, uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype) = 0;
 
 		virtual void Flush() = 0;
 
