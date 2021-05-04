@@ -49,6 +49,27 @@
     <Filter Include="BPTrees\Compressor\StringCompressor">
       <UniqueIdentifier>{30092b10-1adb-4def-94fc-2e319c28307d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="database">
+      <UniqueIdentifier>{c705e4b2-1d8d-46d7-a018-922a4aa58f32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="database\transaction">
+      <UniqueIdentifier>{c279d236-f453-4b97-9603-967dc93c57de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="database\include">
+      <UniqueIdentifier>{4ffa9095-3759-4e6c-b747-9fab3f773864}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="database\transaction\wal">
+      <UniqueIdentifier>{5572f2b3-a91c-434b-8614-5c514f54c090}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="database\transaction\twophaselocking">
+      <UniqueIdentifier>{47e2fdb8-b990-4703-9c3a-a63aa4239e89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="database\transaction\direct">
+      <UniqueIdentifier>{5bbd69e2-5888-4038-b109-cefdb2cd8e27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="database\fileds">
+      <UniqueIdentifier>{2bfded6b-0df8-41d7-ab5c-f8c71be4726b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -235,6 +256,33 @@
     <ClInclude Include="storage\PageObject.h">
       <Filter>storage</Filter>
     </ClInclude>
+    <ClInclude Include="BPTrees\Compressor\EntropyEncoder\SignedNumLenEncoder.h">
+      <Filter>BPTrees\Compressor\EntropyEncoder</Filter>
+    </ClInclude>
+    <ClInclude Include="database\include\bptreedb.h">
+      <Filter>database\include</Filter>
+    </ClInclude>
+    <ClInclude Include="database\transaction\wal\TransactionLog.h">
+      <Filter>database\transaction\wal</Filter>
+    </ClInclude>
+    <ClInclude Include="database\transaction\twophaselocking\TransactionManager.h">
+      <Filter>database\transaction\twophaselocking</Filter>
+    </ClInclude>
+    <ClInclude Include="database\transaction\Transaction.h">
+      <Filter>database\transaction</Filter>
+    </ClInclude>
+    <ClInclude Include="database\transaction\twophaselocking\TransactionLog.h">
+      <Filter>database\transaction\twophaselocking</Filter>
+    </ClInclude>
+    <ClInclude Include="database\transaction\twophaselocking\Transaction.h">
+      <Filter>database\transaction\twophaselocking</Filter>
+    </ClInclude>
+    <ClInclude Include="database\include\Value.h">
+      <Filter>database\include</Filter>
+    </ClInclude>
+    <ClInclude Include="database\fields\Field.h">
+      <Filter>database\fileds</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -284,6 +332,18 @@
     </ClCompile>
     <ClCompile Include="BPTrees\Compressor\EntropyEncoder\BoolEncoder.cpp">
       <Filter>BPTrees\Compressor\EntropyEncoder</Filter>
+    </ClCompile>
+    <ClCompile Include="BPTrees\Compressor\EntropyEncoder\SignedNumLenEncoder.cpp">
+      <Filter>BPTrees\Compressor\EntropyEncoder</Filter>
+    </ClCompile>
+    <ClCompile Include="database\transaction\wal\TransactionLog.cpp">
+      <Filter>database\transaction\wal</Filter>
+    </ClCompile>
+    <ClCompile Include="database\transaction\twophaselocking\TransactionLog.cpp">
+      <Filter>database\transaction\twophaselocking</Filter>
+    </ClCompile>
+    <ClCompile Include="database\transaction\twophaselocking\Transaction.cpp">
+      <Filter>database\transaction\twophaselocking</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

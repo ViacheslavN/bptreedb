@@ -188,8 +188,8 @@ namespace bptreedb
 	{
 		try
 		{
+			std::lock_guard<std::recursive_mutex> locker(m_mutex);
 			{
-
 				CommonLib::CPrefCounterHolder holder(m_pStoragePerformer, eReadData, nSize);
 
 				m_file.SetFilePos64(m_offset + (nAddr * m_minPageSize), CommonLib::soFromBegin);
@@ -216,6 +216,8 @@ namespace bptreedb
 	{
 		try
 		{
+			std::lock_guard<std::recursive_mutex> locker(m_mutex);
+
 			int64_t nFileAddr = nAddr * m_minPageSize;
 			m_file.SetFilePos64(m_offset + nFileAddr, CommonLib::soFromBegin);
 
@@ -271,6 +273,8 @@ namespace bptreedb
 	{
 		try
 		{
+			std::lock_guard<std::recursive_mutex> locker(m_mutex);
+
 			if (nSize == 0)
 				nSize = m_minPageSize;
 

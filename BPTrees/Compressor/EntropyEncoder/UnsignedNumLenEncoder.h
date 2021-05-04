@@ -20,7 +20,7 @@ namespace bptreedb
 	class CUnsignedNumLenEncoder: public CBaseNumLenEncoder
 	{
 	public:
-		CUnsignedNumLenEncoder(TAllocsSetPtr pAllocsSet, TCompressorParamsBasePtr pParams, ECompressParams type);
+		CUnsignedNumLenEncoder(TAllocsSetPtr ptrAllocsSet, TCompressorParamsBasePtr ptrParams, ECompressParams type);
 		~CUnsignedNumLenEncoder();
 
 	
@@ -31,7 +31,7 @@ namespace bptreedb
 		void FinishDecoding(CommonLib::IReadStream *pStream);
 
 		template <class TSymbol>
-		bool EncodeSymbol(TSymbol symbol)
+		bool EncodeSymbol(const TSymbol& symbol)
 		{
 
 			uint16_t nBitLen = 0;

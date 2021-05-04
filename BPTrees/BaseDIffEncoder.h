@@ -91,7 +91,7 @@ namespace bptreedb
 					{
 						TValue nPrev = vecValues[nIndex - 1];
 						TValue nNext = vecValues[nIndex + 1];
-						TValue nNewSymbol = nNext - nPrev;
+						TSignValue nNewSymbol = nNext - nPrev;
 
 						AddDiffSymbol(nNewSymbol);
 

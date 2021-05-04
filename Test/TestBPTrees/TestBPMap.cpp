@@ -10,14 +10,16 @@ typedef bptreedb::TBaseValueEncoder<int64_t,  bptreedb::CUnsignedNumLenEncoder> 
 
 
 //typedef bptreedb::TEmptyValueEncoder<int64_t> TKeyEncoder;
-typedef bptreedb::TEmptyValueEncoder<double> TValueEncoder;
+//typedef bptreedb::TEmptyValueEncoder<double> TValueEncoder;
 //typedef bptreedb::TEmptyValueEncoder<int64_t> TLinkEncoder;
 
-typedef bptreedb::BPTreeLeafNodeMap<int64_t, double,  bptreedb::TBaseNodeCompressor<int64_t, double, TKeyEncoder, TValueEncoder > > TLeafNode;
+typedef bptreedb::TValueDiffEncoder<int64_t, int64_t, bptreedb::CSignedNumLenEncoder> TValueEncoder;
+
+typedef bptreedb::BPTreeLeafNodeMap<int64_t, int64_t,  bptreedb::TBaseNodeCompressor<int64_t, int64_t, TKeyEncoder, TValueEncoder > > TLeafNode;
 
 
 typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TKeyEncoder, TLinkEncoder > > TInnerNode;
-typedef bptreedb::TBPMap<int64_t, double, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPMap;
+typedef bptreedb::TBPMap<int64_t, int64_t, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPMap;
 
 
 typedef TDataGenerator<int64_t, TRandomInegerGenerator<int64_t> > TTestDataGenerator;
@@ -103,7 +105,7 @@ void InsertBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPe
 		{
 				 
 			int64_t val = (int64_t)pDataGenerator->GetValue((uint32_t)i);
-			tree.insert(val, (double)i);
+			tree.insert(val,  i);
 			if (i%nStep == 0)
 			{
 				std::cout << i << "  " << (i * 100) / nCount << " %" << '\r';
@@ -149,7 +151,7 @@ void FindBPTreeMap(CommonLib::IAllocPtr pAlloc, CommonLib::TPrefCounterPtr pPerf
 			if (it.Key() != val)
 				throw CommonLib::CExcBase("Error find key %1", it.Key(), val);
 
-			if (it.Value() != (double)i)
+			if (it.Value() !=  i)
 				throw CommonLib::CExcBase("Error find value %1", it.Value(), i);
 
 			if (i%nStep == 0)
@@ -297,9 +299,9 @@ void TestBPTreeMap()
 #endif
 
 		int64_t nBegin = 0;
-		int64_t nEnd = 1000000;
+		int64_t nEnd = 10000000;
 		int64_t nBPTreePage = -1;
-		uint32_t nNodeCache =	100;
+		uint32_t nNodeCache =	10000;
 		bool checkCRC = false;
 		
 		

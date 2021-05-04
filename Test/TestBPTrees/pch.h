@@ -44,6 +44,7 @@
 #include "../../BPTrees/BaseEncoder.h"
 #include "../../BPTrees/BaseDIffEncoder.h"
 #include "../../BPTrees/Compressor/EntropyEncoder/UnsignedNumLenEncoder.h"
+#include "../../BPTrees/Compressor/EntropyEncoder/SignedNumLenEncoder.h"
 
 #ifdef _WIN32
 	#include "../../BPTrees/Compressor/ZlibCompressor/zstdencoder.h"

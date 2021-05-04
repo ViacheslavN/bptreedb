@@ -43,6 +43,9 @@ public:
 	virtual uint32_t GetObjectID() const ;
 	virtual ObjectPageType GetParentType() const;
 	virtual uint32_t GetParentObjectID() const;
+	virtual byte_t* GetMetaData() = 0;
+	virtual const byte_t* GetMetaData() const = 0;
+	virtual uint32_t GetMetaDataSize() const = 0;
 
 private:
  
@@ -63,7 +66,9 @@ private:
 	uint32_t m_parentID{ 0 };
 	uint32_t m_parentType{ 0 };
 
-	static const uint32_t page_header_size = 4 * sizeof(uint32_t); 
+	static const uint32_t m_metainfo_block_size = 50;
+	static const uint32_t object_id_size = 4 * sizeof(uint32_t);
+	static const uint32_t page_header_size = object_id_size + m_metainfo_block_size;
 };
  
 

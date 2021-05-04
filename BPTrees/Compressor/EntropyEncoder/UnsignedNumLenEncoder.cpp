@@ -4,11 +4,10 @@
 namespace bptreedb
 {
 
-	CUnsignedNumLenEncoder::CUnsignedNumLenEncoder(TAllocsSetPtr pAllocsSet, TCompressorParamsBasePtr pParams, ECompressParams type)
+	CUnsignedNumLenEncoder::CUnsignedNumLenEncoder(TAllocsSetPtr ptrAllocsSet, TCompressorParamsBasePtr ptrParams, ECompressParams type)
 	{
-
-		 TCompressorParamsPtr pCompParams = pParams->GetCompressParams(type);
-		 m_estimateErr = pCompParams->GetIntParam("error", 1);
+		 TCompressorParamsPtr ptrCompParams = ptrParams->GetCompressParams(type);
+		 m_estimateErr = ptrCompParams->GetIntParam("error", 1);
 	}
 
 	CUnsignedNumLenEncoder::~CUnsignedNumLenEncoder()

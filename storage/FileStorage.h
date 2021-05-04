@@ -12,7 +12,7 @@
 
 namespace bptreedb
 {
-	class CFileStorage : public IStorage
+	class CFileStorage : public IStorage, public IFilePages
 	{
 	private:
 		CFileStorage(const CFileStorage&);
@@ -46,16 +46,18 @@ namespace bptreedb
 
 		virtual void Flush();
 		virtual void SetStoragePerformer(CommonLib::TPrefCounterPtr pStoragePerformer);
+		virtual int32_t GetStorageId() const;
 
 	private:
 
 		CommonLib::file::CFile m_file;
-		std::shared_ptr<IPageCipher> m_pageCipher;
+		IPageCipherPtr m_pageCipher;
 		CommonLib::IAllocPtr m_pAlloc;
 
 		uint64_t m_offset{ 0 };
 		uint32_t m_minPageSize{ 256 };
 		uint64_t m_lastAddr{ 0 };
+		int32_t m_storage_id{ -1 };
 
 		struct TPageFreeChecker
 		{
@@ -73,5 +75,6 @@ namespace bptreedb
 		typedef std::vector<byte_t> TBufferForChiper;
 		TBufferForChiper m_bufForChiper;
 		CommonLib::TPrefCounterPtr m_pStoragePerformer;
+		mutable std::recursive_mutex m_mutex;
 	};
 }

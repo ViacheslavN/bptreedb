@@ -163,6 +163,7 @@
     <ClCompile Include="MixTest.cpp" />
     <ClCompile Include="TestEncoder.cpp" />
     <ClCompile Include="TestEntropyEncoder.cpp" />
+    <ClCompile Include="TestSignedEncoder.cpp" />
     <ClCompile Include="TestStringCompressor.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -180,6 +181,7 @@
     <ClInclude Include="BitStream.h" />
     <ClInclude Include="TestEncoder.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="TestSignedEncoder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

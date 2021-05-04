@@ -27,4 +27,7 @@
 #include "../../../CommonLib/filesystem/File.h"
 #include "../../../CommonLib/compress/EntropyCoders/RangeCoder.h"
 #include "../../../CommonLib/compress/EntropyCoders/ArithmeticCoder.h"
+#include "../TestDataGeneratorLib/RandomIntegerValueGenerator.h"
+#include "../TestDataGeneratorLib/IntegerValueGenerator.h"
+#include "../TestDataGeneratorLib/TestDataGenerator.h"
 #pragma warning(disable:4146)

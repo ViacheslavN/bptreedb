@@ -30,6 +30,9 @@
     <ClCompile Include="BitStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TestSignedEncoder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -39,6 +42,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="BitStream.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TestSignedEncoder.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

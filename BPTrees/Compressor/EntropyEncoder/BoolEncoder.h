@@ -24,7 +24,7 @@ namespace bptreedb
 		void EncodeBit(bool bit, uint32_t pos);
 
 
-		void BeginDecoding(CommonLib::IReadStream *pStream, uint32_t count);
+		void BeginDecoding(CommonLib::IReadStream *pStream);
 		bool DecodeBit(uint32_t pos);
 
 	private:
@@ -52,7 +52,9 @@ namespace bptreedb
 
 		enum  BitsOffset
 		{
-			SignBit = 2
+			SignBit = 2,
+			SignPosBit = 3,
+			DataTypePosBit = 4
 		};
 
 
@@ -66,7 +68,7 @@ namespace bptreedb
 				if (bit)
 				{
 					uint32_t byte_offset = m_bit_pos >> 3;
-					m_pBuffer[byte_offset] |= ((byte_t)1 << (m_bit_pos & 0xf));
+					m_pBuffer[byte_offset] |= ((byte_t)1 << (m_bit_pos & 0x7));
 				}
 
 				m_bit_pos += 1;			
@@ -74,9 +76,8 @@ namespace bptreedb
 
 			bool ReadBit()
 			{
-				uint32_t byte_offset = m_bit_pos >> 3;
-				m_bit_pos += 1;
-				return (m_pBuffer[byte_offset] >> (m_bit_pos & 0xf)) & 0x1;
+				uint32_t byte_offset = m_bit_pos >> 3; 
+				return (m_pBuffer[byte_offset] >> (m_bit_pos++ & 0x7)) & 0x1;
 			}
 
 

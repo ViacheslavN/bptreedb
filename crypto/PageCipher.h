@@ -19,4 +19,6 @@ namespace bptreedb
 		virtual void decryptBuf(byte_t* pBuf, uint32_t len);
 
 	};
+
+	typedef std::shared_ptr<IPageCipher> IPageCipherPtr;
 }

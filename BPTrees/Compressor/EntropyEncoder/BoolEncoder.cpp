@@ -38,21 +38,21 @@ namespace bptreedb
 	uint32_t CBoolEncoder::GetCompressSize() const
 	{
 		if (m_bools[0] == 0 || m_bools[1] == 0)
-			return 1;
+			return 1 + sizeof(uint32_t);
 
 		uint32_t nByteSize = ((m_bools[0] + m_bools[1] + 7) / 8) + 1;
 
 		uint32_t nMinCount = min(m_bools[0], m_bools[1]);
 
 		eCompressDataType type = GetCompressType(m_bools[0] + m_bools[1]);
-		uint32_t nBytePosCodeSize = GetLenForDiffLen(type, nMinCount + 1);
+		uint32_t nBytePosCodeSize = GetLenForDiffLen(type, nMinCount );
 
-		return min(nBytePosCodeSize, nByteSize);
+		return min(nBytePosCodeSize, nByteSize) + sizeof(uint32_t);
 
 	}
 
 
-	bool CBoolEncoder::BeginEncoding(CommonLib::IWriteStream *pStream)
+	bool CBoolEncoder::BeginEncoding(CommonLib::IWriteStream *ptrStream)
 	{
 		byte_t nFlag = 0;
 		if (m_bools[0] == 0 || m_bools[1] == 0)
@@ -62,49 +62,55 @@ namespace bptreedb
 			if (m_bools[1] != 0)
 				nFlag |= (1 << SignBit);
 
-			pStream->Write(nFlag);
+			ptrStream->Write(nFlag);
+			return ptrStream->WriteSafe(m_bools[0] + m_bools[1]);
 		}
 		else
 		{
  
-			CommonLib::IMemoryStream *pMemStream = dynamic_cast<CommonLib::IMemoryStream *>(pStream);
-			if (!pMemStream)
+			CommonLib::IMemoryStream *ptrMemStream = dynamic_cast<CommonLib::IMemoryStream *>(ptrStream);
+			if (!ptrMemStream)
 				throw CommonLib::CExcBase(L"IStream isn't memstream");
 
 			uint32_t nByteSize = ((m_bools[0] + m_bools[1] + 7) / 8) + 1;
 			uint32_t nMinCount = min(m_bools[0], m_bools[1]);
 			m_dataType = GetCompressType(m_bools[0] + m_bools[1]);
-			uint32_t nBytePosCodeSize = GetLenForDiffLen(m_dataType, nMinCount + 1);
+			uint32_t nBytePosCodeSize = GetLenForDiffLen(m_dataType, nMinCount);
 
 			if (nByteSize < nBytePosCodeSize)
 			{
-				m_encodeType = PosBits;
-				pStream->Write((byte_t)m_encodeType);
-				m_bitsRW.Attach(pMemStream->Buffer());
-
-				if (!pStream->SeekSafe(nByteSize, CommonLib::soFromCurrent))
+				m_encodeType = BitEncode;
+				ptrStream->Write((byte_t)m_encodeType);
+				if (!ptrStream->WriteSafe(m_bools[0] + m_bools[1]))
 					return false;
+				
+				m_bitsRW.Attach(ptrMemStream->BufferFromCurPos());
+				return ptrStream->SeekSafe(nByteSize, CommonLib::soFromCurrent);
 
 			}
 			else
 			{
-				m_encodeType = BitEncode;
-				pStream->Write((byte_t)m_encodeType);
+				m_encodeType = PosBits;
+				nFlag = m_encodeType;
 				if (m_bools[1] != 0)
 				{
-					nFlag |= (1 << SignBit);
+					nFlag |= (1 << SignPosBit);
 					m_bit = true;
 				}
+				nFlag |= ((byte_t)m_dataType << DataTypePosBit);
 
-				WriteCompressValue(m_dataType, nMinCount, pStream);
-
-				m_WriteStream.AttachBuffer(pMemStream->Buffer(), nBytePosCodeSize);
-				if (!pStream->SeekSafe(nBytePosCodeSize, CommonLib::soFromCurrent))
+				ptrStream->Write(nFlag);
+				if (!ptrStream->WriteSafe(m_bools[0] + m_bools[1]))
 					return false;
+
+				WriteCompressValue(m_dataType, nMinCount, ptrStream);	
+
+				m_WriteStream.AttachBuffer(ptrMemStream->BufferFromCurPos(), nBytePosCodeSize);
+				return ptrStream->SeekSafe(nBytePosCodeSize, CommonLib::soFromCurrent);
 			}
 		}
-
-		return true;
+		
+ 
 	}
 
 	void CBoolEncoder::EncodeBit(bool bit, uint32_t pos)
@@ -125,9 +131,11 @@ namespace bptreedb
 		}
 	}
 
-	void CBoolEncoder::BeginDecoding(CommonLib::IReadStream *pStream, uint32_t count)
+	void CBoolEncoder::BeginDecoding(CommonLib::IReadStream *ptrStream)
 	{
-		byte_t nFlag = pStream->ReadByte();
+		byte_t nFlag = ptrStream->ReadByte();
+		uint32_t count = ptrStream->ReadIntu32();
+
 		m_encodeType = (EncodeType)(nFlag & 0x03);
 
 		if (m_encodeType == OneBit)
@@ -137,30 +145,30 @@ namespace bptreedb
 		}
 		else if (m_encodeType == PosBits)
 		{
-			m_pos.resize(count);
-			m_bit = nFlag & (1 << 2) ? true : false;
-			m_dataType = GetCompressType(count);
-
+		
+			m_bit = nFlag & (1 << SignPosBit) ? true : false;
+			m_dataType =  (eCompressDataType)(nFlag >> DataTypePosBit);
 			uint32_t posCount = 0;
-			ReadCompressValue<uint32_t>(m_dataType, posCount, pStream);
+			ReadCompressValue<uint32_t>(m_dataType, posCount, ptrStream);
 			m_pos.reserve(posCount);
+
 			for (size_t i = 0; i < posCount; ++i)
 			{
 				uint32_t nPos = 0;
-				ReadCompressValue<uint32_t>(m_dataType, nPos, pStream);
+				ReadCompressValue<uint32_t>(m_dataType, nPos, ptrStream);
 				m_pos.push_back(nPos);
 			}
 		}
 		else if (m_encodeType == BitEncode)
 		{
-			CommonLib::IMemoryStream *pMemStream = dynamic_cast<CommonLib::IMemoryStream *>(pStream);
-			if (!pMemStream)
+			CommonLib::IMemoryStream *ptrMemStream = dynamic_cast<CommonLib::IMemoryStream *>(ptrStream);
+			if (!ptrMemStream)
 				throw CommonLib::CExcBase(L"IStream isn't memstream");
 
 			uint32_t nByteSize = ((count + 7) / 8) + 1;
 
-			m_bitsRW.Attach(pMemStream->Buffer());
-			pStream->Seek(nByteSize, CommonLib::soFromCurrent);
+			m_bitsRW.Attach(ptrMemStream->BufferFromCurPos());
+			ptrStream->Seek(nByteSize, CommonLib::soFromCurrent);
 		}
 	}
 

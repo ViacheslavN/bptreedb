@@ -222,5 +222,19 @@ namespace bptreedb
 		return m_parentID;
 	}
 
+	byte_t* CFilePage::GetMetaData()
+	{
+		return m_pData + object_id_size;
+	}
+
+	const byte_t* CFilePage::GetMetaData() const
+	{
+		return m_pData + object_id_size;
+	}
+
+	uint32_t CFilePage::GetMetaDataSize() const
+	{
+		return m_metainfo_block_size;
+	}
 
 }

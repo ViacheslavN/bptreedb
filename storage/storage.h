@@ -42,6 +42,10 @@ namespace bptreedb
 		virtual uint32_t GetObjectID() const = 0;
 		virtual ObjectPageType GetParentType() const = 0;
 		virtual uint32_t GetParentObjectID() const = 0;
+
+		virtual byte_t* GetMetaData() = 0;
+		virtual const byte_t* GetMetaData() const = 0;
+		virtual uint32_t GetMetaDataSize() const = 0;
 	};
 
 
@@ -61,6 +65,25 @@ namespace bptreedb
 
 	};
 
+
+
+	class IFilePages
+	{
+		public
+			IFilePages(){}
+			~IFilePages(){}
+
+			virtual FilePagePtr GetFilePage(int64_t nAddr, uint32_t nSize, bool decrypt) = 0;
+			virtual void GetFilePage(FilePagePtr& pPage, int64_t nAddr, uint32_t nSize, bool decrypt) = 0;
+			virtual void SaveFilePage(FilePagePtr& pPage) = 0;
+			virtual void DropFilePage(int64_t nAddr) = 0;
+			virtual FilePagePtr GetNewFilePage(uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype, uint32_t nSize = 0) = 0;
+			virtual int64_t GetNewFilePageAddr(uint32_t nSize = 0) = 0;
+			virtual FilePagePtr GetEmptyFilePage(int64_t nAddr, uint32_t nSize, uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype) = 0;
+	};
+
+	typedef std::shared_ptr<IFilePages> FilePagesPtr;
+
 	class IStorage
 	{
 	public:
@@ -72,31 +95,20 @@ namespace bptreedb
 			eDecryptData
 		};
 		
-
 		IStorage() {}
 		virtual ~IStorage() {}
 
+		virtual uint32_t GetStorageId() const = 0;
 		virtual void Open(const wchar_t* pszName, bool bCreate, uint32_t nMinPageSize = 8192) = 0;
 		virtual void Close() = 0;
-
 		virtual void ReadData(int64_t nAddr, byte_t* pData, uint32_t nSize, bool decrypt) = 0;
-		virtual void WriteData(int64_t nAddr, const byte_t* pData, uint32_t nSize, bool decrypt) = 0;
-		virtual FilePagePtr GetFilePage(int64_t nAddr, uint32_t nSize, bool decrypt) = 0;
-		virtual void GetFilePage(FilePagePtr& pPage, int64_t nAddr, uint32_t nSize, bool decrypt) = 0;
-		virtual void SaveFilePage(FilePagePtr& pPage) = 0;
-		virtual void DropFilePage(int64_t nAddr) = 0;
-		virtual FilePagePtr GetNewFilePage(uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype, uint32_t nSize = 0) = 0;
-		virtual int64_t GetNewFilePageAddr(uint32_t nSize = 0) = 0;
+		virtual void WriteData(int64_t nAddr, const byte_t* pData, uint32_t nSize, bool decrypt) = 0;	
 		virtual void SetOffset(uint64_t offset) = 0;
-		virtual FilePagePtr GetEmptyFilePage(int64_t nAddr, uint32_t nSize, uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype) = 0;
-
 		virtual void Flush() = 0;
-
-		virtual void SetStoragePerformer(CommonLib::TPrefCounterPtr pStoragePerformer) = 0;
-	
+		virtual void SetStoragePerformer(CommonLib::TPrefCounterPtr pStoragePerformer) = 0;	
 	};
 
-	typedef std::shared_ptr<IStorage> TStoragePtr;
+	typedef std::shared_ptr<IStorage> IStoragePtr;
 
 
 

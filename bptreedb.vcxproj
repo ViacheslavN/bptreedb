@@ -326,6 +326,7 @@
     <ClInclude Include="BPTrees\Compressor\EntropyEncoder\BaseNumLenEncoder.h" />
     <ClInclude Include="BPTrees\Compressor\EntropyEncoder\BitStream.h" />
     <ClInclude Include="BPTrees\Compressor\EntropyEncoder\BoolEncoder.h" />
+    <ClInclude Include="BPTrees\Compressor\EntropyEncoder\SignedNumLenEncoder.h" />
     <ClInclude Include="BPTrees\Compressor\EntropyEncoder\UnsignedNumLenEncoder.h" />
     <ClInclude Include="BPTrees\Compressor\StringCompressor\EmptyStringEncoder.h" />
     <ClInclude Include="BPTrees\Compressor\StringCompressor\ZLibStringEncoder.h" />
@@ -336,6 +337,14 @@
     <ClInclude Include="BPTrees\StringPageAlloc.h" />
     <ClInclude Include="BPTrees\StringVal.h" />
     <ClInclude Include="crypto\PageCipher.h" />
+    <ClInclude Include="database\fields\Field.h" />
+    <ClInclude Include="database\include\bptreedb.h" />
+    <ClInclude Include="database\include\Value.h" />
+    <ClInclude Include="database\transaction\Transaction.h" />
+    <ClInclude Include="database\transaction\twophaselocking\Transaction.h" />
+    <ClInclude Include="database\transaction\twophaselocking\TransactionLog.h" />
+    <ClInclude Include="database\transaction\twophaselocking\TransactionManager.h" />
+    <ClInclude Include="database\transaction\wal\TransactionLog.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="storage\CacheStorage.h" />
     <ClInclude Include="storage\FilePage.h" />
@@ -362,11 +371,15 @@
     <ClCompile Include="BPTrees\Compressor\EntropyEncoder\BaseNumLenEncoder.cpp" />
     <ClCompile Include="BPTrees\Compressor\EntropyEncoder\BitStream.cpp" />
     <ClCompile Include="BPTrees\Compressor\EntropyEncoder\BoolEncoder.cpp" />
+    <ClCompile Include="BPTrees\Compressor\EntropyEncoder\SignedNumLenEncoder.cpp" />
     <ClCompile Include="BPTrees\Compressor\EntropyEncoder\UnsignedNumLenEncoder.cpp" />
     <ClCompile Include="BPTrees\Compressor\StringCompressor\EmptyStringEncoder.cpp" />
     <ClCompile Include="BPTrees\Compressor\StringCompressor\ZLibStringEncoder.cpp" />
     <ClCompile Include="BPTrees\StringPageAlloc.cpp" />
     <ClCompile Include="BPTrees\StringVal.cpp" />
+    <ClCompile Include="database\transaction\twophaselocking\Transaction.cpp" />
+    <ClCompile Include="database\transaction\twophaselocking\TransactionLog.cpp" />
+    <ClCompile Include="database\transaction\wal\TransactionLog.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">Create</PrecompiledHeader>

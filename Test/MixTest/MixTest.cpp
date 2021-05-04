@@ -7,9 +7,15 @@
 
 void TestStringCompressor();
 void TestEntropyEncoder();
+void TestSignedEncoder();
+
 
 int main()
 {
+
+	TestSignedEncoder();
+	return 0;
+
 	std::vector<byte_t> vecbitsBuffer;
 
 	vecbitsBuffer.resize(10000, 0);

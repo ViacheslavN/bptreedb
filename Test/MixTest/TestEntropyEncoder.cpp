@@ -1,7 +1,5 @@
 #include "pch.h"
-#include "../TestDataGeneratorLib/RandomIntegerValueGenerator.h"
-#include "../TestDataGeneratorLib/IntegerValueGenerator.h"
-#include "../TestDataGeneratorLib/TestDataGenerator.h"
+
 #include "TestEncoder.h"
 
 typedef TDataGenerator<int64_t, TRandomInegerGenerator<int64_t> > TTestDataGenerator;
