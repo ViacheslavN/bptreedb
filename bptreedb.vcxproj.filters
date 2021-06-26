@@ -271,9 +271,6 @@
     <ClInclude Include="database\transaction\Transaction.h">
       <Filter>database\transaction</Filter>
     </ClInclude>
-    <ClInclude Include="database\transaction\twophaselocking\TransactionLog.h">
-      <Filter>database\transaction\twophaselocking</Filter>
-    </ClInclude>
     <ClInclude Include="database\transaction\twophaselocking\Transaction.h">
       <Filter>database\transaction\twophaselocking</Filter>
     </ClInclude>
@@ -282,6 +279,12 @@
     </ClInclude>
     <ClInclude Include="database\fields\Field.h">
       <Filter>database\fileds</Filter>
+    </ClInclude>
+    <ClInclude Include="database\transaction\twophaselocking\TransactionLog2PL.h">
+      <Filter>database\transaction\twophaselocking</Filter>
+    </ClInclude>
+    <ClInclude Include="database\transaction\TransactionBase.h">
+      <Filter>database\transaction</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -339,11 +342,14 @@
     <ClCompile Include="database\transaction\wal\TransactionLog.cpp">
       <Filter>database\transaction\wal</Filter>
     </ClCompile>
-    <ClCompile Include="database\transaction\twophaselocking\TransactionLog.cpp">
-      <Filter>database\transaction\twophaselocking</Filter>
-    </ClCompile>
     <ClCompile Include="database\transaction\twophaselocking\Transaction.cpp">
       <Filter>database\transaction\twophaselocking</Filter>
+    </ClCompile>
+    <ClCompile Include="database\transaction\twophaselocking\TransactionLog2PL.cpp">
+      <Filter>database\transaction\twophaselocking</Filter>
+    </ClCompile>
+    <ClCompile Include="database\transaction\TransactionBase.cpp">
+      <Filter>database\transaction</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

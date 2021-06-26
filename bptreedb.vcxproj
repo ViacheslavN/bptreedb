@@ -341,8 +341,9 @@
     <ClInclude Include="database\include\bptreedb.h" />
     <ClInclude Include="database\include\Value.h" />
     <ClInclude Include="database\transaction\Transaction.h" />
+    <ClInclude Include="database\transaction\TransactionBase.h" />
     <ClInclude Include="database\transaction\twophaselocking\Transaction.h" />
-    <ClInclude Include="database\transaction\twophaselocking\TransactionLog.h" />
+    <ClInclude Include="database\transaction\twophaselocking\TransactionLog2PL.h" />
     <ClInclude Include="database\transaction\twophaselocking\TransactionManager.h" />
     <ClInclude Include="database\transaction\wal\TransactionLog.h" />
     <ClInclude Include="stdafx.h" />
@@ -377,8 +378,9 @@
     <ClCompile Include="BPTrees\Compressor\StringCompressor\ZLibStringEncoder.cpp" />
     <ClCompile Include="BPTrees\StringPageAlloc.cpp" />
     <ClCompile Include="BPTrees\StringVal.cpp" />
+    <ClCompile Include="database\transaction\TransactionBase.cpp" />
     <ClCompile Include="database\transaction\twophaselocking\Transaction.cpp" />
-    <ClCompile Include="database\transaction\twophaselocking\TransactionLog.cpp" />
+    <ClCompile Include="database\transaction\twophaselocking\TransactionLog2PL.cpp" />
     <ClCompile Include="database\transaction\wal\TransactionLog.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

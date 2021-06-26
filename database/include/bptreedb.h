@@ -323,8 +323,8 @@ namespace bptreedb
 	class  IDirectSelectCursor : public ICursor
 	{
 	public:
-		ISelectCursor() {}
-		virtual ~ISelectCursor() {}
+		IDirectSelectCursor() {}
+		virtual ~IDirectSelectCursor() {}
 
 		virtual bool  NextRow() = 0;
 		virtual IDirectRowPtr  GetRow() = 0;
@@ -404,7 +404,7 @@ namespace bptreedb
 		virtual ITablePtr GetTableByName(const astr& pszTableName) const = 0;
 
 		virtual bool AddTable(const STableParams& params, ITransactionPtr ptrTran) = 0;
-		virtual bool DropTable(const CommonLib::CString& sTableName, ITransactionPtr ptrTran) = 0;
+		virtual bool DropTable(const astr& sTableName, ITransactionPtr ptrTran) = 0;
 		virtual bool DropTable(int64_t nID, ITransactionPtr ptrTran) = 0;
 		virtual bool DropTable(ITablePtr ptrTable, ITransactionPtr ptrTran) = 0;		
 	};
@@ -442,7 +442,7 @@ namespace bptreedb
  	};
 
 
-	struct ITransaction  
+	class ITransaction  
 	{
 	public:
 		ITransaction() {}
@@ -454,10 +454,10 @@ namespace bptreedb
 		virtual void Commit() = 0;
 		virtual void Rollback() = 0;
 		virtual bool IsError() const = 0; 
-		virtual CommonLib::CGuid GetId() const = 0;
+		virtual const CommonLib::CGuid& GetId() const = 0;
 
 		virtual IStatementPtr CreateStatement(const astr& sSQLQuery) = 0;
-		virtual ICursorPtr ExecuteQuery(IStatement* pStatement) = 0;
+		virtual ICursorPtr ExecuteQuery(IStatementPtr pStatement) = 0;
 		 
 		virtual ICursorPtr ExecuteSelectQuery(const astr& sTable, const std::vector<astr>& fileds) = 0; // For test
 		virtual ICursorPtr ExecuteSelectQuery(const astr& sTable, const std::vector<astr>& fileds, const astr& sField, IValuePtr ptrVal, eOpType opType) = 0; // For test

@@ -43,9 +43,9 @@ public:
 	virtual uint32_t GetObjectID() const ;
 	virtual ObjectPageType GetParentType() const;
 	virtual uint32_t GetParentObjectID() const;
-	virtual byte_t* GetMetaData() = 0;
-	virtual const byte_t* GetMetaData() const = 0;
-	virtual uint32_t GetMetaDataSize() const = 0;
+	virtual byte_t* GetMetaData();
+	virtual const byte_t* GetMetaData() const;
+	virtual uint32_t GetMetaDataSize() const;
 
 private:
  

@@ -22,12 +22,12 @@ namespace bptreedb
 	public:
 
 		
-		CFileStorage(std::shared_ptr<CommonLib::IAlloc> pAlloc, /*uint32_t nCacheSize = 1000,*/ bool bCheckCRC = true);
+		CFileStorage(std::shared_ptr<CommonLib::IAlloc> pAlloc, int32_t storageId, bool bCheckCRC = true);
 		virtual ~CFileStorage();
 
 
 
-		virtual void Open(const wchar_t* pszName, bool bCreate, uint32_t nMinPageSize = 8192);
+		virtual void Open(const char* pszNameUtf8, bool bCreate, uint32_t nMinPageSize = 8192);
 		virtual void Close();
 
 
@@ -77,4 +77,6 @@ namespace bptreedb
 		CommonLib::TPrefCounterPtr m_pStoragePerformer;
 		mutable std::recursive_mutex m_mutex;
 	};
+
+	typedef std::shared_ptr< CFileStorage> CFileStoragePtr;
 }

@@ -6,7 +6,7 @@
 namespace bptreedb
 {
 
-	CFileStorage::CFileStorage(CommonLib::IAllocPtr pAlloc, /*uint32_t nCacheSize, */bool bCheckCRC) : m_pAlloc(pAlloc), /*m_pageCache(pAlloc), m_cacheSize(nCacheSize),*/ m_checkCRC(bCheckCRC)
+	CFileStorage::CFileStorage(CommonLib::IAllocPtr pAlloc, int32_t storageId, bool bCheckCRC) : m_pAlloc(pAlloc),  m_checkCRC(bCheckCRC), m_storage_id(storageId)
 	{
 		 
 	}
@@ -16,7 +16,7 @@ namespace bptreedb
 
 	}
 
-	void CFileStorage::Open(const wchar_t* pszName, bool bCreate, uint32_t nMinPageSize )
+	void CFileStorage::Open(const char* pszNameUtf8, bool bCreate, uint32_t nMinPageSize )
 	{
 		try
 		{
@@ -24,7 +24,7 @@ namespace bptreedb
 			CommonLib::file::enAccesRights nReadWrite = CommonLib::file::aeReadWrite;
 
 			m_minPageSize = nMinPageSize;
-			m_file.OpenFile(pszName, nOpenMode, nReadWrite, CommonLib::file::smNoMode, CommonLib::file::oftBinary);
+			m_file.OpenFileA(pszNameUtf8, nOpenMode, nReadWrite, CommonLib::file::smNoMode, CommonLib::file::oftBinary);
 
 			uint64_t nSize = m_file.GetFileSize();
 			m_lastAddr = nSize / m_minPageSize;
@@ -32,7 +32,7 @@ namespace bptreedb
 		}
 		catch (std::exception& excSrc)
 		{
-			CommonLib::CExcBase::RegenExcT("Error open  storage path: %1, create: %2", pszName, bCreate ? 1 : 0, excSrc);
+			CommonLib::CExcBase::RegenExcT("Error open  storage path: %1, create: %2", pszNameUtf8, bCreate ? 1 : 0, excSrc);
 			throw;
 		}
 	}

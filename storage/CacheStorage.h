@@ -15,9 +15,9 @@ namespace bptreedb
 			virtual ~TCacheStorage() {}
 
 
-			virtual void Open(const wchar_t* pszName, bool bCreate, uint32_t nMinPageSize = 8192)
+			virtual void Open(const char* pszNameUtf8, bool bCreate, uint32_t nMinPageSize = 8192)
 			{
-				return m_pStorage->Open(pszName, bCreate, nMinPageSize);
+				return m_pStorage->Open(pszNameUtf8, bCreate, nMinPageSize);
 			}
 
 			virtual void Close()

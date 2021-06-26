@@ -69,9 +69,9 @@ namespace bptreedb
 
 	class IFilePages
 	{
-		public
+	public:
 			IFilePages(){}
-			~IFilePages(){}
+			virtual ~IFilePages(){}
 
 			virtual FilePagePtr GetFilePage(int64_t nAddr, uint32_t nSize, bool decrypt) = 0;
 			virtual void GetFilePage(FilePagePtr& pPage, int64_t nAddr, uint32_t nSize, bool decrypt) = 0;
@@ -98,8 +98,8 @@ namespace bptreedb
 		IStorage() {}
 		virtual ~IStorage() {}
 
-		virtual uint32_t GetStorageId() const = 0;
-		virtual void Open(const wchar_t* pszName, bool bCreate, uint32_t nMinPageSize = 8192) = 0;
+		virtual int32_t GetStorageId() const = 0;
+		virtual void Open(const char* pszNameUtf8, bool bCreate, uint32_t nMinPageSize = 8192) = 0;
 		virtual void Close() = 0;
 		virtual void ReadData(int64_t nAddr, byte_t* pData, uint32_t nSize, bool decrypt) = 0;
 		virtual void WriteData(int64_t nAddr, const byte_t* pData, uint32_t nSize, bool decrypt) = 0;	
