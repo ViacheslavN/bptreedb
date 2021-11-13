@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../include/bptreedb.h"
- 
+#include "../include/Variant.h"
 
 namespace bptreedb
 {
@@ -19,9 +19,8 @@ namespace bptreedb
 		virtual bool Next() = 0;
 		virtual bool Back() = 0;
 		virtual bool IsNull() = 0;
-		virtual bool GetVal(IValuePtr ptrVal) = 0;
+		virtual void GetVal(CVariant& val) = 0;
 		virtual int64_t GetRowID() = 0;
-
 		virtual int64_t GetAddr() const = 0;
 		virtual int32_t GetPos() const = 0;
 
@@ -35,12 +34,12 @@ namespace bptreedb
 		IValueField() {}
 		virtual ~IValueField(){}
 
-		virtual void Insert(int64_t nOID, IValuePtr ptrVal, IFieldIteratorPtr ptrFromIter, IFieldIteratorPtr* ptrRetIter = nullptr) = 0;
-		virtual int64_t Insert(IValuePtr ptrVal, IFieldIteratorPtr ptrFromIter, IFieldIteratorPtr* ptrRetIter = nullptr) = 0;
+		virtual void Insert(int64_t nOID, const CVariant& val, IFieldIteratorPtr ptrFromIter, IFieldIteratorPtr* ptrRetIter = nullptr) = 0;
+		virtual int64_t Insert(const CVariant& val, IFieldIteratorPtr ptrFromIter, IFieldIteratorPtr* ptrRetIter = nullptr) = 0;
 
-		virtual void Update(int64_t nRowID, IValuePtr ptrFieldVal) = 0;
+		virtual void Update(int64_t nRowID, const CVariant& val) = 0;
 		virtual void Remove(int64_t nRowID, IFieldIteratorPtr* ptrRetIter = nullptr) = 0;
-		virtual bool Find(int64_t nRowID, IValuePtr ptrFieldVal) = 0;
+		virtual bool Find(int64_t nRowID, const CVariant& val) = 0;
 		virtual void Find(int64_t nRowID, IFieldIteratorPtr retPtr, IFieldIteratorPtr* ptrFrom = nullptr) = 0;
 
 		virtual IFieldIteratorPtr Find(int64_t nRowID, IFieldIteratorPtr pFrom) = 0;

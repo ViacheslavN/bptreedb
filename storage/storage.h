@@ -110,6 +110,4 @@ namespace bptreedb
 
 	typedef std::shared_ptr<IStorage> IStoragePtr;
 
-
-
 }

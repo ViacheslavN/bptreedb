@@ -13,6 +13,9 @@ void TestSignedEncoder();
 int main()
 {
 
+	bptreedb::CVariant variant = 123.4;
+	bptreedb::CVariant strVariant = astr("123445");
+	bptreedb::CVariant str1Variant = strVariant;
 	TestSignedEncoder();
 	return 0;
 

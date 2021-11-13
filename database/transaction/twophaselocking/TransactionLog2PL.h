@@ -12,6 +12,7 @@ namespace bptreedb
 
 				enum ePageFlags
 				{
+					eFP_NULL = 0,
 					eFP_NEW = 1,
 					eFP_CHANGE = 2,
 					eFP_EMPTY = 4,
@@ -20,7 +21,7 @@ namespace bptreedb
 				};
 
 			public:
-				CTransactionLog(CommonLib::IAllocPtr ptrAlloc, bool bCheckCRC);
+				CTransactionLog(CommonLib::IAllocPtr ptrAlloc, bool bCheckCRC, IFileStoragesHolderPtr ptrFileStoragesHolder);
 				~CTransactionLog();
 
 				void Open(const astr& fileName, bool bCreate, uint32_t nMinPageSize = 8192);
@@ -28,23 +29,23 @@ namespace bptreedb
 				void Flush();
 
 				FilePagePtr GetFilePage(int32_t nStorageId, int64_t nAddr, uint32_t nSize, bool decrypt);
-				void SaveFilePage(int32_t nStorageId, FilePagePtr& ptrPage);
+				void SaveFilePage(int32_t nStorageId, FilePagePtr ptrPage);
 				void DropFilePage(int32_t nStorageId, int64_t nAddr);
-				FilePagePtr GetNewFilePage(int32_t nStorageId, uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype, uint32_t nSize = 0);
+				FilePagePtr GetNewFilePage(int32_t nStorageId, uint32_t objectID, ObjectPageType objectType, uint32_t parentID, ObjectPageType parentType, uint32_t nSize = 0);
 				int64_t GetNewFilePageAddr(int32_t nStorageId, uint32_t nSize = 0);
 				FilePagePtr GetEmptyFilePage(int32_t nStorageId, int64_t nAddr, uint32_t nSize, uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype);
 
 			private:
+
 				CommonLib::IAllocPtr m_ptrAlloc;
 				CFileStoragePtr m_ptrFileStorage;
-
+				IFileStoragesHolderPtr m_ptrFileStoragesHolder;
 
 				struct SPageInfo
 				{
-					int64_t m_nAddr;
 					uint32_t m_flags;
-
-					int64_t m_nOrignAddr;
+					int64_t m_nAddrInLog;
+					uint32_t m_nSize;
 				};
 
 				class CPageKey : public std::pair<int32_t, int64_t>

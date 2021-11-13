@@ -7,10 +7,11 @@ namespace bptreedb
 	{
 		namespace twoPL
 		{
-			CTransaction::CTransaction(const astr& transactionLogFile, const CommonLib::CGuid& guid, eTransactionDataType type, CommonLib::IAllocPtr ptrAlloc, bool bCheckCRC) : CTransactonBase(guid, type),
+			CTransaction::CTransaction(const astr& transactionLogFile, const CommonLib::CGuid& guid, eTransactionDataType type, CommonLib::IAllocPtr ptrAlloc, bool bCheckCRC,
+				IFileStoragesHolderPtr ptrStoragesHolder) : CTransactonBase(guid, type, ptrStoragesHolder),
 				m_transactionLogFile(transactionLogFile)
 			{
-				m_ptrTransactionLog.reset(new CTransactionLog(ptrAlloc, bCheckCRC));
+				m_ptrTransactionLog.reset(new CTransactionLog(ptrAlloc, bCheckCRC, ptrStoragesHolder));
 			}
 
 			CTransaction::~CTransaction()

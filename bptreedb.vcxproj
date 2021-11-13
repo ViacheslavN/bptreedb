@@ -340,6 +340,7 @@
     <ClInclude Include="database\fields\Field.h" />
     <ClInclude Include="database\include\bptreedb.h" />
     <ClInclude Include="database\include\Value.h" />
+    <ClInclude Include="database\include\Variant.h" />
     <ClInclude Include="database\transaction\Transaction.h" />
     <ClInclude Include="database\transaction\TransactionBase.h" />
     <ClInclude Include="database\transaction\twophaselocking\Transaction.h" />
@@ -378,10 +379,13 @@
     <ClCompile Include="BPTrees\Compressor\StringCompressor\ZLibStringEncoder.cpp" />
     <ClCompile Include="BPTrees\StringPageAlloc.cpp" />
     <ClCompile Include="BPTrees\StringVal.cpp" />
+    <ClInclude Include="database\include\VariantTypeList.h" />
     <ClCompile Include="database\transaction\TransactionBase.cpp" />
     <ClCompile Include="database\transaction\twophaselocking\Transaction.cpp" />
     <ClCompile Include="database\transaction\twophaselocking\TransactionLog2PL.cpp" />
+    <ClCompile Include="database\transaction\twophaselocking\TransactionManager.cpp" />
     <ClCompile Include="database\transaction\wal\TransactionLog.cpp" />
+    <ClCompile Include="database\Variant.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">Create</PrecompiledHeader>

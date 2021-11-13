@@ -3,11 +3,100 @@
 
 namespace bptreedb
 {
-	class CValue : public IValue
+
+	template<typename T>
+	inline eFieldDataType CFieldTypeId()
+	{
+		return fdtUnknown;
+	}
+
+	template<>
+	inline eFieldDataType CFieldTypeId<bool>()
+	{
+		return fdtBool;
+	}
+
+	template<>
+	inline eFieldDataType CFieldTypeId<int8_t>()
+	{
+		return fdtInteger8;
+	}
+
+	template<>
+	inline eFieldDataType CFieldTypeId<uint8_t>()
+	{
+		return fdtUInteger8;
+	}
+
+	template<>
+	inline eFieldDataType CFieldTypeId<int16_t>()
+	{
+		return fdtInteger16;
+	}
+
+	template<>
+	inline eFieldDataType CFieldTypeId<uint16_t>()
+	{
+		return fdtUInteger16;
+	}
+
+	template<>
+	inline eFieldDataType CFieldTypeId<int32_t>()
+	{
+		return fdtInteger32;
+	}
+
+	template<>
+	inline eFieldDataType CFieldTypeId<uint32_t>()
+	{
+		return fdtUInteger32;
+	}
+
+	template<>
+	inline eFieldDataType CFieldTypeId<int64_t>()
+	{
+		return fdtInteger64;
+	}
+
+	template<>
+	inline eFieldDataType CFieldTypeId<uint64_t>()
+	{
+		return fdtUInteger64;
+	}
+
+	template<>
+	inline eFieldDataType CFieldTypeId<float>()
+	{
+		return fdtFloat;
+	}
+
+	template<>
+	inline eFieldDataType CFieldTypeId<double>()
+	{
+		return fdtDouble;
+	}
+
+	template<>
+	inline eFieldDataType CFieldTypeId<astr>()
+	{
+		return fdtString;
+	}
+
+	template<typename _TValue>
+	class CValueBaseT : public IValue
 	{
 	public:
-		virtual bool IsNull() const;
-		virtual eFieldDataType GetDataType() const;
+		typedef _TValue TValue;
+
+		virtual bool IsNull() const
+		{
+			return 
+		}
+
+		virtual eFieldDataType GetDataType() const
+		{
+			return CFieldTypeId<TValue>();
+		}
 
 		virtual void Get(uint8_t& val);
 		virtual void Get(uint16_t& val);
@@ -49,8 +138,6 @@ namespace bptreedb
 		protected:
 			eFieldDataType m_filedType{ fdtUnknown };
 			bool m_IsNull{ true };
-
-			union 
 
 	};
 }

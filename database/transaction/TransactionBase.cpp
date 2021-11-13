@@ -6,7 +6,8 @@ namespace bptreedb
 {
 	namespace transaction
 	{
-		CTransactonBase::CTransactonBase(const CommonLib::CGuid& guid, eTransactionDataType type) : m_guid(guid), m_type(type), m_bError(false)
+		CTransactonBase::CTransactonBase(const CommonLib::CGuid& guid, eTransactionDataType type, IFileStoragesHolderPtr ptrFilesStoragesHolder) : m_guid(guid), m_type(type), m_bError(false),
+			m_ptrFilesStoragesHolder(ptrFilesStoragesHolder)
 		{
 
 		}
@@ -20,11 +21,6 @@ namespace bptreedb
 		bool CTransactonBase::IsError() const
 		{
 			return m_bError;
-		}
-
-		void CTransactonBase::AddStorage(IStoragePtr ptrStorage)
-		{
-			m_Storages.insert(std::make_pair(ptrStorage->GetStorageId(), ptrStorage));
 		}
 
 		void CTransactonBase::AddInnerTransactions(IDBTransactionPtr ptrTransaction)

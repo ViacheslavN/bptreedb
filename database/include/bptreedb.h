@@ -1,4 +1,7 @@
 #pragma once
+
+#include "Variant.h"
+
 namespace bptreedb
 {
 
@@ -7,6 +10,7 @@ namespace bptreedb
 	{
 		fdtUnknown = 0,
 		fdtNull,
+		fdtBool,
 		fdtInteger8,
 		fdtInteger16,
 		fdtInteger32,
@@ -117,6 +121,7 @@ namespace bptreedb
 	typedef std::shared_ptr<class ISchema> ISchemaPtr;
 	typedef std::shared_ptr<class IDatabase> IDatabasePtr; 
 	typedef std::shared_ptr<class IFileStorage> IFileStoragePtr;
+	typedef std::shared_ptr<class IBlob> IBlobPtr;
 
 	class IField  
 	{
@@ -185,6 +190,17 @@ namespace bptreedb
 		{}
 	};
 
+	class IBlob
+	{
+	public:
+		IBlob() {}
+		virtual ~IBlob() {}
+
+		virtual size_t Size() const = 0;
+		virtual byte_t *GetData() = 0;
+		virtual const byte_t  *GetData() const = 0;
+	};
+
 
 	class IValue
 	{
@@ -206,6 +222,7 @@ namespace bptreedb
 		virtual void Get(double& val) = 0;
 		virtual void Get(float& val) = 0;
 		virtual void Get(astr& val) = 0;
+		virtual void Get(IBlobPtr ptrVal) = 0;
 
 		virtual void Set(const uint8_t& val) = 0;
 		virtual void Set(const uint16_t& val) = 0;
@@ -217,7 +234,7 @@ namespace bptreedb
 		virtual void Set(const int64_t& val) = 0;
 		virtual void Set(const double& val) = 0;
 		virtual void Set(const float& val) = 0;
-		virtual void Set(const astr& val) = 0;
+		virtual void Set(IBlobPtr ptrVal) = 0;
 
 	};
 
@@ -258,43 +275,11 @@ namespace bptreedb
 		virtual bool IsNull(int32_t col) = 0;
 		virtual bool IsNull(const astr& colName) = 0;
 
-		virtual void GetUint8(uint8_t& val, int32_t col) = 0;
-		virtual void GetUint16(uint16_t& val, int32_t col) = 0;
-		virtual void GetUint32(uint32_t& val, int32_t col) = 0;
-		virtual void GetUint64(uint64_t& val, int32_t col) = 0;
-		virtual void GetInt8(int8_t& val, int32_t col) = 0;
-		virtual void GetInt16(int16_t& val, int32_t col) = 0;
-		virtual void GetInt32(int32_t& val, int32_t col) = 0;
-		virtual void GetInt64(int64_t& val, int32_t col) = 0;
-		virtual void GetFloat(float& val, int32_t col) = 0;
-		virtual void GetDouble(double& val, int32_t col) = 0;
-		virtual void GetString(astr& val, int32_t col) = 0;
+		virtual void GetValue(CVariant& val, int32_t col) = 0;
+		virtual void GetValue(CVariant& val, const astr&  col) = 0;
 
-		virtual void GetUint8(uint8_t& val, const astr&  col) = 0;
-		virtual void GetUint16(uint16_t& val, const astr&  col) = 0;
-		virtual void GetUint32(uint32_t& val, const astr&  col) = 0;
-		virtual void GetUint64(uint64_t& val, const astr&  col) = 0;
-		virtual void GetInt8(int8_t& val, const astr&  col) = 0;
-		virtual void GetInt16(int16_t& val, const astr&  col) = 0;
-		virtual void GetInt32(int32_t& val, const astr&  col) = 0;
-		virtual void GetInt64(int64_t& val, const astr&  col) = 0;
-		virtual void GetFloat(float& val, const astr& col) = 0;
-		virtual void GetDouble(double& val, const astr&  col) = 0;
-		virtual void GetString(astr& val, const astr&  col) = 0;
-
-
-		virtual void SetUint8(const uint8_t& val, int32_t col) = 0;
-		virtual void SetUint16(const uint16_t& val, int32_t col) = 0;
-		virtual void SetUint32(const uint32_t& val, int32_t col) = 0;
-		virtual void SetUint64(const uint64_t& val, int32_t col) = 0;
-		virtual void SetInt8(const int8_t& val, int32_t col) = 0;
-		virtual void SetInt16(const int16_t& val, int32_t col) = 0;
-		virtual void SetInt32(const int32_t& val, int32_t col) = 0;
-		virtual void SetInt64(const int64_t& val, int32_t col) = 0;
-		virtual void SetFloat(const float& val, int32_t col) = 0;
-		virtual void SetDouble(const double& val, int32_t col) = 0;
-		virtual void SetString(const astr& val, int32_t col) = 0;
-
+		virtual void SetValue(const CVariant& val, int32_t col) = 0;
+		virtual void SetValue(const CVariant& val, const astr&  col) = 0;
 	};
 
 
@@ -439,6 +424,7 @@ namespace bptreedb
 		virtual bool SetValueBlob(uint32_t col, const byte_t* pBuf, uint32_t nSize) = 0;
 		virtual bool SetValueText(uint32_t col, const astr& str) = 0;
 		virtual bool SetValueText(uint32_t Col, const char* pBuf, uint32_t nLen) = 0;
+		virtual bool SetValue(uint32_t col, CVariant& value) = 0;
  	};
 
 

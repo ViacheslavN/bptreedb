@@ -9,11 +9,14 @@ namespace bptreedb
 	{
 		namespace twoPL
 		{
+			std::shared_ptr<class CTransaction> CTransactionPtr;
+
 			class CTransaction : public CTransactonBase
 			{
 			public:
 
-				CTransaction(const astr& transactionLogFile, const CommonLib::CGuid& guid, eTransactionDataType type, CommonLib::IAllocPtr ptrAlloc, bool bCheckCRC);
+				CTransaction(const astr& transactionLogFile, const CommonLib::CGuid& guid, eTransactionDataType type, CommonLib::IAllocPtr ptrAlloc, bool bCheckCRC, 
+					IFileStoragesHolderPtr ptrStoragesHolder);
 				~CTransaction();
 
 				//ITransaction

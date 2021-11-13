@@ -24,14 +24,9 @@ namespace bptreedb
 		
 		CFileStorage(std::shared_ptr<CommonLib::IAlloc> pAlloc, int32_t storageId, bool bCheckCRC = true);
 		virtual ~CFileStorage();
-
-
-
+			   
 		virtual void Open(const char* pszNameUtf8, bool bCreate, uint32_t nMinPageSize = 8192);
-		virtual void Close();
-
-
-
+		virtual void Close();			   
 		virtual void ReadData(int64_t nAddr, byte_t* pData, uint32_t nSize, bool decrypt);
 		virtual void WriteData(int64_t nAddr, const byte_t* pData, uint32_t nSize, bool decrypt);
 		virtual void SetOffset(uint64_t offset);
@@ -41,13 +36,10 @@ namespace bptreedb
 		virtual void DropFilePage(int64_t nAddr);
 		virtual FilePagePtr GetNewFilePage(uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype, uint32_t nSize = 0);
 		virtual int64_t GetNewFilePageAddr(uint32_t nSize = 0);
-
 		virtual FilePagePtr GetEmptyFilePage(int64_t nAddr, uint32_t nSize, uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype);
-
 		virtual void Flush();
 		virtual void SetStoragePerformer(CommonLib::TPrefCounterPtr pStoragePerformer);
 		virtual int32_t GetStorageId() const;
-
 	private:
 
 		CommonLib::file::CFile m_file;
@@ -79,4 +71,18 @@ namespace bptreedb
 	};
 
 	typedef std::shared_ptr< CFileStorage> CFileStoragePtr;
+
+
+
+	class IFileStoragesHolder
+	{
+	public:
+		IFileStoragesHolder() {}
+		virtual ~IFileStoragesHolder() {}
+
+		virtual CFileStoragePtr GetStorage(int32_t nId) const = 0;
+		virtual void AddStorage(int32_t nId, CFileStoragePtr ptrStorage) = 0;
+	};
+
+	typedef std::shared_ptr<IFileStoragesHolder> IFileStoragesHolderPtr;
 }

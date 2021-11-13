@@ -30,4 +30,6 @@
 #include "../TestDataGeneratorLib/RandomIntegerValueGenerator.h"
 #include "../TestDataGeneratorLib/IntegerValueGenerator.h"
 #include "../TestDataGeneratorLib/TestDataGenerator.h"
+#include "../../database/include/Variant.h"
+
 #pragma warning(disable:4146)

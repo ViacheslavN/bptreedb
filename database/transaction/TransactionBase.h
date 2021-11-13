@@ -10,7 +10,7 @@ namespace bptreedb
 		class CTransactonBase : public IDBTransaction
 		{
 		public:
-			CTransactonBase(const CommonLib::CGuid& guid, eTransactionDataType type);
+			CTransactonBase(const CommonLib::CGuid& guid, eTransactionDataType type, IFileStoragesHolderPtr ptrStoragesHolder);
 			~CTransactonBase() = default;
 
 			//ITransaction
@@ -19,12 +19,9 @@ namespace bptreedb
 			virtual bool IsError() const;
 
 			//IDBTransaction
-			virtual void AddStorage(IStoragePtr ptrStorage);
 			virtual void AddInnerTransactions(IDBTransactionPtr ptrTransaction);
 
 		private:
-
-
 			typedef std::map<int32_t, IStoragePtr> TMapStorages;
 			typedef std::vector<IDBTransactionPtr> TVecInnerTransactions;
 
@@ -34,6 +31,7 @@ namespace bptreedb
 			CommonLib::CGuid m_guid;
 			eTransactionDataType m_type;
 			bool m_bError;
+			IFileStoragesHolderPtr m_ptrFileStorageHolder;
 		};
 	}
 }

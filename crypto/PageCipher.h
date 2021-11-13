@@ -10,13 +10,13 @@ namespace bptreedb
 		IPageCipher(){}
 		virtual ~IPageCipher(){}
 
-		virtual void encryptPage(IFilePage *pFilePage);
-		virtual void decryptPage(IFilePage *pFilePage);
-		virtual void encryptPage(IFilePage *pFilePage, byte_t* pDstBuf, uint32_t len);
-		virtual void decryptPage(IFilePage *pFilePage, byte_t* pDstBuf, uint32_t len);
-		virtual void encryptBuf(byte_t* pBuf, uint32_t len);
-		virtual void encryptBuf(const byte_t* pBuf, byte_t* pDstBuf, uint32_t len);
-		virtual void decryptBuf(byte_t* pBuf, uint32_t len);
+		virtual void EncryptPage(IFilePage *pFilePage);
+		virtual void DecryptPage(IFilePage *pFilePage);
+		virtual void EncryptPage(IFilePage *pFilePage, byte_t* pDstBuf, uint32_t len);
+		virtual void DecryptPage(IFilePage *pFilePage, byte_t* pDstBuf, uint32_t len);
+		virtual void EncryptBuf(byte_t* pBuf, uint32_t len);
+		virtual void EncryptBuf(const byte_t* pBuf, byte_t* pDstBuf, uint32_t len);
+		virtual void DecryptBuf(byte_t* pBuf, uint32_t len);
 
 	};
 

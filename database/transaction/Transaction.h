@@ -28,7 +28,6 @@ namespace bptreedb
 			virtual FilePagePtr GetEmptyFilePage(int32_t nStorageId, int64_t nAddr, uint32_t nSize, uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype) = 0;
 
 			virtual void AddInnerTransactions(IDBTransactionPtr ptrTransaction) = 0;
-			virtual void AddStorage(IStoragePtr ptrStorage) = 0;
 		};
 
 
@@ -38,7 +37,7 @@ namespace bptreedb
 			IDBTransactionManager() {}
 			virtual ~IDBTransactionManager(){}
 
-			virtual IDBTransactionPtr StartTransaction() = 0;
+			virtual IDBTransactionPtr StartTransaction(eTransactionDataType type) = 0;
 			virtual void CloseTransaction(IDBTransactionPtr ptrIDBTransaction) = 0;
 			virtual void Restore(IStoragePtr ptrStorage) = 0;
 

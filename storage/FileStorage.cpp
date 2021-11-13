@@ -89,14 +89,12 @@ namespace bptreedb
 			else
 			{
 				pPage->ReloadHeader();
-			}
-			
+			}			
 
 			if (m_pageCipher.get() && decrypt)
 			{
 				pPage->SetNeedEncrypt(true);
-			}
-						 
+			}						 
 
 			if (m_checkCRC)
 			{
@@ -202,7 +200,7 @@ namespace bptreedb
 			if (m_pageCipher.get() && decrypt)
 			{
 				CommonLib::CPrefCounterHolder holder(m_pStoragePerformer, eDecryptData, nSize);
-				m_pageCipher->decryptBuf(pData, decrypt);
+				m_pageCipher->DecryptBuf(pData, decrypt);
 			}
 		}
 		catch (std::exception& excSrc)
@@ -228,7 +226,7 @@ namespace bptreedb
 					m_bufForChiper.resize(nSize);
 				{
 					CommonLib::CPrefCounterHolder holder(m_pStoragePerformer, eEncryptData, nSize);
-					m_pageCipher->encryptBuf(pData, &m_bufForChiper[0], nSize);
+					m_pageCipher->EncryptBuf(pData, &m_bufForChiper[0], nSize);
 				}
 				{
 					CommonLib::CPrefCounterHolder holder(m_pStoragePerformer, eWriteData, nSize);

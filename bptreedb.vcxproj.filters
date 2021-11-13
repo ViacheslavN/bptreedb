@@ -286,6 +286,12 @@
     <ClInclude Include="database\transaction\TransactionBase.h">
       <Filter>database\transaction</Filter>
     </ClInclude>
+    <ClInclude Include="database\include\Variant.h">
+      <Filter>database\include</Filter>
+    </ClInclude>
+    <ClInclude Include="database\include\VariantTypeList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -350,6 +356,12 @@
     </ClCompile>
     <ClCompile Include="database\transaction\TransactionBase.cpp">
       <Filter>database\transaction</Filter>
+    </ClCompile>
+    <ClCompile Include="database\transaction\twophaselocking\TransactionManager.cpp">
+      <Filter>database\transaction\twophaselocking</Filter>
+    </ClCompile>
+    <ClCompile Include="database\Variant.cpp">
+      <Filter>database</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
