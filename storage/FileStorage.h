@@ -26,6 +26,7 @@ namespace bptreedb
 		virtual ~CFileStorage();
 			   
 		virtual void Open(const char* pszNameUtf8, bool bCreate, uint32_t nMinPageSize = 8192);
+		virtual void Open(const wchar_t* pszName, bool bCreate, uint32_t nMinPageSize = 8192);
 		virtual void Close();			   
 		virtual void ReadData(int64_t nAddr, byte_t* pData, uint32_t nSize, bool decrypt);
 		virtual void WriteData(int64_t nAddr, const byte_t* pData, uint32_t nSize, bool decrypt);
@@ -59,9 +60,6 @@ namespace bptreedb
 			}
 		};
 
-	//	typedef utils::TCacheLRU_2Q<int64_t, FilePagePtr, TPageFreeChecker> TNodesCache;
-	//	TNodesCache m_pageCache;
-	//	uint32_t m_cacheSize;
 		bool m_checkCRC;
 
 		typedef std::vector<byte_t> TBufferForChiper;

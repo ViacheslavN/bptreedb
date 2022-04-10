@@ -9,8 +9,9 @@ namespace bptreedb
 		namespace twoPL
 		{
 
-			CTransactionManager::CTransactionManager(const astr& path, CommonLib::IAllocPtr ptrAlloc, bool bCheckCRC, IFileStoragesHolderPtr ptrStoragesHolder) : m_path(path),
-				m_ptrAlloc(ptrAlloc), m_bCheckCRC(bCheckCRC), m_ptrStoragesHolder(ptrStoragesHolder)
+			CTransactionManager::CTransactionManager(const astr& path, CommonLib::IAllocPtr ptrAlloc, bool bCheckCRC, IFileStoragesHolderPtr ptrStoragesHolder,
+				uint64_t nTransactionId) : m_path(path),
+				m_ptrAlloc(ptrAlloc), m_bCheckCRC(bCheckCRC), m_ptrStoragesHolder(ptrStoragesHolder), m_nTransactionId(nTransactionId)
 			{
 
 			}

@@ -80,11 +80,7 @@ void BPSETBASE_DECLARATION::RemoveFromLeafNode(TBPTreeNodePtr pNode, int32_t nIn
 {
 	try
 	{
-		if (key == 1698769370)
-		{
-			int dd = 0;
-			dd++;
-		}
+
 		int32_t nFoundIndex;
 		TBPTreeNodePtr pParentNode = GetParentNode(pNode, &nFoundIndex);
 

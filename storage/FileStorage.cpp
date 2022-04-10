@@ -37,6 +37,11 @@ namespace bptreedb
 		}
 	}
 
+	void CFileStorage::Open(const wchar_t* pszName, bool bCreate, uint32_t nMinPageSize)
+	{
+		Open(CommonLib::StringEncoding::str_w2utf8_safe(pszName).c_str(), bCreate, nMinPageSize);
+	}
+
 	void CFileStorage::Close()
 	{
 		try
@@ -315,6 +320,11 @@ namespace bptreedb
 	void CFileStorage::SetStoragePerformer(CommonLib::TPrefCounterPtr pStoragePerformer)
 	{
 		m_pStoragePerformer = pStoragePerformer;
+	}
+
+	int32_t CFileStorage::GetStorageId() const
+	{
+		return m_storage_id;
 	}
 		   	 
 }

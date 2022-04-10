@@ -99,16 +99,16 @@ namespace bptreedb
 		switch (nType)
 		{
 		case ectByte:
-			value = pStream->ReadByte();
+			value = (TValue)pStream->ReadByte();
 			break;
 		case ectUInt16:
-			value = pStream->Readint16();
+			value = (TValue)pStream->Readint16();
 			break;
 		case ectUInt32:
-			value = pStream->ReadIntu32();
+			value = (TValue)pStream->ReadIntu32();
 			break;
 		case ectUInt64:
-			value = pStream->ReadIntu64();
+			value = (TValue)pStream->ReadIntu64();
 			break;
 		}
 	}

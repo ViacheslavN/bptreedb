@@ -19,7 +19,7 @@ typedef bptreedb::BPTreeLeafNodeMap<int64_t, int64_t,  bptreedb::TBaseNodeCompre
 
 
 typedef bptreedb::BPTreeInnerNode<int64_t, bptreedb::TBaseNodeCompressor<int64_t, int64_t, TKeyEncoder, TLinkEncoder > > TInnerNode;
-typedef bptreedb::TBPMap<int64_t, int64_t, comp<int64_t>, bptreedb::IStorage, TInnerNode, TLeafNode> TBPMap;
+typedef bptreedb::TBPMap<int64_t, int64_t, comp<int64_t>, bptreedb::CFileStorage, TInnerNode, TLeafNode> TBPMap;
 
 
 typedef TDataGenerator<int64_t, TRandomInegerGenerator<int64_t> > TTestDataGenerator;
@@ -48,6 +48,7 @@ uint64_t CreateBPTreeMap(CommonLib::IAllocPtr pAlloc, TStorage pStorage, bool mi
 		bptreedb::TCompressorParamsPtr pCompInnerKey(new bptreedb::CompressorParams());
 		bptreedb::TCompressorParamsPtr pCompInnerValue(new bptreedb::CompressorParams());
 		bptreedb::TCompressorParamsPtr pCompLeafKey(new bptreedb::CompressorParams());
+		bptreedb::TCompressorParamsPtr pCompLeafValuey(new bptreedb::CompressorParams());
 
 		pCompInnerKey->SetIntParam("compressLevel", 3);
 		pCompInnerKey->SetIntParam("compressRate", 4);
@@ -66,6 +67,12 @@ uint64_t CreateBPTreeMap(CommonLib::IAllocPtr pAlloc, TStorage pStorage, bool mi
 		pCompLeafKey->SetIntParam("MaxCount", nMaxCount);
 
 		pCompParmas->AddCompressParams(pCompLeafKey, bptreedb::eLeafKey);
+
+		pCompLeafValuey->SetIntParam("compressLevel", 3);
+		pCompLeafValuey->SetIntParam("compressRate", 4);
+		pCompLeafValuey->SetIntParam("MaxCount", nMaxCount);
+
+		pCompParmas->AddCompressParams(pCompLeafValuey, bptreedb::eLeafValue);
 
 		tree.InnitTree(pCompParmas, minSplit, 0, bptreedb::eEmptyType, 0, bptreedb::eEmptyType);
 		tree.Flush();
@@ -303,7 +310,7 @@ void TestBPTreeMap()
 		int64_t nBPTreePage = -1;
 		uint32_t nNodeCache =	10000;
 		bool checkCRC = false;
-		
+		int32_t storageId = 1;
 		
 		TDataGeneratorPtr pDataGenerator(new TTestDataGenerator((uint32_t)nEnd, dataPath));
 		pDataGenerator->Open();
@@ -318,21 +325,21 @@ void TestBPTreeMap()
 		CommonLib::TPrefCounterPtr pStoragePerformer(new CommonLib::CPerfCounter(20));
 		CommonLib::TPrefCounterPtr pBPTreePerf(new CommonLib::CPerfCounter(20));
 		{
-			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, checkCRC));
+			bptreedb::CFileStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, storageId, checkCRC));
 			pStorage->Open(storagePath.c_str(), true, nPageSize);
 			pStorage->SetStoragePerformer(pStoragePerformer);
-			nBPTreePage = CreateBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pStorage, minSplit);
+			nBPTreePage = CreateBPTreeMap<TBPMap, bptreedb::CFileStoragePtr>(pAlloc, pStorage, minSplit);
 			//LogPerf(pStoragePerformer);
 		}
 
 		{
 
-			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, checkCRC));
+			bptreedb::CFileStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, storageId, checkCRC));
 			pStorage->Open(storagePath.c_str(), false, nPageSize);
 			pStoragePerformer->Reset();
 			pBPTreePerf->Reset();
 			pStorage->SetStoragePerformer(pStoragePerformer);
-			InsertBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nNodeCache, nBegin, nEnd, minSplit, pDataGenerator);
+			InsertBPTreeMap<TBPMap, bptreedb::CFileStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nNodeCache, nBegin, nEnd, minSplit, pDataGenerator);
 
 			pStorage->Close();
 
@@ -346,32 +353,32 @@ void TestBPTreeMap()
 
 
 		{
-			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, checkCRC));
+			bptreedb::CFileStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, storageId, checkCRC));
 			pStorage->Open(storagePath.c_str(), false, nPageSize);
 			pStoragePerformer->Reset();
 			pBPTreePerf->Reset();
 			pStorage->SetStoragePerformer(pStoragePerformer);
-			TravelTree<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage);
+			TravelTree<TBPMap, bptreedb::CFileStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage);
 		}
 
 		{
-			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, checkCRC));
+			bptreedb::CFileStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, storageId, checkCRC));
 			pStorage->Open(storagePath.c_str(), false, nPageSize);
 			pStoragePerformer->Reset();
 			pBPTreePerf->Reset();
 			pStorage->SetStoragePerformer(pStoragePerformer);
-			InfoBPTree<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage);
+			InfoBPTree<TBPMap, bptreedb::CFileStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage);
 		}
 
 
 		{
-			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, checkCRC));
+			bptreedb::CFileStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, storageId, checkCRC));
 			pStorage->Open(storagePath.c_str(), false, nPageSize);
 			pStoragePerformer->Reset();
 			pBPTreePerf->Reset();
 			pStorage->SetStoragePerformer(pStoragePerformer);
 
-			FindBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nBegin, nEnd, pDataGenerator);
+			FindBPTreeMap<TBPMap, bptreedb::CFileStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nBegin, nEnd, pDataGenerator);
 
 			CPerfLog::LogBPtreeFindPerf(pBPTreePerf);
 			CPerfLog::LogBPtreePerf(pBPTreePerf);
@@ -388,13 +395,13 @@ void TestBPTreeMap()
 		storagePath = testbt;*/
 
 		{
-			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, checkCRC));
+			bptreedb::CFileStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, storageId, checkCRC));
 			pStorage->Open(storagePath.c_str(), false, nPageSize);
 			pStoragePerformer->Reset();
 			pBPTreePerf->Reset();
 			pStorage->SetStoragePerformer(pStoragePerformer);
 
-			DeleteFromBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nNodeCache, nBegin, nEnd/2, minSplit, pDataGenerator);
+			DeleteFromBPTreeMap<TBPMap, bptreedb::CFileStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nNodeCache, nBegin, nEnd/2, minSplit, pDataGenerator);
 
 
 			CPerfLog::LogBPtreeFindPerf(pBPTreePerf);
@@ -403,23 +410,23 @@ void TestBPTreeMap()
 			CPerfLog::LogPerfStorage(pStoragePerformer);
 		}
 		{
-			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, checkCRC));
+			bptreedb::CFileStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, storageId, checkCRC));
 			pStorage->Open(storagePath.c_str(), false, nPageSize);
 			pStoragePerformer->Reset();
 			pBPTreePerf->Reset();
 			pStorage->SetStoragePerformer(pStoragePerformer);
-			InfoBPTree<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage);
+			InfoBPTree<TBPMap, bptreedb::CFileStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage);
 		}
 
 
 		{
-			bptreedb::TStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, checkCRC));
+			bptreedb::CFileStoragePtr  pStorage(new bptreedb::CFileStorage(pAlloc, storageId, checkCRC));
 			pStorage->Open(storagePath.c_str(), false, nPageSize);
 			pStoragePerformer->Reset();
 			pBPTreePerf->Reset();
 			pStorage->SetStoragePerformer(pStoragePerformer);
 
-			FindBPTreeMap<TBPMap, bptreedb::TStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nEnd / 2 + 1, nEnd, pDataGenerator);
+			FindBPTreeMap<TBPMap, bptreedb::CFileStoragePtr>(pAlloc, pBPTreePerf, pStorage, nBPTreePage, nEnd / 2 + 1, nEnd, pDataGenerator);
 
 			CPerfLog::LogBPtreeFindPerf(pBPTreePerf);
 			CPerfLog::LogBPtreePerf(pBPTreePerf);

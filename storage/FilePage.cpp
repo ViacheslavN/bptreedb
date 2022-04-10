@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "FilePage.h"
 #include "../utils/CRC.h"
-
+ 
 namespace bptreedb
 {
 
@@ -184,7 +184,7 @@ namespace bptreedb
 
 	void CFilePage::WriteCRC(byte_t* pData, uint32_t nSize)
 	{
-		uint32_t calcCrc = (uint32_t)utils::Crc32(pData + sizeof(uint32_t), nSize - sizeof(uint32_t));
+		uint32_t calcCrc = (uint32_t)util::Crc32(pData + sizeof(uint32_t), nSize - sizeof(uint32_t));
 		memcpy(pData, &calcCrc, sizeof(uint32_t));
 	}
 
@@ -192,7 +192,7 @@ namespace bptreedb
 	{
 		uint32_t crc = 0;
 		memcpy(&crc, pData, sizeof(uint32_t));
-		uint32_t calcCrc = (uint32_t)utils::Crc32(pData + sizeof(uint32_t), nSize - sizeof(uint32_t));
+		uint32_t calcCrc = (uint32_t)util::Crc32(pData + sizeof(uint32_t), nSize - sizeof(uint32_t));
 
 		return crc == calcCrc;
 	}

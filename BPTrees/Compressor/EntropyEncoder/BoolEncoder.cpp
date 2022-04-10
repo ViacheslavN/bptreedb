@@ -28,6 +28,7 @@ namespace bptreedb
 	void CBoolEncoder::AddSymbol(bool bSign)
 	{
 		m_bools[bSign ? 1 : 0] += 1;
+
 	}
 
 	void CBoolEncoder::RemoveSymbol(bool bSign)
@@ -63,14 +64,17 @@ namespace bptreedb
 				nFlag |= (1 << SignBit);
 
 			ptrStream->Write(nFlag);
-			return ptrStream->WriteSafe(m_bools[0] + m_bools[1]);
+			if (!ptrStream->WriteSafe(m_bools[0]))
+				return false;
+			if (!ptrStream->WriteSafe(m_bools[1]))
+				return false;
 		}
 		else
 		{
  
 			CommonLib::IMemoryStream *ptrMemStream = dynamic_cast<CommonLib::IMemoryStream *>(ptrStream);
 			if (!ptrMemStream)
-				throw CommonLib::CExcBase(L"IStream isn't memstream");
+				throw CommonLib::CExcBase(L"CBoolEncoder:BeginDecoding IStream isn't memstream");
 
 			uint32_t nByteSize = ((m_bools[0] + m_bools[1] + 7) / 8) + 1;
 			uint32_t nMinCount = min(m_bools[0], m_bools[1]);
@@ -81,7 +85,9 @@ namespace bptreedb
 			{
 				m_encodeType = BitEncode;
 				ptrStream->Write((byte_t)m_encodeType);
-				if (!ptrStream->WriteSafe(m_bools[0] + m_bools[1]))
+				if (!ptrStream->WriteSafe(m_bools[0]))
+					return false;
+				if (!ptrStream->WriteSafe(m_bools[1]))
 					return false;
 				
 				m_bitsRW.Attach(ptrMemStream->BufferFromCurPos());
@@ -100,7 +106,9 @@ namespace bptreedb
 				nFlag |= ((byte_t)m_dataType << DataTypePosBit);
 
 				ptrStream->Write(nFlag);
-				if (!ptrStream->WriteSafe(m_bools[0] + m_bools[1]))
+				if (!ptrStream->WriteSafe(m_bools[0]))
+					return false;
+				if (!ptrStream->WriteSafe(m_bools[1]))
 					return false;
 
 				WriteCompressValue(m_dataType, nMinCount, ptrStream);	
@@ -134,7 +142,10 @@ namespace bptreedb
 	void CBoolEncoder::BeginDecoding(CommonLib::IReadStream *ptrStream)
 	{
 		byte_t nFlag = ptrStream->ReadByte();
-		uint32_t count = ptrStream->ReadIntu32();
+		m_bools[0] = ptrStream->ReadIntu32();
+		m_bools[1] = ptrStream->ReadIntu32();
+
+		uint32_t count = m_bools[0] + m_bools[1];
 
 		m_encodeType = (EncodeType)(nFlag & 0x03);
 
@@ -163,7 +174,7 @@ namespace bptreedb
 		{
 			CommonLib::IMemoryStream *ptrMemStream = dynamic_cast<CommonLib::IMemoryStream *>(ptrStream);
 			if (!ptrMemStream)
-				throw CommonLib::CExcBase(L"IStream isn't memstream");
+				throw CommonLib::CExcBase(L"CBoolEncoder:BeginDecoding IStream isn't memstream");
 
 			uint32_t nByteSize = ((count + 7) / 8) + 1;
 
@@ -189,6 +200,9 @@ namespace bptreedb
 		case BitEncode:
 			return m_bitsRW.ReadBit();
 			break;
+
+		default:
+			throw CommonLib::CExcBase(L"CBoolEncoder: DecodeBit unknown encodeType: %1", (int)m_encodeType);
 		}
 	
 	}

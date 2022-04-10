@@ -4,17 +4,7 @@
 BPSETBASE_TEMPLATE_PARAMS
 void BPSETBASE_DECLARATION::AddToCache(TBPTreeNodePtr pNode)
 {
-
-/*	m_TempCache.insert(std::make_pair(pNode->GetAddr(), pNode));
-
-	while (m_NodeCache.Size() > m_nChacheSize && !m_bLockRemoveItemFromCache)
-	{
-		TBPTreeNodePtr pRemNode = m_NodeCache.RemoveBack();
-		DropNode(pRemNode);
-	}*/
-
 	m_NodeCache.AddElem(pNode->GetAddr(), pNode);
-//	m_TempCache.erase(pNode->GetAddr());
 }
 
 BPSETBASE_TEMPLATE_PARAMS
@@ -324,12 +314,6 @@ void BPSETBASE_DECLARATION::SaveNode(TBPTreeNodePtr& pNode)
 
 	try
 	{
-
-
-		/*FilePagePtr pPage = m_pStorage->GetEmptyFilePage(nAddr, m_nNodePageSize);
-		CommonLib::CFxMemoryWriteStream stream;
-		stream.AttachBuffer(pPage->GetData(), pPage->GetPageSize());*/
-
 		m_cachePage->Erase();
 		CommonLib::CFxMemoryWriteStream stream;
 		stream.AttachBuffer(m_cachePage->GetData(), m_cachePage->GetPageSize());

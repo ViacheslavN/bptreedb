@@ -1,13 +1,12 @@
 #include "stdafx.h"
-
 #include "TransactionBase.h"
 
 namespace bptreedb
 {
 	namespace transaction
 	{
-		CTransactonBase::CTransactonBase(const CommonLib::CGuid& guid, eTransactionDataType type, IFileStoragesHolderPtr ptrFilesStoragesHolder) : m_guid(guid), m_type(type), m_bError(false),
-			m_ptrFilesStoragesHolder(ptrFilesStoragesHolder)
+		CTransactonBase::CTransactonBase(const CommonLib::CGuid& guid, eTransactionDataType type, IFileStoragesHolderPtr ptrFileStoragesHolder) : m_guid(guid), m_type(type), m_bError(false),
+			m_ptrFileStorageHolder(ptrFileStoragesHolder)
 		{
 
 		}

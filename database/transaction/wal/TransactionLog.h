@@ -1,5 +1,8 @@
 #pragma once
 
+#include "../../../../CommonLib/filesystem/filesystem.h"
+#include "../../../storage/storage.h"
+
 namespace bptreedb
 {
 	namespace transaction
