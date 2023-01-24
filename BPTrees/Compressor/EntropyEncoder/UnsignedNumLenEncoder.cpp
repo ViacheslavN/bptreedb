@@ -15,16 +15,13 @@ namespace bptreedb
 
 	}
 
-	bool CUnsignedNumLenEncoder::BeginEncoding(CommonLib::IWriteStream *pStream)
+	bool CUnsignedNumLenEncoder::BeginEncoding(CommonLib::IMemoryWriteStream *pStream)
 	{
 		WriteHeader(pStream);
 
 		uint32_t nBitSize = CBitBase::GetByteForBits(m_nBitRowSize);
-		CommonLib::IMemoryStream *pMemStream = dynamic_cast<CommonLib::IMemoryStream *>(pStream);
-		if (!pMemStream)
-			throw CommonLib::CExcBase(L"IStream isn't memstream");
 
-		m_bitWStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos());
+		m_bitWStream.AttachBuffer(pStream->Buffer() + pStream->Pos());
 		if (!pStream->SeekSafe(nBitSize, CommonLib::soFromCurrent))
 			return false;
 
@@ -34,29 +31,26 @@ namespace bptreedb
  
 	}
 
-	bool CUnsignedNumLenEncoder::FinishEncoding(CommonLib::IWriteStream *pStream)
+	bool CUnsignedNumLenEncoder::FinishEncoding(CommonLib::IMemoryWriteStream *pStream)
 	{
 
 		return m_encoder.EncodeFinish();
 	}
 
-	void CUnsignedNumLenEncoder::BeginDecoding(CommonLib::IReadStream *pStream)
+	void CUnsignedNumLenEncoder::BeginDecoding(CommonLib::IMemoryReadStream *pStream)
 	{
 		ReadHeader(pStream);
 
 		uint32_t nBitSize = CBitBase::GetByteForBits(m_nBitRowSize);
-		CommonLib::IMemoryStream *pMemStream = dynamic_cast<CommonLib::IMemoryStream *>(pStream);
-		if (!pMemStream)
-			throw CommonLib::CExcBase(L"IStream isn't memstream");
 
-		m_bitRStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos());
+		m_bitRStream.AttachBuffer(pStream->Buffer() + pStream->Pos());
 		pStream->Seek(nBitSize, CommonLib::soFromCurrent);
 
 		m_decoder.SetStream(pStream);
 		m_decoder.StartDecode();
 	}
 
-	void CUnsignedNumLenEncoder::FinishDecoding(CommonLib::IReadStream *pStream)
+	void CUnsignedNumLenEncoder::FinishDecoding(CommonLib::IMemoryReadStream *pStream)
 	{
 
 	}

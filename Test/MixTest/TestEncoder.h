@@ -19,11 +19,11 @@ namespace testencoding
 
 		TestEncoder(CommonLib::TPrefCounterPtr pPerf);
 
-		void BeginEncoding(CommonLib::IWriteStream *pStream);
-		bool FinishEncoding(CommonLib::IWriteStream *pStream);
+		void BeginEncoding(CommonLib::IMemoryWriteStream *pStream);
+		bool FinishEncoding(CommonLib::IMemoryWriteStream *pStream);
 
-		void BeginDecoding(CommonLib::IReadStream *pStream);
-		void FinishDecoding(CommonLib::IReadStream *pStream);
+		void BeginDecoding(CommonLib::IMemoryReadStream *pStream);
+		void FinishDecoding(CommonLib::IMemoryReadStream *pStream);
 
 		template <class TSymbol>
 		bool EncodeSymbol(TSymbol symbol)

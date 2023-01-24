@@ -30,8 +30,8 @@ namespace bptreedb
 		void UpdateSymbol(int nIndex, StringValue& newValue, const StringValue& oldValue, const TValueMemSet& vecValues);
 		uint32_t GetCompressSize() const;
 		void BeginEncoding(const TValueMemSet& vecValues);
-		uint32_t Encode(const TValueMemSet& vecValues, CommonLib::IWriteStream *pStream, uint32_t maxCompSize, CBPTreeContext *pContext);
-		void Decode(uint32_t nCount, TValueMemSet& vecValues, CommonLib::IReadStream *pStream, uint32_t nCompSize, CBPTreeContext *pContext);
+		uint32_t Encode(const TValueMemSet& vecValues, CommonLib::IMemoryWriteStream *pStream, uint32_t maxCompSize, CBPTreeContext *pContext);
+		void Decode(uint32_t nCount, TValueMemSet& vecValues, CommonLib::IMemoryReadStream *pStream, uint32_t nCompSize, CBPTreeContext *pContext);
 		
 		void Clear();
 		uint32_t Count() const;

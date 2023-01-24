@@ -24,11 +24,11 @@ namespace bptreedb
 		~CUnsignedNumLenEncoder();
 
 	
-		bool BeginEncoding(CommonLib::IWriteStream *pStream);
-		bool FinishEncoding(CommonLib::IWriteStream *pStream);
+		bool BeginEncoding(CommonLib::IMemoryWriteStream *pStream);
+		bool FinishEncoding(CommonLib::IMemoryWriteStream *pStream);
 
-		void BeginDecoding(CommonLib::IReadStream *pStream);
-		void FinishDecoding(CommonLib::IReadStream *pStream);
+		void BeginDecoding(CommonLib::IMemoryReadStream *pStream);
+		void FinishDecoding(CommonLib::IMemoryReadStream *pStream);
 
 		template <class TSymbol>
 		bool EncodeSymbol(const TSymbol& symbol)

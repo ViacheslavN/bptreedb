@@ -71,18 +71,13 @@ namespace bptreedb
 
 		}
 
-		uint32_t Encode(const TValueMemSet& vecValues, CommonLib::IWriteStream *pStream, uint32_t maxCompSize, CBPTreeContext *pContext)
+		uint32_t Encode(const TValueMemSet& vecValues, CommonLib::IMemoryWriteStream *pStream, uint32_t maxCompSize, CBPTreeContext *pContext)
 		{
 			try
 			{
 				if (m_nCount != vecValues.size())
 					throw CommonLib::CExcBase("Empty encoder wrong size, count: %1, values size: %2", m_nCount, vecValues.size());
-
-
-				CommonLib::IMemoryStream *pMemStream = dynamic_cast<CommonLib::IMemoryStream *>(pStream);
-				if (!pMemStream)
-					throw CommonLib::CExcBase(L"IStream isn't memstream");
-
+				
 				pStream->Write(vecValues[0]);
 				if (vecValues.size() > 1)
 				{
@@ -90,7 +85,7 @@ namespace bptreedb
 					streamSize = streamSize > maxCompSize ? maxCompSize : streamSize;
 
 					TEncoder zStream(m_compressLevel);
-					zStream.AttachOut((Bytef*)pMemStream->Buffer() + pStream->Pos(), streamSize);
+					zStream.AttachOut((Bytef*)pStream->Buffer() + pStream->Pos(), streamSize);
 
 					uint32_t count = 0;
 					switch (m_codeType)
@@ -217,14 +212,10 @@ namespace bptreedb
 			}
 		}
 			   		 
-		void Decode(uint32_t nCount, TValueMemSet& vecValues, CommonLib::IReadStream *pStream, uint32_t nCompSize, CBPTreeContext *pContext)
+		void Decode(uint32_t nCount, TValueMemSet& vecValues, CommonLib::IMemoryReadStream *pStream, uint32_t nCompSize, CBPTreeContext *pContext)
 		{
 			try
 			{
-				CommonLib::IMemoryStream *pMemStream = dynamic_cast<CommonLib::IMemoryStream *>(pStream);
-				if (!pMemStream)
-					throw CommonLib::CExcBase(L"IStream isn't memstream");
-
 
 				TValue value;
 				pStream->Read(value);
@@ -233,7 +224,7 @@ namespace bptreedb
 				if (nCount > 1)
 				{
 					TDecoder zStream;
-					zStream.AttachIn(pMemStream->Buffer() + pStream->Pos(), nCompSize - sizeof(TValue));
+					zStream.AttachIn(pStream->Buffer() + pStream->Pos(), nCompSize - sizeof(TValue));
 
 					switch (m_codeType)
 					{

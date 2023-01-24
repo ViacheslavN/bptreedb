@@ -15,7 +15,7 @@ namespace bptreedb
 
 	}
 
-	void CompressorParamsBase::Load(CommonLib::IReadStream *pStream)
+	void CompressorParamsBase::Load(CommonLib::IMemoryReadStream *pStream)
 	{
 		try
 		{
@@ -37,7 +37,7 @@ namespace bptreedb
 		}
 	}
 
-	void CompressorParamsBase::Save(CommonLib::IWriteStream *pStream)
+	void CompressorParamsBase::Save(CommonLib::IMemoryWriteStream *pStream)
 	{
 		try
 		{
@@ -100,7 +100,7 @@ namespace bptreedb
 		m_DoubleParams[name] = value;
 	}
 
-	void CompressorParams::Save(CommonLib::IWriteStream *pStream)
+	void CompressorParams::Save(CommonLib::IMemoryWriteStream *pStream)
 	{
 		try
 		{
@@ -113,7 +113,7 @@ namespace bptreedb
 		}
 	}
 
-	void CompressorParams::Load(CommonLib::IReadStream *pStream)
+	void CompressorParams::Load(CommonLib::IMemoryReadStream *pStream)
 	{
 		try
 		{

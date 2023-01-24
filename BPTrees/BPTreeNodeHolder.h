@@ -41,12 +41,12 @@ namespace bptreedb
 
 		} 
 
-		void Load(CommonLib::IReadStream* pStream, CBPTreeContext *pContext)
+		void Load(CommonLib::IMemoryReadStream* pStream, CBPTreeContext *pContext)
 		{
 			m_pCurNode->Load(pStream, pContext);
 		}
 
-		uint32_t Save(CommonLib::IWriteStream *pStream, CBPTreeContext *pContext)
+		uint32_t Save(CommonLib::IMemoryWriteStream *pStream, CBPTreeContext *pContext)
 		{
 			try
 			{

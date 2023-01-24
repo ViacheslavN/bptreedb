@@ -74,7 +74,7 @@ namespace bptreedb
 	}
 
 	template<class TValue>
-	void WriteCompressValue(eCompressDataType nType, TValue value, CommonLib::IWriteStream* pStream)
+	void WriteCompressValue(eCompressDataType nType, TValue value, CommonLib::IMemoryWriteStream* pStream)
 	{
 		switch (nType)
 		{
@@ -94,7 +94,7 @@ namespace bptreedb
 	}
 
 	template<class TValue>
-	void ReadCompressValue(eCompressDataType nType, TValue& value, CommonLib::IReadStream* pStream)
+	void ReadCompressValue(eCompressDataType nType, TValue& value, CommonLib::IMemoryReadStream* pStream)
 	{
 		switch (nType)
 		{
@@ -115,7 +115,7 @@ namespace bptreedb
 
 
 	template<class TValue>
-	TValue ReadCompressValue(eCompressDataType nType, CommonLib::IReadStream* pStream)
+	TValue ReadCompressValue(eCompressDataType nType, CommonLib::IMemoryReadStream* pStream)
 	{
 		switch (nType)
 		{

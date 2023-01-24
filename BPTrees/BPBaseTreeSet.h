@@ -129,7 +129,7 @@ namespace bptreedb
 		TBPTreeNodePtr GetMinimumNode(TBPTreeNodePtr pNode);
 
 		template <class TNodeHolder>
-		std::shared_ptr<TNodeHolder> LoadNode(CommonLib::IReadStream *pStream, TAllocsSetPtr pAllocsSet, bool bMulti, uint32_t nPageSize, int64_t nAddr, TCompressorParamsBasePtr pCompressParams, CBPTreeContext *pContext)
+		std::shared_ptr<TNodeHolder> LoadNode(CommonLib::IMemoryReadStream *pStream, TAllocsSetPtr pAllocsSet, bool bMulti, uint32_t nPageSize, int64_t nAddr, TCompressorParamsBasePtr pCompressParams, CBPTreeContext *pContext)
 		{
 			try
 			{

@@ -12,7 +12,7 @@ namespace bptreedb
 	{
 
 		template<class _TStorage>
-		class TWriteStreamPage : public CommonLib::TMemoryStreamBaseEmpty<CommonLib::IWriteStreamBase>
+		class TWriteStreamPage : public CommonLib::TMemoryStreamBaseEmpty<CommonLib::IMemoryWriteStream>
 		{
 			public:
 				typedef _TStorage TStorage;
@@ -40,29 +40,19 @@ namespace bptreedb
 						throw;
 					}
 
-				}
-	
-				virtual void WriteStream(IStream *pStream, int64_t nPos, int64_t nSize)
-				{
-					IMemoryStream *pMemStream = dynamic_cast<IMemoryStream *>(pStream);
-					if (pMemStream)
-					{
-						int64_t _nPos = (nPos != -1 ? nPos : 0);
-						int64_t _nSize = (nSize != -1 ? nSize : pStream->Size());
+				}	
+			
 
-						Write(_nSize);
-						Write(pMemStream->Buffer() + _nPos, _nSize);
-					}
-				}
-
-				virtual void WriteBytes(const byte_t* buffer, size_t size)
+				virtual std::streamsize WriteBytes(const byte_t* buffer, size_t size)
 				{
 					write_bytes_impl(buffer, size, false);
+					return size;
 				}
 
-				virtual void WriteInverse(const byte_t* buffer, size_t size)
+				virtual std::streamsize WriteInverse(const byte_t* buffer, size_t size)
 				{
 					write_bytes_impl(buffer, size, true);
+					return size;
 				}
 
 				virtual bool IsEnoughSpace(size_t size) const

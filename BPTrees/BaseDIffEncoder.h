@@ -30,8 +30,8 @@ namespace bptreedb
 		{}		
 
 
-		virtual void Write(const TValue& value, CommonLib::IWriteStream *pStream, CBPTreeContext *pContext) = 0;
-		virtual void Read(TValue& value, CommonLib::IReadStream *pStream, CBPTreeContext *pContext) = 0;
+		virtual void Write(const TValue& value, CommonLib::IMemoryWriteStream *pStream, CBPTreeContext *pContext) = 0;
+		virtual void Read(TValue& value, CommonLib::IMemoryReadStream *pStream, CBPTreeContext *pContext) = 0;
 		virtual uint32_t GetValueSize() const = 0;
 
 
@@ -123,7 +123,7 @@ namespace bptreedb
 
 		}
 
-		uint32_t Encode(const TValueMemSet& vecValues, CommonLib::IWriteStream *pStream, uint32_t maxCompSize, CBPTreeContext *pContext)
+		uint32_t Encode(const TValueMemSet& vecValues, CommonLib::IMemoryWriteStream *pStream, uint32_t maxCompSize, CBPTreeContext *pContext)
 		{
 
 			size_t i = 1;
@@ -152,7 +152,7 @@ namespace bptreedb
 			return 0;
 		}
 
-		void Decode(uint32_t nCount, TValueMemSet& vecValues, CommonLib::IReadStream *pStream, uint32_t nCompSize, CBPTreeContext *pContext)
+		void Decode(uint32_t nCount, TValueMemSet& vecValues, CommonLib::IMemoryReadStream *pStream, uint32_t nCompSize, CBPTreeContext *pContext)
 		{
 
 			size_t i = 1;
@@ -200,12 +200,12 @@ namespace bptreedb
 		TValueDiffEncoder(TAllocsSetPtr pAllocsSet, TCompressorParamsBasePtr pParams, ECompressParams type) : TBase(pAllocsSet, pParams, type)
 		{}
 
-		virtual void Write(const TValue& value, CommonLib::IWriteStream *pStream, CBPTreeContext *pContext)
+		virtual void Write(const TValue& value, CommonLib::IMemoryWriteStream *pStream, CBPTreeContext *pContext)
 		{
 			pStream->Write(value);
 		}
 
-		virtual void Read(TValue& value, CommonLib::IReadStream *pStream, CBPTreeContext *pContext)
+		virtual void Read(TValue& value, CommonLib::IMemoryReadStream *pStream, CBPTreeContext *pContext)
 		{
 			pStream->Read(value);
 		}

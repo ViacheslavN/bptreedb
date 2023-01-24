@@ -36,8 +36,8 @@ namespace bptreedb
 		virtual ~IBPTreeNode();
 
 
-		virtual void Load(CommonLib::IReadStream* pStream, CBPTreeContext *pContext) = 0;
-		virtual uint32_t Save(CommonLib::IWriteStream* pStream, CBPTreeContext *pContext) = 0;
+		virtual void Load(CommonLib::IMemoryReadStream* pStream, CBPTreeContext *pContext) = 0;
+		virtual uint32_t Save(CommonLib::IMemoryWriteStream* pStream, CBPTreeContext *pContext) = 0;
 
 		virtual uint32_t Size() const = 0;
 		virtual uint32_t HeadSize() const = 0;

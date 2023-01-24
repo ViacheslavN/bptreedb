@@ -20,11 +20,11 @@ namespace bptreedb
 		void RemoveSymbol(bool bSign);
 		uint32_t GetCompressSize() const;
 
-		bool BeginEncoding(CommonLib::IWriteStream *pStream);
+		bool BeginEncoding(CommonLib::IMemoryWriteStream *pStream);
 		void EncodeBit(bool bit, uint32_t pos);
 
 
-		void BeginDecoding(CommonLib::IReadStream *pStream);
+		void BeginDecoding(CommonLib::IMemoryReadStream *pStream);
 		bool DecodeBit(uint32_t pos);
 
 	private:
@@ -35,10 +35,10 @@ namespace bptreedb
 				IBoolEncoder(){}
 				virtual ~IBoolEncoder(){}
 
-				virtual bool BeginEncoding(CommonLib::IWriteStream *pStream) = 0;
+				virtual bool BeginEncoding(CommonLib::IMemoryWriteStream *pStream) = 0;
 				virtual void EncodeSymbol(uint32_t pos) = 0;
 
-				virtual void BeginDecoding(CommonLib::IReadStream *pStream) = 0;
+				virtual void BeginDecoding(CommonLib::IMemoryReadStream *pStream) = 0;
 				virtual bool DecodeSymbol(uint32_t pos) = 0;
 		};
 

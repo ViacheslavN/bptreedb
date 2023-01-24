@@ -10,43 +10,37 @@ namespace testencoding
 	}
 
 
-	void TestEncoder::BeginEncoding(CommonLib::IWriteStream *pStream)
+	void TestEncoder::BeginEncoding(CommonLib::IMemoryWriteStream *pStream)
 	{
 		WriteHeader(pStream);
 
 		uint32_t nBitSize = (m_nBitRowSize + 7) / 8;
-		CommonLib::IMemoryStream *pMemStream = dynamic_cast<CommonLib::IMemoryStream *>(pStream);
-		if (!pMemStream)
-			throw CommonLib::CExcBase(L"IStream isn't memstream");
 
-		m_bitWStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos(), nBitSize);
+		m_bitWStream.AttachBuffer(pStream->Buffer() + pStream->Pos(), nBitSize);
 		pStream->Seek(nBitSize, CommonLib::soFromCurrent);
 
 		m_encoder.SetStream(pStream);
 	}
 
-	bool TestEncoder::FinishEncoding(CommonLib::IWriteStream *pStream)
+	bool TestEncoder::FinishEncoding(CommonLib::IMemoryWriteStream *pStream)
 	{
 		return m_encoder.EncodeFinish();
 	}
 
-	void TestEncoder::BeginDecoding(CommonLib::IReadStream *pStream)
+	void TestEncoder::BeginDecoding(CommonLib::IMemoryReadStream *pStream)
 	{
 		ReadHeader(pStream);
 
 		uint32_t nBitSize = (m_nBitRowSize + 7) / 8;
-		CommonLib::IMemoryStream *pMemStream = dynamic_cast<CommonLib::IMemoryStream *>(pStream);
-		if (!pMemStream)
-			throw CommonLib::CExcBase(L"IStream isn't memstream");
 
-		m_bitRStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos(), nBitSize);
+		m_bitRStream.AttachBuffer(pStream->Buffer() + pStream->Pos(), nBitSize);
 		pStream->Seek(nBitSize, CommonLib::soFromCurrent);
 
 		m_decoder.SetStream(pStream);
 		m_decoder.StartDecode();
 	}
 
-	void TestEncoder::FinishDecoding(CommonLib::IReadStream *pStream)
+	void TestEncoder::FinishDecoding(CommonLib::IMemoryReadStream *pStream)
 	{
 
 	}

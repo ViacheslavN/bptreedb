@@ -14,14 +14,14 @@ namespace bptreedb
 
 	}
 
-	bool CSignedNumLenEncoder::BeginEncoding(CommonLib::IWriteStream *ptrStream)
+	bool CSignedNumLenEncoder::BeginEncoding(CommonLib::IMemoryWriteStream *ptrStream)
 	{
 		m_pos = 0;
 		m_boolEncoder.BeginEncoding(ptrStream);
 		return TBase::BeginEncoding(ptrStream);
 	}
  
-	void CSignedNumLenEncoder::BeginDecoding(CommonLib::IReadStream *ptrStream)
+	void CSignedNumLenEncoder::BeginDecoding(CommonLib::IMemoryReadStream *ptrStream)
 	{
 		m_pos = 0;
 		m_boolEncoder.BeginDecoding(ptrStream);

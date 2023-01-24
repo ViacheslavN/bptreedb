@@ -15,8 +15,8 @@ namespace bptreedb
 		typedef CUnsignedNumLenEncoder TBase;
 
 
-		bool BeginEncoding(CommonLib::IWriteStream *pStream);
-		void BeginDecoding(CommonLib::IReadStream *pStream);
+		bool BeginEncoding(CommonLib::IMemoryWriteStream *pStream);
+		void BeginDecoding(CommonLib::IMemoryReadStream *pStream);
 		void Clear();
 
 		template <class TSymbol>

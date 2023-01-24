@@ -82,8 +82,8 @@ namespace bptreedb
 			uint32_t GetRowBitsSize() const;
 
 			uint32_t GetMaxBitLen() const;
-			void WriteHeader(CommonLib::IWriteStream* pStream);
-			void ReadHeader(CommonLib::IReadStream* pStream);			
+			void WriteHeader(CommonLib::IMemoryWriteStream* pStream);
+			void ReadHeader(CommonLib::IMemoryReadStream* pStream);
 
 		protected:
 

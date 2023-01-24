@@ -54,7 +54,7 @@ namespace bptreedb
 
 		}
 
-		uint32_t Encode(const TValueMemSet& vecValues, CommonLib::IWriteStream *pStream, uint32_t maxCompSize, CBPTreeContext *pContext)
+		uint32_t Encode(const TValueMemSet& vecValues, CommonLib::IMemoryWriteStream *pStream, uint32_t maxCompSize, CBPTreeContext *pContext)
 		{
 			if (m_nCount != vecValues.size())
 				throw CommonLib::CExcBase("Empty encoder wrong size, count: %1, values size: %2", m_nCount, vecValues.size());
@@ -68,7 +68,7 @@ namespace bptreedb
 			return 0;
 		}
 
-		void Decode(uint32_t nSize, TValueMemSet& vecValues, CommonLib::IReadStream *pStream, uint32_t nCompSize, CBPTreeContext *pContext)
+		void Decode(uint32_t nSize, TValueMemSet& vecValues, CommonLib::IMemoryReadStream *pStream, uint32_t nCompSize, CBPTreeContext *pContext)
 		{
 			TValue value;
 			for (uint32_t i = 0, sz = nSize; i < sz; ++i)

@@ -54,7 +54,7 @@ namespace bptreedb
 
 		}
 
-		uint64_t Encode(const TValueMemSet& vecValues, CommonLib::IWriteStream *pStream, uint32_t maxCompSize, CBPTreeContext *pContext)
+		uint64_t Encode(const TValueMemSet& vecValues, CommonLib::IMemoryWriteStream *pStream, uint32_t maxCompSize, CBPTreeContext *pContext)
 		{
 			size_t i = 0;
 			try
@@ -81,7 +81,7 @@ namespace bptreedb
 			
 		}
 
-		void Decode(uint64_t nCount, TValueMemSet& vecValues, CommonLib::IReadStream *pStream, uint32_t nCompSize, CBPTreeContext *pContext)
+		void Decode(uint64_t nCount, TValueMemSet& vecValues, CommonLib::IMemoryReadStream *pStream, uint32_t nCompSize, CBPTreeContext *pContext)
 		{
 
 			size_t i = 0;

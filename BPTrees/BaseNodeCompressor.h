@@ -41,7 +41,7 @@ namespace bptreedb
 			
 			virtual ~TBaseNodeCompressor() {}
 
-			virtual void Load(TKeyMemSet& vecKeys, TValueMemSet& vecValues, CommonLib::IReadStream* pStream, CBPTreeContext *pContext)
+			virtual void Load(TKeyMemSet& vecKeys, TValueMemSet& vecValues, CommonLib::IMemoryReadStream* pStream, CBPTreeContext *pContext)
 			{
 				try
 				{
@@ -64,12 +64,9 @@ namespace bptreedb
 					uint32_t nKeySize = pStream->ReadIntu32();
 					uint32_t nValueSize = pStream->ReadIntu32();
 
-					CommonLib::IMemoryStream *pMemStream = dynamic_cast<CommonLib::IMemoryStream *>(pStream); // TO DO fix
-					if (!pMemStream)
-						throw CommonLib::CExcBase(L"IStream isn't memstream");
 
-					KeyStream.AttachBuffer(pMemStream->Buffer()+ pStream->Pos(), nKeySize);
-					ValueStream.AttachBuffer(pMemStream->Buffer() + pStream->Pos() + nKeySize, nValueSize);
+					KeyStream.AttachBuffer(pStream->Buffer()+ pStream->Pos(), nKeySize);
+					ValueStream.AttachBuffer(pStream->Buffer() + pStream->Pos() + nKeySize, nValueSize);
 
 					m_KeyEncoder.Decode(m_nCount, vecKeys, &KeyStream, nKeySize, pContext);
 					m_ValueEncoder.Decode(m_nCount, vecValues, &ValueStream, nValueSize, pContext);
@@ -81,7 +78,7 @@ namespace bptreedb
 				}
 			}
 
-			virtual uint32_t Write(TKeyMemSet& vecKeys, TValueMemSet& vecValues, CommonLib::IWriteStream* pStream, CBPTreeContext *pContext)
+			virtual uint32_t Write(TKeyMemSet& vecKeys, TValueMemSet& vecValues, CommonLib::IMemoryWriteStream* pStream, CBPTreeContext *pContext)
 			{
 				try
 				{
@@ -123,7 +120,7 @@ namespace bptreedb
 					if (values != 0)
 						return values;
 
-					size_t endPos =  pStream->Pos();
+					size_t endPos = pStream->Pos();
 					valueSize = (uint32_t)(endPos - valueStartPos);
 
 					pStream->Seek(sizePos, CommonLib::soFromBegin);

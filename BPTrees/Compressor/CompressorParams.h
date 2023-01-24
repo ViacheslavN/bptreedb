@@ -31,8 +31,8 @@ namespace bptreedb
 	public:
 		CompressorParams();
 		virtual ~CompressorParams();
-		virtual void Load(CommonLib::IReadStream *pStream);
-		virtual void Save(CommonLib::IWriteStream *pStream);
+		virtual void Load(CommonLib::IMemoryReadStream *pStream);
+		virtual void Save(CommonLib::IMemoryWriteStream *pStream);
 
 		int32_t GetIntParam(const astr& name, int32_t defValue) const;
 		double GetDoubleParam(const astr& name, double defValue) const;
@@ -54,7 +54,7 @@ namespace bptreedb
 		}
 
 		template <class Type>
-		void SaveParams(const std::map<astr, Type>& mapParams, CommonLib::IWriteStream *pStream)
+		void SaveParams(const std::map<astr, Type>& mapParams, CommonLib::IMemoryWriteStream *pStream)
 		{
 			pStream->Write(uint32_t(mapParams.size()));
 			auto it = mapParams.begin();
@@ -67,7 +67,7 @@ namespace bptreedb
 		}
 
 		template <class Type>
-		void LoadParams(std::map<astr, Type>& mapParams, CommonLib::IReadStream *pStream)
+		void LoadParams(std::map<astr, Type>& mapParams, CommonLib::IMemoryReadStream *pStream)
 		{
 			uint32_t size = pStream->ReadIntu32();
 
@@ -101,8 +101,8 @@ namespace bptreedb
 	public:
 		CompressorParamsBase();
 		virtual ~CompressorParamsBase();
-		virtual void Load(CommonLib::IReadStream *pStream);
-		virtual void Save(CommonLib::IWriteStream *pStream);
+		virtual void Load(CommonLib::IMemoryReadStream *pStream);
+		virtual void Save(CommonLib::IMemoryWriteStream *pStream);
 
 		TCompressorParamsPtr GetCompressParams(ECompressParams eId);
 		void AddCompressParams(TCompressorParamsPtr ptrParams, ECompressParams eId);

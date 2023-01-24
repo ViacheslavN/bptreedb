@@ -62,7 +62,7 @@ public:
 		return m_Compressor.RowSize();
 	}
 
-	virtual uint32_t Save(CommonLib::IWriteStream *stream, CBPTreeContext *pContext)
+	virtual uint32_t Save(CommonLib::IMemoryWriteStream *stream, CBPTreeContext *pContext)
 	{
 		try
 		{
@@ -76,7 +76,7 @@ public:
 		}
 	}
 
-	virtual void Load(CommonLib::IReadStream* stream, CBPTreeContext *pContext)
+	virtual void Load(CommonLib::IMemoryReadStream* stream, CBPTreeContext *pContext)
 	{
 		try
 		{

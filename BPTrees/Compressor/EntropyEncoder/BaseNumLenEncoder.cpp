@@ -182,7 +182,7 @@ namespace bptreedb
 	
  
 
-	void CBaseNumLenEncoder::WriteHeader(CommonLib::IWriteStream* pStream)
+	void CBaseNumLenEncoder::WriteHeader(CommonLib::IMemoryWriteStream* pStream)
 	{
 		try
 		{
@@ -243,7 +243,7 @@ namespace bptreedb
 
 	}
 
-	void CBaseNumLenEncoder::ReadHeader(CommonLib::IReadStream* pStream)
+	void CBaseNumLenEncoder::ReadHeader(CommonLib::IMemoryReadStream* pStream)
 	{
 		try
 		{

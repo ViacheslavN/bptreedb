@@ -450,7 +450,7 @@ namespace bptreedb
 		virtual ~BPTreeLeafNode()
 		{}
 
-		virtual  uint32_t Save(CommonLib::IWriteStream* stream, CBPTreeContext *pContext)
+		virtual  uint32_t Save(CommonLib::IMemoryWriteStream* stream, CBPTreeContext *pContext)
 		{
 			try
 			{
@@ -466,7 +466,7 @@ namespace bptreedb
 
 		}
 
-		virtual void Load(CommonLib::IReadStream* stream, CBPTreeContext *pContext)
+		virtual void Load(CommonLib::IMemoryReadStream* stream, CBPTreeContext *pContext)
 		{
 			try
 			{

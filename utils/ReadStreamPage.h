@@ -11,7 +11,7 @@ namespace bptreedb
 	{
 
 template<class _TStorage>
-class TReadStreamPage : public CommonLib::TMemoryStreamBaseEmpty<CommonLib::IReadStreamBase>
+class TReadStreamPage : public CommonLib::TMemoryStreamBaseEmpty<CommonLib::IMemoryReadStream>
 {
 public:
 	typedef _TStorage TStorage;
@@ -41,21 +41,19 @@ public:
 
 	}
 
-	virtual void ReadBytes(byte_t* dst, size_t size)
+	virtual std::streamsize ReadBytes(byte_t* dst, size_t size)
 	{
 		read_bytes_impl(dst, size, false);
+		return size;
 	}
 
-	virtual void ReadInverse(byte_t* dst, size_t size)
+	virtual std::streamsize ReadInverse(byte_t* dst, size_t size)
 	{
 		read_bytes_impl(dst, size, true);
+		return size;
 	}
 
-	virtual void ReadStream(IStream *pStream, bool bAttach)
-	{
-		throw CommonLib::CExcBase("ReadStreamPage: ReadStream not implement");
-	}
-
+ 
 	virtual bool ReadBytesSafe(byte_t* dst, size_t size)
 	{
 		try
@@ -84,11 +82,10 @@ public:
 		return false;
 	}
 
-	virtual bool ReadStreamSafe(IStream *pStream, bool bAttach)
+	virtual bool IsEnoughSpace(size_t size) const
 	{
-		return false;
+		return true;
 	}
-
 
 private:
 

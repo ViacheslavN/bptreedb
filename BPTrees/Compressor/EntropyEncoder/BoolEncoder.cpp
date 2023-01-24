@@ -53,7 +53,7 @@ namespace bptreedb
 	}
 
 
-	bool CBoolEncoder::BeginEncoding(CommonLib::IWriteStream *ptrStream)
+	bool CBoolEncoder::BeginEncoding(CommonLib::IMemoryWriteStream *ptrStream)
 	{
 		byte_t nFlag = 0;
 		if (m_bools[0] == 0 || m_bools[1] == 0)
@@ -72,9 +72,6 @@ namespace bptreedb
 		else
 		{
  
-			CommonLib::IMemoryStream *ptrMemStream = dynamic_cast<CommonLib::IMemoryStream *>(ptrStream);
-			if (!ptrMemStream)
-				throw CommonLib::CExcBase(L"CBoolEncoder:BeginDecoding IStream isn't memstream");
 
 			uint32_t nByteSize = ((m_bools[0] + m_bools[1] + 7) / 8) + 1;
 			uint32_t nMinCount = min(m_bools[0], m_bools[1]);
@@ -90,7 +87,7 @@ namespace bptreedb
 				if (!ptrStream->WriteSafe(m_bools[1]))
 					return false;
 				
-				m_bitsRW.Attach(ptrMemStream->BufferFromCurPos());
+				m_bitsRW.Attach(ptrStream->BufferFromCurPos());
 				return ptrStream->SeekSafe(nByteSize, CommonLib::soFromCurrent);
 
 			}
@@ -113,7 +110,7 @@ namespace bptreedb
 
 				WriteCompressValue(m_dataType, nMinCount, ptrStream);	
 
-				m_WriteStream.AttachBuffer(ptrMemStream->BufferFromCurPos(), nBytePosCodeSize);
+				m_WriteStream.AttachBuffer(ptrStream->BufferFromCurPos(), nBytePosCodeSize);
 				return ptrStream->SeekSafe(nBytePosCodeSize, CommonLib::soFromCurrent);
 			}
 		}
@@ -139,7 +136,7 @@ namespace bptreedb
 		}
 	}
 
-	void CBoolEncoder::BeginDecoding(CommonLib::IReadStream *ptrStream)
+	void CBoolEncoder::BeginDecoding(CommonLib::IMemoryReadStream *ptrStream)
 	{
 		byte_t nFlag = ptrStream->ReadByte();
 		m_bools[0] = ptrStream->ReadIntu32();
@@ -172,13 +169,9 @@ namespace bptreedb
 		}
 		else if (m_encodeType == BitEncode)
 		{
-			CommonLib::IMemoryStream *ptrMemStream = dynamic_cast<CommonLib::IMemoryStream *>(ptrStream);
-			if (!ptrMemStream)
-				throw CommonLib::CExcBase(L"CBoolEncoder:BeginDecoding IStream isn't memstream");
 
 			uint32_t nByteSize = ((count + 7) / 8) + 1;
-
-			m_bitsRW.Attach(ptrMemStream->BufferFromCurPos());
+			m_bitsRW.Attach(ptrStream->BufferFromCurPos());
 			ptrStream->Seek(nByteSize, CommonLib::soFromCurrent);
 		}
 	}
