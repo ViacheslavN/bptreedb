@@ -7,7 +7,12 @@
 #ifndef PCH_H
 #define PCH_H
 
-// add headers that you want to pre-compile here
-#include "framework.h"
+#define WIN32_LEAN_AND_MEAN    
+
+#include "../../CommonLib/CommonLib.h"
+#include "../../CommonLib/exception/exc_base.h"
+#include "../../CommonLib/alloc/alloc.h"
+#include "../../CommonLib/perf/PerfCount.h"
+#include "../../CommonLib/guid/guid.h"
 
 #endif //PCH_H
