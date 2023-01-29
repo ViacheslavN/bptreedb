@@ -332,13 +332,17 @@
   <ItemGroup>
     <ClInclude Include="FilePage.h" />
     <ClInclude Include="FileStorage.h" />
+    <ClInclude Include="PageMemoryBuffer.h" />
     <ClInclude Include="PageObject.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="ReadStreamPage.h" />
     <ClInclude Include="Storage.h" />
+    <ClInclude Include="WriteStreamPage.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FilePage.cpp" />
     <ClCompile Include="FileStorage.cpp" />
+    <ClCompile Include="PageMemoryBuffer.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">Create</PrecompiledHeader>

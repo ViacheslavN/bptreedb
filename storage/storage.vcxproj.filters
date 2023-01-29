@@ -33,6 +33,15 @@
     <ClInclude Include="PageObject.h">
       <Filter>FileStorage</Filter>
     </ClInclude>
+    <ClInclude Include="ReadStreamPage.h">
+      <Filter>FileStorage</Filter>
+    </ClInclude>
+    <ClInclude Include="WriteStreamPage.h">
+      <Filter>FileStorage</Filter>
+    </ClInclude>
+    <ClInclude Include="PageMemoryBuffer.h">
+      <Filter>FileStorage</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="storage.cpp">
@@ -45,6 +54,9 @@
       <Filter>FileStorage</Filter>
     </ClCompile>
     <ClCompile Include="FilePage.cpp">
+      <Filter>FileStorage</Filter>
+    </ClCompile>
+    <ClCompile Include="PageMemoryBuffer.cpp">
       <Filter>FileStorage</Filter>
     </ClCompile>
   </ItemGroup>

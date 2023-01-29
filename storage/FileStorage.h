@@ -28,7 +28,7 @@ namespace bptreedb
 			virtual void Flush();
 			virtual void SetStoragePerformer(CommonLib::TPrefCounterPtr pStoragePerformer);
 			virtual int32_t GetStorageId() const;
-			virtual int64_t GetNewFilePageAddr(uint32_t nSize = 0) = 0;
+			virtual int64_t GetNewFilePageAddr(uint32_t nSize = 0);
 
 		private:
 

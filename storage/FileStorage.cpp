@@ -202,6 +202,15 @@ namespace bptreedb
 		{
 			try
 			{
+				auto it = m_pageCache.Begin();
+				while (!it.IsNull())
+				{
+					if(it.Object()->pageState == CLEAN)
+						continue;
+
+					WriteData(it.Key(), it.Object()->pageData.data(), it.Object()->pageData.size());
+				}
+
 				m_file.Flush();
 			}
 			catch (std::exception& excSrc)

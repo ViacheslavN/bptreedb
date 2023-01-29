@@ -78,9 +78,6 @@ namespace bptreedb
 				iterator(QList* pTopList, QList* pBackList) : m_pTopList(pTopList), m_pBackList(pBackList)
 				{
 
-					assert(pTopList != NULL);
-					assert(pBackList != NULL);
-
 					m_type = TOP;
 					m_listIt = m_pTopList->Begin();
 					if (m_listIt.IsNull())

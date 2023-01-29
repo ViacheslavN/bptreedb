@@ -3,23 +3,24 @@
 #pragma once
 
 #include "../../CommonLib/CommonLib.h"
-#include "../../CommonLib/stream/MemoryStream.h"
+#include "../../CommonLib/stream/stream.h"
 #include "../../CommonLib/stream/StreamBaseEmpty.h"
+#include "FilePage.h"
 
 namespace bptreedb
 {
-	namespace utils
+	namespace storage
 	{
 
-		template<class _TStorage>
+		template<class _TPageIO>
 		class TReadStreamPage : public CommonLib::TMemoryStreamBaseEmpty<CommonLib::IMemoryReadStream>
 		{
 		public:
-			typedef _TStorage TStorage;
-			typedef std::shared_ptr<TStorage> TStoragePtr;
+			typedef _TPageIO TPageIO;
+			typedef std::shared_ptr<TPageIO> TPageIOPtr;
 
-			TReadStreamPage(TStoragePtr& pStorage) :
-				m_pStorage(pStorage)
+			TReadStreamPage(TPageIOPtr ptrPageIO, CommonLib::IAllocPtr ptrAlloc) :
+				m_ptrPageIO(ptrPageIO), m_ptrAlloc(ptrAlloc)
 			{
 
 			}
@@ -34,7 +35,7 @@ namespace bptreedb
 				}
 				catch (CommonLib::CExcBase& excSrc)
 				{
-					excSrc.AddMsgT("Failed open WriteStreamPage addr: %1, pagesize: %2", nPageAddr, m_nPageSize);
+					excSrc.AddMsgT("Failed open ReadStreamPage addr: %1, pagesize: %2", nPageAddr, m_nPageSize);
 					throw;
 				}
 
@@ -95,13 +96,13 @@ namespace bptreedb
 					size_t nPos = 0;
 					while (size)
 					{
-						size_t nFreeSize = m_stream.Size() - m_stream.Pos();
+						size_t nFreeSize = m_ptrStream->Size() - m_ptrStream->Pos();
 						if (nFreeSize >= size)
 						{
 							if (bInvers)
-								m_stream.ReadInverse(buffer + nPos, size);
+								m_ptrStream->ReadInverse(buffer + nPos, size);
 							else
-								m_stream.ReadBytes(buffer + nPos, size);
+								m_ptrStream->ReadBytes(buffer + nPos, size);
 
 							size = 0;
 						}
@@ -111,9 +112,9 @@ namespace bptreedb
 							if (nReadSize)
 							{
 								if (bInvers)
-									m_stream.ReadInverse(buffer + nPos, nReadSize);
+									m_ptrStream->ReadInverse(buffer + nPos, nReadSize);
 								else
-									m_stream.ReadBytes(buffer + nPos, nReadSize);
+									m_ptrStream->ReadBytes(buffer + nPos, nReadSize);
 
 								size -= nReadSize;
 								nPos += nReadSize;
@@ -136,10 +137,14 @@ namespace bptreedb
 			{
 				try
 				{
-					m_pCurrentPage = m_pStorage->GetFilePage(nPageAddr, m_nPageSize);
-					m_stream.AttachBuffer(m_pCurrentPage->GetData(), m_pCurrentPage->GetPageSize());
-					m_nNextAddr = m_stream.ReadInt64();
-					m_stream.ReadInt64();
+					if(m_pCurrentPage.get() == nullptr)
+						m_pCurrentPage = CFilePage::Read(m_ptrPageIO, m_ptrAlloc, m_nPageSize, nPageAddr);
+					else
+						CFilePage::Read(m_ptrPageIO, m_pCurrentPage, nPageAddr);
+
+					m_ptrStream = m_pCurrentPage->GetReadStream();
+					m_nNextAddr = m_ptrStream->ReadInt64();
+					m_ptrStream->ReadInt64();
 				}
 				catch (std::exception& excSrc)
 				{
@@ -148,11 +153,12 @@ namespace bptreedb
 			}
 
 		private:
-			int64_t m_nNextAddr{ -1 };;
+			int64_t m_nNextAddr{ -1 };
 			uint32_t m_nPageSize{ 0 };
-			TStoragePtr m_pStorage;
-			FilePagePtr m_pCurrentPage;
-			CommonLib::CReadMemoryStream m_stream;
+			TPageIOPtr m_ptrPageIO;
+			CFilePagePtr m_pCurrentPage;
+			CommonLib::IAllocPtr m_ptrAlloc;
+			CommonLib::IMemoryReadStreamPtr m_ptrStream;
 		};
 	}
 }
