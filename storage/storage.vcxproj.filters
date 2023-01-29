@@ -27,6 +27,12 @@
     <ClInclude Include="FileStorage.h">
       <Filter>FileStorage</Filter>
     </ClInclude>
+    <ClInclude Include="FilePage.h">
+      <Filter>FileStorage</Filter>
+    </ClInclude>
+    <ClInclude Include="PageObject.h">
+      <Filter>FileStorage</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="storage.cpp">
@@ -36,6 +42,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FileStorage.cpp">
+      <Filter>FileStorage</Filter>
+    </ClCompile>
+    <ClCompile Include="FilePage.cpp">
       <Filter>FileStorage</Filter>
     </ClCompile>
   </ItemGroup>

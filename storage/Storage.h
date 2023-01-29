@@ -6,8 +6,6 @@ namespace bptreedb
 {
 	namespace storage
 	{
-
-
 		class IStorageCipher
 		{
 		public:

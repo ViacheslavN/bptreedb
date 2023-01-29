@@ -330,11 +330,14 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="FilePage.h" />
     <ClInclude Include="FileStorage.h" />
+    <ClInclude Include="PageObject.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Storage.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FilePage.cpp" />
     <ClCompile Include="FileStorage.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
