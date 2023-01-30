@@ -129,7 +129,7 @@ namespace bptreedb
 			try
 			{
 				if (m_ptrCurrentPage.get() == nullptr)
-					m_ptrCurrentPage = m_ptrIFilePager->GetNewPage(nPageAddr);
+					m_ptrCurrentPage = m_ptrIFilePager->ReadPage(nPageAddr);
 				else
 					m_ptrIFilePager->ReadPage(m_ptrCurrentPage, nPageAddr);
 

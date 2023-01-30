@@ -85,7 +85,7 @@ int main()
 		int cacheSize = 5;
 		int32_t storageId = 1;
 		int64_t nBegin = 0;
-		int64_t nEnd = 1;
+		int64_t nEnd = 1024*1024;
 
 		astr file = "D:\\streamTest";
 

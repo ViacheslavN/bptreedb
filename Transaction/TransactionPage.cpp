@@ -93,16 +93,18 @@ namespace bptreedb
 
 		CommonLib::IMemoryWriteStreamPtr CTransactionPage::GetWriteStream() const
 		{
-			CommonLib::IMemoryWriteStreamPtr ptrStream = m_ptrPage->GetWriteStream();
-			ptrStream->Seek(page_header_size, CommonLib::soFromBegin);
-
+			CommonLib::IMemoryWriteStreamPtr ptrBaseStream = m_ptrPage->GetWriteStream();
+			CommonLib::IMemoryWriteStreamPtr ptrStream = std::make_shared<CommonLib::CFxMemoryWriteStream>();
+			ptrStream->AttachBuffer(ptrBaseStream->Buffer() + page_header_size, ptrBaseStream->Size() - page_header_size);
+ 
 			return ptrStream;
 		}
 
 		CommonLib::IMemoryReadStreamPtr CTransactionPage::GetReadStream() const
 		{
-			CommonLib::IMemoryReadStreamPtr ptrStream = m_ptrPage->GetReadStream();
-			ptrStream->Seek(page_header_size, CommonLib::soFromBegin);
+			CommonLib::IMemoryReadStreamPtr ptrBaseStream = m_ptrPage->GetReadStream();
+			CommonLib::IMemoryReadStreamPtr ptrStream = std::make_shared<CommonLib::CReadMemoryStream>();
+			ptrStream->AttachBuffer(ptrBaseStream->Buffer() + page_header_size, ptrBaseStream->Size() - page_header_size);
 
 			return ptrStream;
 		}
