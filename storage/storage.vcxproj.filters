@@ -16,6 +16,9 @@
     <Filter Include="FileStorage">
       <UniqueIdentifier>{ceb68d3e-353a-41fe-8bea-764027fa3ff6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Snapshot">
+      <UniqueIdentifier>{e9775ca7-710c-41e5-8c73-664b9db3a5e2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -57,6 +60,12 @@
       <Filter>FileStorage</Filter>
     </ClCompile>
     <ClCompile Include="PageMemoryBuffer.cpp">
+      <Filter>FileStorage</Filter>
+    </ClCompile>
+    <ClCompile Include="ReadStreamPage.cpp">
+      <Filter>FileStorage</Filter>
+    </ClCompile>
+    <ClCompile Include="WriteStreamPage.cpp">
       <Filter>FileStorage</Filter>
     </ClCompile>
   </ItemGroup>

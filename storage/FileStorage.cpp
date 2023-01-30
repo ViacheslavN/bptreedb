@@ -93,6 +93,10 @@ namespace bptreedb
 		{
 			CommonLib::CPrefCounterHolder holder(m_ptrStoragePerformer, eReadData, m_minPageSize);
 
+			if (nAddr >= m_lastAddr)
+				throw CommonLib::CExcBase("Failed to read data, outrange addr %1, lastAddr: %2", nAddr, m_lastAddr);
+
+
 			TCacheFilePagePtr ptrPage = m_pageCache.GetElem(nAddr);
 			if (ptrPage.get())
 			{
@@ -122,6 +126,7 @@ namespace bptreedb
 
 				ptrPage->CopyFrom(pData);
 				ptrPage->nAddr = nAddr;
+				ptrPage->pageState = CLEAN;
 				m_pageCache.AddElem(ptrPage->nAddr, ptrPage);
 			}
 			else
@@ -164,6 +169,9 @@ namespace bptreedb
 
 		void CFileStorage::_WriteData(int64_t nAddr, const byte_t* pData)
 		{
+			if (nAddr >= m_lastAddr)
+				throw CommonLib::CExcBase("Failed to read data, outrange addr %1, lastAddr: %2", nAddr, m_lastAddr);
+
 			TCacheFilePagePtr ptrPage = m_pageCache.GetElem(nAddr);
 			if (ptrPage.get())
 			{
@@ -208,7 +216,9 @@ namespace bptreedb
 					if(it.Object()->pageState == CLEAN)
 						continue;
 
-					WriteData(it.Key(), it.Object()->pageData.data(), it.Object()->pageData.size());
+					WriteData(it.Key(), it.Object()->pageData.data(), (uint32_t)it.Object()->pageData.size());
+
+					it.Next();
 				}
 
 				m_file.Flush();

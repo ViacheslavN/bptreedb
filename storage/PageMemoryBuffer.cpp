@@ -120,6 +120,11 @@ namespace bptreedb
 			return m_nSize;
 		}
 
+		void CPageMemoryBuffer::SetOffset(uint32_t offset)
+		{
+			m_dataOffset = offset;
+		}
+
 		void CPageMemoryBuffer::Close()
 		{
 			try

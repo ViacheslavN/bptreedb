@@ -42,7 +42,7 @@ namespace bptreedb
 			int32_t m_cacheSize{ 256*1024 };
 			int32_t m_storage_id{ -1 };
 			uint32_t m_minPageSize{ MIN_PAGE_SIZE };
-			uint64_t m_lastAddr{ 0 };
+			int64_t m_lastAddr{ 0 };
 			uint64_t m_offset{ 0 };
 			IStorageCipherPtr m_ptrStorageCipher;
 			CommonLib::file::CFile m_file;
@@ -65,8 +65,7 @@ namespace bptreedb
 				SCacheFilePage(int64_t	_nAddr, const byte_t *pByte, size_t size) : nAddr(_nAddr)
 				{
 					pageData.resize(size);
-					CopyFrom(pByte);
-					pageState = CLEAN;
+					memcpy(pageData.data(), pByte, pageData.size());			 
 				}
 
 				int64_t	nAddr;

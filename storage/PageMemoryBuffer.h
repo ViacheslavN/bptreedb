@@ -12,7 +12,7 @@ namespace bptreedb
 		{
 		public:
 
-			CPageMemoryBuffer(CommonLib::IAllocPtr ptrAlloc, uint32_t offset);
+			CPageMemoryBuffer(CommonLib::IAllocPtr ptrAlloc, uint32_t offset = 0);
 			virtual ~CPageMemoryBuffer();
 
 			virtual void Create(size_t nSize);
@@ -25,9 +25,10 @@ namespace bptreedb
 			virtual void Close();
 			virtual CommonLib::IMemStreamBufferPtr CreateBuffer();
 
-			virtual byte_t* GetFullData();
-			virtual const byte_t* GetFullData() const;
-			virtual uint32_t GetFullSize() const;
+			byte_t* GetFullData();
+			const byte_t* GetFullData() const;
+			uint32_t GetFullSize() const;
+			void SetOffset(uint32_t offset);
 
 		private:
 			byte_t* m_pBuffer{ nullptr };

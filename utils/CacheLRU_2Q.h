@@ -47,12 +47,14 @@ namespace bptreedb
 			};
 
 			typedef  TList<TCacheVal> QList;
+			typedef typename QList::TNode TListNode;
+			typedef std::map<TKey, TListNode*> TCacheMap;
 
 		public:
 			typedef typename QList::iterator TListIterator;
 
-			TCacheLRU_2Q(std::shared_ptr<CommonLib::IAlloc> pAlloc = std::shared_ptr<CommonLib::IAlloc>(), TObj nullObj = TObj()) :
-				m_pAlloc(pAlloc), m_TopList(pAlloc), m_BackList(pAlloc),
+			TCacheLRU_2Q(CommonLib::IAllocPtr ptrAlloc = CommonLib::IAllocPtr(), TObj nullObj = TObj()) :
+				m_pAlloc(ptrAlloc), m_TopList(ptrAlloc), m_BackList(ptrAlloc),
 				m_NullObj(nullObj)
 			{
 				if (m_pAlloc.get() == nullptr)
@@ -75,54 +77,24 @@ namespace bptreedb
 			class iterator
 			{
 			public:
-				iterator(QList* pTopList, QList* pBackList) : m_pTopList(pTopList), m_pBackList(pBackList)
-				{
-
-					m_type = TOP;
-					m_listIt = m_pTopList->Begin();
-					if (m_listIt.IsNull())
-					{
-						m_type = BACK;
-						m_listIt = m_pBackList->Begin();
-					}
+				iterator(typename TCacheMap::iterator start, typename TCacheMap::iterator end) : m_itBegin(start), m_itEnd(end)
+				{			
 
 				}
 
 				bool IsNull()
 				{
-					if ((m_type == BACK))
-						return m_listIt.IsNull();
-
-					else if (m_listIt.IsNull())
-					{
-						m_type = BACK;
-						m_listIt = m_pBackList->Begin();
-						return m_listIt.IsNull();
-					}
+					return m_itBegin == m_itEnd;
 				}
 
-				TObj& Object() { return m_listIt.Value().m_obj; }
-				TKey& Key() { return m_listIt.Value().m_key; }
+				TObj& Object() { return  m_itBegin->second->m_val.m_obj; }
+				const TKey& Key() { return m_itBegin->first;}
 
 				void Next()
 				{
 					try
 					{
-
-						if ((m_type == BACK))
-						{
-							m_listIt.Next();
-							return;
-						}
-
-						if (m_listIt.IsNull())
-						{
-							m_type = BACK;
-							m_listIt = m_pBackList->Begin();
-						}
-
-						m_listIt.next();
-
+						++m_itBegin;
 					}
 					catch (CommonLib::CExcBase& exc)
 					{
@@ -133,10 +105,8 @@ namespace bptreedb
 				}
 
 			private:
-				eQueueType m_type;
-				QList* m_pTopList;
-				QList* m_pBackList;
-				TListIterator m_listIt;
+				typename TCacheMap::iterator m_itBegin;
+				typename TCacheMap::iterator m_itEnd;
 			};
 
 			void AddElem(const TKey& key, TObj& pObj, bool bAddBack = true)
@@ -243,7 +213,7 @@ namespace bptreedb
 				return cacheVal.m_obj;
 			}
 
-			iterator Begin() { return iterator(&m_TopList, &m_BackList); }
+			iterator Begin() { return iterator(m_CacheMap.begin(), m_CacheMap.end()); }
 
 		private:
 
@@ -286,8 +256,7 @@ namespace bptreedb
 
 		private:
 
-			typedef typename QList::TNode TListNode;
-			typedef std::map<TKey, TListNode*> TCacheMap;
+	
 
 			std::shared_ptr<CommonLib::IAlloc> m_pAlloc;
 			TCacheMap m_CacheMap;

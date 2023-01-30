@@ -10,20 +10,23 @@
 #include "../../storage/WriteStreamPage.h"
 
 #include <iostream>
+#include "Pager.h"
 
 
-int64_t TestWrite(const astr& fileName, int pageSize, int cacheSize, int storageid, bool bCreate, int64_t nBegin, int64_t nEnd)
+int64_t TestWrite(const astr& fileName, int pageSize, int cacheSize, int storageid, int nStreamAddr, int64_t nBegin, int64_t nEnd)
 {
 	try
 	{
 		CommonLib::IAllocPtr ptrAlloc = CommonLib::IAlloc::CreateSimpleAlloc();
 		bptreedb::storage::IStoragePtr ptrStorage = std::make_shared<bptreedb::storage::CFileStorage>(ptrAlloc, storageid, cacheSize);
-		ptrStorage->Open(fileName.c_str(), bCreate, 0, pageSize);
-		int64_t nAddr = ptrStorage->GetNewFilePageAddr(pageSize);
+		ptrStorage->Open(fileName.c_str(), nStreamAddr == -1, 0, pageSize);
+		int64_t nAddr = nStreamAddr == -1 ? ptrStorage->GetNewFilePageAddr(pageSize) : nStreamAddr;
 
-		bptreedb::storage::TWriteStreamPage<bptreedb::storage::IPageIO> stream(ptrStorage, ptrAlloc, 1, 1, 1);
+		CPagerPtr ptrPager = std::make_shared<CPager>(ptrStorage, ptrAlloc, pageSize);
 
-		stream.Open(nAddr, pageSize, bCreate);
+		bptreedb::storage::TWriteStreamPage stream(ptrPager);
+
+		stream.Open(nAddr, nStreamAddr == -1);
 
 		for (int64_t i = nBegin; i < nEnd; ++i)
 		{
@@ -36,9 +39,9 @@ int64_t TestWrite(const astr& fileName, int pageSize, int cacheSize, int storage
 		return nAddr;
 
 	}
-	catch (CommonLib::CExcBase& excSrc)
+	catch (std::exception& excSrc)
 	{
-		excSrc.AddMsg("Failed to test write");
+		CommonLib::CExcBase::RegenExcT("Failed to test write", excSrc);
 		throw;
 	}
 }
@@ -52,22 +55,23 @@ void TestRead(const astr& fileName, int pageSize, int cacheSize, int storageid, 
 		bptreedb::storage::IStoragePtr ptrStorage = std::make_shared<bptreedb::storage::CFileStorage>(ptrAlloc, storageid, cacheSize);
 		ptrStorage->Open(fileName.c_str(), false, 0, pageSize);
 
-		bptreedb::storage::TReadStreamPage<bptreedb::storage::IPageIO> stream(ptrStorage, ptrAlloc);
+		CPagerPtr ptrPager = std::make_shared<CPager>(ptrStorage, ptrAlloc, pageSize);
 
-		stream.Open(nAddr, pageSize);
+		bptreedb::storage::TReadStreamPage stream(ptrPager);
+
+		stream.Open(nAddr);
 
 		for (int64_t i = nBegin; i < nEnd; ++i)
 		{
 			int64_t val =  stream.ReadInt64();
 			if (val != i)
-				throw CommonLib::CExcBase("Failed test read val: %1, i: %2", val, i);
+				throw CommonLib::CExcBase("val: %1, i: %2", val, i);
 		}
 
-
 	}
-	catch (CommonLib::CExcBase& excSrc)
+	catch (std::exception& excSrc)
 	{
-		excSrc.AddMsg("Failed to test write");
+		CommonLib::CExcBase::RegenExcT("Failed test read ", excSrc);
 		throw;
 	}
 }
@@ -81,16 +85,19 @@ int main()
 		int cacheSize = 5;
 		int32_t storageId = 1;
 		int64_t nBegin = 0;
-		int64_t nEnd = 1024*1024;
+		int64_t nEnd = 1;
 
 		astr file = "D:\\streamTest";
 
-		int nAddr = TestWrite(file, pageSize, cacheSize, storageId, true, nBegin, nEnd);
+		int64_t nAddr = -1;
+
+		nAddr = TestWrite(file, pageSize, cacheSize, storageId, nAddr, nBegin, nEnd);
+		TestRead(file, pageSize, cacheSize, storageId, nAddr, nBegin, nEnd);
+		TestWrite(file, pageSize, cacheSize, storageId, nAddr, nBegin, nEnd);
 		TestRead(file, pageSize, cacheSize, storageId, nAddr, nBegin, nEnd);
 
-
 	}
-	catch (CommonLib::CExcBase& exc)
+	catch (std::exception& exc)
 	{
 		std::cout << "Exception: " << exc.what();
 	}

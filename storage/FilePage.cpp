@@ -6,36 +6,24 @@ namespace bptreedb
 {
 	namespace storage
 	{
-		CFilePage::CFilePage(std::shared_ptr<CommonLib::IAlloc> pAlloc, uint32_t nSize, int64_t nAddr,
-			uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype) :  m_nAddr(nAddr),
-			m_objectID(objectID), m_objectType(objecttype), m_parentID(parentID), m_parentType(parenttype)
+		CFilePage::CFilePage(std::shared_ptr<CommonLib::IAlloc> pAlloc, uint32_t nSize, int64_t nAddr) :  m_nAddr(nAddr)
 		{
 			m_ptrBuffer = std::make_shared<CPageMemoryBuffer>(pAlloc, page_header_size);
 			m_ptrBuffer->Create(nSize);
 		}
 
-		CFilePage::CFilePage(std::shared_ptr<CommonLib::IAlloc> pAlloc, byte_t* pData, uint32_t nSize, int64_t nAddr,
-			uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype) :
-			 m_nAddr(nAddr), m_objectID(objectID), m_objectType(objecttype), m_parentID(parentID), m_parentType(parenttype)
+		CFilePage::CFilePage(std::shared_ptr<CommonLib::IAlloc> pAlloc, byte_t* pData, uint32_t nSize, int64_t nAddr) :
+			 m_nAddr(nAddr)
 		{
 			m_ptrBuffer = std::make_shared<CPageMemoryBuffer>(pAlloc, page_header_size);
 			m_ptrBuffer->AttachBuffer(pData, nSize);
 		}
 
-
-		CFilePage::CFilePage(CPageMemoryBufferPtr ptrBuffer, int64_t nAddr,
-			uint32_t objectID, ObjectPageType objecttype, uint32_t parentID, ObjectPageType parenttype) :
-			m_nAddr(nAddr), m_objectID(objectID), m_objectType(objecttype), m_parentID(parentID), m_parentType(parenttype)
-		{
-			m_ptrBuffer = ptrBuffer;
-		}
-
-
 		CFilePage::CFilePage(CPageMemoryBufferPtr ptrBuffer, int64_t nAddr) : m_nAddr(nAddr)
 		{
 			m_ptrBuffer = ptrBuffer;
-			ReloadHeader();
-		}
+			m_ptrBuffer->SetOffset(page_header_size);
+ 		}
 
 		CFilePage::~CFilePage()
 		{
@@ -61,27 +49,7 @@ namespace bptreedb
 		void CFilePage::SetAddr(int64_t nAddr)
 		{
 			m_nAddr = nAddr;
-		}
-
-		ObjectPageType CFilePage::GetObjectType() const
-		{
-			return (ObjectPageType)m_objectType;
-		}
-
-		uint32_t CFilePage::GetObjectID() const
-		{
-			return m_objectID;
-		}
-
-		ObjectPageType CFilePage::GetParentType() const
-		{
-			return (ObjectPageType)m_parentType;
-		}
-
-		uint32_t CFilePage::GetParentObjectID() const
-		{
-			return m_parentID;
-		}
+		}	
 
 		byte_t* CFilePage::GetData()
 		{
@@ -144,43 +112,14 @@ namespace bptreedb
 			return crc == calcCrc;
 		}
 
-		void CFilePage::ReloadHeader()
-		{
-			byte_t* pBuf = GetDataWithoutCRC();
-
-			memcpy(&m_objectID, pBuf, sizeof(uint32_t));
-			pBuf += sizeof(uint32_t);
-
-			memcpy(&m_objectType, pBuf, sizeof(uint32_t));
-			pBuf += sizeof(uint32_t);
-
-			memcpy(&m_parentID, pBuf, sizeof(uint32_t));
-			pBuf += sizeof(uint32_t);
-
-			memcpy(&m_parentType, pBuf, sizeof(uint32_t));
-		}
+		
 
 		void CFilePage::Save(IPageIOPtr ptrPageIO)
 		{
 			try
-			{
-		
-				byte_t* pBuf = GetDataWithoutCRC();
-
-				memcpy(pBuf, &m_objectID, sizeof(uint32_t));
-				pBuf += sizeof(uint32_t);
-
-				memcpy(pBuf, &m_objectType, sizeof(uint32_t));
-				pBuf += sizeof(uint32_t);
-
-				memcpy(pBuf, &m_parentID, sizeof(uint32_t));
-				pBuf += sizeof(uint32_t);
-
-				memcpy(pBuf, &m_parentType, sizeof(uint32_t));
-
+			{			
 				WriteCRC(GetFullData(), GetFullPageSize());
 				ptrPageIO->WriteData(m_nAddr, GetFullData(), GetFullPageSize());
-
 			}		
 			catch (std::exception& excSrc)
 			{
@@ -189,7 +128,7 @@ namespace bptreedb
 			}
 		}
 
-		CFilePagePtr CFilePage::Read(IPageIOPtr ptrPageIO, std::shared_ptr<CommonLib::IAlloc> pAlloc, uint32_t nSize, int64_t nAddr)
+		IFilePagePtr CFilePage::Read(IPageIOPtr ptrPageIO, std::shared_ptr<CommonLib::IAlloc> pAlloc, uint32_t nSize, int64_t nAddr)
 		{
 			try
 			{
@@ -197,7 +136,7 @@ namespace bptreedb
 				ptrBuffer->Create(nSize);
 				ptrPageIO->ReadData(nAddr, ptrBuffer->GetFullData(), ptrBuffer->GetFullSize());
 
-				CFilePagePtr ptrPage = std::make_shared<class CFilePage>(ptrBuffer, nAddr);
+				CFilePagePtr ptrPage = std::make_shared<CFilePage>(ptrBuffer, nAddr);
 				ptrPage->CheckCRCAndThrow();
 
 				return ptrPage;
@@ -209,14 +148,13 @@ namespace bptreedb
 			}
 		}
 
-		void  CFilePage::Read(IPageIOPtr ptrPageIO, CFilePagePtr ptrPage, int64_t nAddr)
+		void  CFilePage::Read(IPageIOPtr ptrPageIO, int64_t nAddr)
 		{
 			try
 			{
-				ptrPageIO->ReadData(nAddr, ptrPage->GetFullData(), ptrPage->GetFullPageSize());
-				ptrPage->CheckCRCAndThrow();
-				ptrPage->ReloadHeader();
-				ptrPage->SetAddr(nAddr);		 
+				ptrPageIO->ReadData(nAddr, m_ptrBuffer->GetFullData(), m_ptrBuffer->GetFullSize());
+				CheckCRCAndThrow();
+				SetAddr(nAddr);		 
 			}
 			catch (std::exception& excSrc)
 			{

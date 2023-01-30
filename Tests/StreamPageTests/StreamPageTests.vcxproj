@@ -142,15 +142,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Pager.cpp" />
     <ClCompile Include="StreamTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\storage\storage.vcxproj">
       <Project>{85735427-39b7-47d3-a5d8-9df4acb2d6ab}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\Transaction\Transaction.vcxproj">
+      <Project>{5f39b1af-d9b4-4fb8-a6db-50f892c53225}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\utils\utils.vcxproj">
       <Project>{91eca85f-4bbb-4fb0-9a37-729fb9db0f18}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Pager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
