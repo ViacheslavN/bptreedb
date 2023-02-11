@@ -5,8 +5,8 @@ namespace bptreedb
 {
 	namespace storage
 	{
-		CFileStorage::CFileStorage(std::shared_ptr<CommonLib::IAlloc> pAlloc, int32_t storageId, int32_t cacheSize) : m_ptrAlloc(pAlloc), 
-			m_storage_id(storageId), m_cacheSize(cacheSize)
+		CFileStorage::CFileStorage(CommonLib::IAllocPtr ptrAlloc, int32_t storageId, int32_t cacheSize, IStorageCipherPtr ptrCipher) : m_ptrAlloc(ptrAlloc),
+			m_storage_id(storageId), m_cacheSize(cacheSize), m_ptrStorageCipher(ptrCipher)
 		{
 
 		}
@@ -167,6 +167,32 @@ namespace bptreedb
 			}
 		}
 
+		void CFileStorage::DropData(int64_t nAddr, uint32_t nSize)
+		{
+			try
+			{
+				if ((nSize % m_minPageSize) != 0)
+					throw CommonLib::CExcBase("Wrong size: %1", nSize);
+
+				std::lock_guard<std::recursive_mutex> locker(m_mutex);
+				{
+					int32_t nPageCnt = nSize / m_minPageSize;
+					uint64_t nStartAddr = nAddr;
+					for (int32_t i = 0; i < nPageCnt; ++i)
+					{
+						_DeleteData(nStartAddr);
+						nStartAddr += m_minPageSize;
+					}
+				}
+			}
+			catch (std::exception& excSrc)
+			{
+				CommonLib::CExcBase::RegenExcT("Failed to drop data, addr: %1, size %2", nAddr, nSize, excSrc);
+				throw;
+			}
+
+		}
+
 		void CFileStorage::_WriteData(int64_t nAddr, const byte_t* pData)
 		{
 			if (nAddr >= m_lastAddr)
@@ -204,6 +230,11 @@ namespace bptreedb
 
 			if (nCnt != m_minPageSize)
 				throw CommonLib::CExcBase(L"Can't write page, page size: %1, written bytes %2", m_minPageSize, nCnt);		
+		}
+
+		void  CFileStorage::_DeleteData(int64_t nAddr)
+		{
+
 		}
 
 		void CFileStorage::Flush()

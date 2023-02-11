@@ -51,6 +51,11 @@ namespace bptreedb
 			m_nAddr = nAddr;
 		}	
 
+		uint32_t CFilePage::GetSize() const
+		{
+			return GetFullPageSize();
+		}
+			
 		byte_t* CFilePage::GetData()
 		{
 			return m_ptrBuffer->GetData();
@@ -114,16 +119,16 @@ namespace bptreedb
 
 		
 
-		void CFilePage::Save(IPageIOPtr ptrPageIO)
+		void CFilePage::Save(IPageIOPtr ptrPageIO, int64_t nAddr)
 		{
 			try
 			{			
 				WriteCRC(GetFullData(), GetFullPageSize());
-				ptrPageIO->WriteData(m_nAddr, GetFullData(), GetFullPageSize());
+				ptrPageIO->WriteData(nAddr, GetFullData(), GetFullPageSize());
 			}		
 			catch (std::exception& excSrc)
 			{
-				CommonLib::CExcBase::RegenExcT("Filed to save file page addr: %1", m_nAddr, excSrc);
+				CommonLib::CExcBase::RegenExcT("Filed to save file page addr: %1", nAddr, excSrc);
 				throw;
 			}
 		}

@@ -339,6 +339,7 @@
     <ClInclude Include="CacheLRU_2Q.h" />
     <ClInclude Include="CRC.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Int128.h" />
     <ClInclude Include="List.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>

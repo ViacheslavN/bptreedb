@@ -2,7 +2,6 @@
 #include "../../CommonLib/CommonLib.h"
 #include "../../CommonLib/alloc/alloc.h"
 #include "Storage.h"
-#include "../../CommonLib/stream/FixedMemoryStream.h"
 #include "PageMemoryBuffer.h"
 
 #include "PageObject.h"
@@ -12,41 +11,7 @@ namespace bptreedb
 	namespace storage
 	{
 
-		class IFilePage
-		{
-		public:
-
-			IFilePage(){}
-			virtual ~IFilePage(){}
-
-			virtual int64_t GetAddr() const = 0;
-			virtual void SetAddr(int64_t nAddr) = 0;
-			virtual CommonLib::IMemoryWriteStreamPtr GetWriteStream() const = 0;
-			virtual CommonLib::IMemoryReadStreamPtr GetReadStream() const = 0;
-
-			virtual void Save(IPageIOPtr ptrPageIO) = 0;
-			virtual void Read(IPageIOPtr ptrPageIO, int64_t nAddr) = 0;
-		};
-
-		typedef std::shared_ptr<class IFilePage> IFilePagePtr;
 		typedef std::shared_ptr<class CFilePage> CFilePagePtr;
-		typedef std::shared_ptr<class IFilePager> IFilePagerPtr;
-
-		class IFilePager
-		{
-		public:
-
-			IFilePager() {}
-			virtual ~IFilePager() {}
-
-			virtual int64_t GetNewFilePageAddr() = 0;
-			virtual IFilePagePtr GetNewPage(int64_t nAddr) = 0;
-			virtual IFilePagePtr ReadPage(int64_t nAddr) = 0;
-			virtual void ReadPage(IFilePagePtr ptrPage, int64_t nAddr) = 0;
-			virtual void SavePage(IFilePagePtr ptrPage) = 0;
-		};
-
-	 
 		class CFilePage : public IFilePage
 		{
 			CFilePage(const CFilePage&);
@@ -63,9 +28,11 @@ namespace bptreedb
 
 			virtual int64_t GetAddr() const;
 			virtual void SetAddr(int64_t nAddr);	
+			virtual uint32_t GetSize() const;
+
 			virtual CommonLib::IMemoryWriteStreamPtr GetWriteStream() const;
 			virtual CommonLib::IMemoryReadStreamPtr GetReadStream() const;
-			virtual void Save(IPageIOPtr ptrPageIO);
+			virtual void Save(IPageIOPtr ptrPageIO, int64_t nAddr);
 			virtual void Read(IPageIOPtr ptrPageIO, int64_t nAddr);
 
 

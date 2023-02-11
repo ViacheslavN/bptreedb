@@ -1,5 +1,6 @@
 #pragma once
 #include "../../CommonLib/filesystem/filesystem.h"
+#include "FilePage.h"
 #include "Storage.h"
 #include "../utils/CacheLRU_2Q.h"
 
@@ -17,7 +18,7 @@ namespace bptreedb
 			CFileStorage& operator = (const CFileStorage&&);
 
 		public:
-			CFileStorage(std::shared_ptr<CommonLib::IAlloc> pAlloc, int32_t storageId, int32_t nCacheSize);
+			CFileStorage(CommonLib::IAllocPtr ptrAlloc, int32_t storageId, int32_t nCacheSize, IStorageCipherPtr ptrCipher);
 			virtual ~CFileStorage();
 
 			virtual void Open(const char* pszNameUtf8, bool bCreate, uint64_t offset, uint32_t nMinPageSize = 8192);
@@ -25,6 +26,7 @@ namespace bptreedb
 			virtual void Close();
 			virtual void ReadData(int64_t nAddr, byte_t* pData, uint32_t nSize);
 			virtual void WriteData(int64_t nAddr, const byte_t* pData, uint32_t nSize);
+			virtual void DropData(int64_t nAddr, uint32_t nSize);
 			virtual void Flush();
 			virtual void SetStoragePerformer(CommonLib::TPrefCounterPtr pStoragePerformer);
 			virtual int32_t GetStorageId() const;
@@ -34,6 +36,7 @@ namespace bptreedb
 
 			void _ReadData(int64_t nAddr, byte_t* pData);
 			void _WriteData(int64_t nAddr, const byte_t* pData);
+			void _DeleteData(int64_t nAddr);
 
 			const uint32_t MIN_PAGE_SIZE = 8192;
 

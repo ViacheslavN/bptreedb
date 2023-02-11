@@ -6,40 +6,23 @@ namespace bptreedb
 {
 	namespace transaction
 	{
-		CTransactionPage::CTransactionPage(CommonLib::IAllocPtr ptrAlloc, uint32_t nSize, int64_t nAddr,
-			int64_t nTransactionId, int32_t nUserId,
-			uint32_t objectID, uint32_t objecttype, uint32_t parentID, uint32_t parenttype): 
-			m_objectID(objectID), m_objectType(objecttype), m_parentID(parentID), m_parentType(parenttype)
+
+		CTransactionPage::CTransactionPage(CommonLib::IAllocPtr ptrAlloc, uint32_t nSize, int64_t nAddr, int32_t nStorageId,
+			const util::CUInt128& lsn, int32_t nUserId) : m_nLSN(lsn), m_nUserId(m_nUserId), m_StorageId(nStorageId)
 		{
-			m_ptrBuffer = std::make_shared<storage::CPageMemoryBuffer>(ptrAlloc);
-			m_ptrBuffer->Create(nSize);
-			m_ptrPage = std::make_shared<storage::CFilePage>(m_ptrBuffer, nAddr);
+			m_ptrPage = std::make_shared<storage::CFilePage>(ptrAlloc, nSize, nAddr);
 		}
 
-		CTransactionPage::CTransactionPage(CommonLib::IAllocPtr ptrAlloc, byte_t* pData, uint32_t nSize, int64_t nAddr,
-			int64_t nTransactionId, int32_t nUserId,
-			uint32_t objectID, uint32_t objecttype, uint32_t parentID, uint32_t parenttype) :
-			m_objectID(objectID), m_objectType(objecttype), m_parentID(parentID), m_parentType(parenttype)
+		CTransactionPage::CTransactionPage(CommonLib::IAllocPtr ptrAlloc, byte_t* pData, uint32_t nSize, int64_t nAddr, int32_t nStorageId,
+			const util::CUInt128& lsn, int32_t nUserId) : m_nLSN(lsn), m_nUserId(m_nUserId), m_StorageId(nStorageId)
 		{
-			m_ptrBuffer = std::make_shared<storage::CPageMemoryBuffer>(ptrAlloc, page_header_size);
-			m_ptrBuffer->AttachBuffer(pData, nSize);
-
-			m_ptrPage = std::make_shared<storage::CFilePage>(m_ptrBuffer, nAddr);
+			m_ptrPage = std::make_shared<storage::CFilePage>(ptrAlloc, pData, nSize, nAddr);
 		}
 
-		CTransactionPage::CTransactionPage(storage::CPageMemoryBufferPtr ptrBuffer, int64_t nAddr,
-			int64_t nTransactionId, int32_t nUserId,
-			uint32_t objectID, uint32_t objecttype, uint32_t parentID, uint32_t parenttype) :
-			m_objectID(objectID), m_objectType(objecttype), m_parentID(parentID), m_parentType(parenttype)
+		CTransactionPage::CTransactionPage(storage::IFilePagePtr ptrPage)
 		{
-			m_ptrBuffer = ptrBuffer;
-			m_ptrPage = std::make_shared<storage::CFilePage>(m_ptrBuffer, nAddr);
-		}
-
-		CTransactionPage::CTransactionPage(storage::CPageMemoryBufferPtr ptrBuffer, int64_t nAddr)
-		{
-			m_ptrBuffer = ptrBuffer;
-			m_ptrPage = std::make_shared<storage::CFilePage>(m_ptrBuffer, nAddr);
+			m_ptrPage = ptrPage;
+			ReadMetaData();
 		}
 
 		CTransactionPage::~CTransactionPage()
@@ -57,38 +40,21 @@ namespace bptreedb
 			m_ptrPage->SetAddr(nAddr);
 		}
 
-		uint32_t CTransactionPage::GetObjectType() const
+		uint32_t CTransactionPage::GetSize() const
 		{
-			return m_objectType;
-		}
-
-		uint32_t CTransactionPage::GetObjectID() const
-		{
-			return m_objectID;
-		}
-
-		uint32_t CTransactionPage::GetParentType() const
-		{
-			return m_parentType;
-		}
-
-		uint32_t CTransactionPage::GetParentObjectID() const
-		{
-			return m_parentID;
+			return m_ptrPage->GetSize();
 		}
  
 
 		void CTransactionPage::ReadMetaData()
 		{
 			CommonLib::IMemoryReadStreamPtr ptrStream = m_ptrPage->GetReadStream();
-			m_nTransactionId = ptrStream->ReadIntu64();
+			m_nLSN.Load(ptrStream);
+			m_StorageId = ptrStream->ReadInt32();
+			ptrStream->ReadInt64(); //nAddr
 			m_nDate = ptrStream->ReadIntu64();
 			m_nUserId = ptrStream->ReadInt32();
 
-			m_objectType = ptrStream->ReadIntu32();
-			m_objectID = ptrStream->ReadIntu32();
-			m_parentID = ptrStream->ReadIntu32();
-			m_parentType = ptrStream->ReadIntu32();
 		}
 
 		CommonLib::IMemoryWriteStreamPtr CTransactionPage::GetWriteStream() const
@@ -109,27 +75,59 @@ namespace bptreedb
 			return ptrStream;
 		}
 
-
-		void CTransactionPage::Save(storage::IPageIOPtr ptrPageIO)
+		uint32_t CTransactionPage::GetStorageId() const
 		{
-			CommonLib::IMemoryWriteStreamPtr ptrStream = m_ptrPage->GetWriteStream();
-			ptrStream->Write(m_nTransactionId);
-			m_nDate = CommonLib::dateutil::CDateUtil::GetCurrentDateTime();
-			ptrStream->Write(m_nDate);
-			ptrStream->Write(m_nUserId);
+			return m_StorageId;
+		} 
 
-			ptrStream->Write(m_objectType);
-			ptrStream->Write(m_objectID);
-			ptrStream->Write(m_parentID);
-			ptrStream->Write(m_parentType);
+		util::CUInt128 CTransactionPage::GetTransactionLSN() const
+		{
+			return m_nLSN;
+		}
 
-			m_ptrPage->Save(ptrPageIO);
+		uint64_t CTransactionPage::GetDate() const
+		{
+			return m_nDate;
+		}
+
+		int32_t CTransactionPage::GetUserId() const
+		{
+			return m_nUserId;
+		}
+
+		void CTransactionPage::Save(storage::IPageIOPtr ptrPageIO, int64_t nAddr)
+		{
+			try
+			{
+				CommonLib::IMemoryWriteStreamPtr ptrStream = m_ptrPage->GetWriteStream();
+				m_nLSN.Save(ptrStream);
+				ptrStream->Write(m_StorageId);
+				ptrStream->Write(m_ptrPage->GetAddr());
+				m_nDate = CommonLib::dateutil::CDateUtil::GetCurrentDateTime();
+				ptrStream->Write(m_nDate);
+				ptrStream->Write(m_nUserId);
+
+				m_ptrPage->Save(ptrPageIO, nAddr);
+			}
+			catch (std::exception& excSrc)
+			{
+				CommonLib::CExcBase::RegenExcT("Failed to save transaction page %1", nAddr, excSrc);
+				throw;
+			}
 		}
 
 		void CTransactionPage::Read(storage::IPageIOPtr ptrPageIO, int64_t nAddr)
 		{
-			m_ptrPage->Read(ptrPageIO, nAddr);
-			ReadMetaData();
+			try
+			{
+				m_ptrPage->Read(ptrPageIO, nAddr);
+				ReadMetaData();
+			}
+			catch (std::exception& excSrc)
+			{
+				CommonLib::CExcBase::RegenExcT("Failed to read transaction page %1", nAddr, excSrc);
+				throw;
+			}
 		}
 	}
 

@@ -16,6 +16,9 @@
     <Filter Include="TransactionPage">
       <UniqueIdentifier>{48df677a-d50b-4fdf-8afb-510af90d8c08}</UniqueIdentifier>
     </Filter>
+    <Filter Include="2PL">
+      <UniqueIdentifier>{7fd6a1e6-eee5-40f4-a2a7-77b7bcfbc632}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -27,6 +30,12 @@
     <ClInclude Include="TransactionPage.h">
       <Filter>TransactionPage</Filter>
     </ClInclude>
+    <ClInclude Include="Transaction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="2PL\Transaction2PL.h">
+      <Filter>2PL</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Transaction.cpp">
@@ -37,6 +46,9 @@
     </ClCompile>
     <ClCompile Include="TransactionPage.cpp">
       <Filter>TransactionPage</Filter>
+    </ClCompile>
+    <ClCompile Include="2PL\Transaction2PL.cpp">
+      <Filter>2PL</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

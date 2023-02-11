@@ -173,8 +173,10 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DatabaseLog.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="SDK\bptreedb.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BPTreeDatabase.cpp" />
