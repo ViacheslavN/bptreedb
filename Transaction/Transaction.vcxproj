@@ -181,6 +181,7 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Transaction.h" />
+    <ClInclude Include="TransactionFilePager.h" />
     <ClInclude Include="TransactionPage.h" />
   </ItemGroup>
   <ItemGroup>
@@ -192,6 +193,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Transaction.cpp" />
+    <ClCompile Include="TransactionFilePager.cpp" />
     <ClCompile Include="TransactionPage.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

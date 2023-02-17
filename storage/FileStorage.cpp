@@ -297,5 +297,25 @@ namespace bptreedb
 				throw;
 			}
 		}
+
+		uint32_t CFileStorage::GetPageSize() const
+		{
+			return m_minPageSize;
+		}
+
+		void CFileStorage::Lock()
+		{
+			m_mutex.lock();
+		}
+
+		void CFileStorage::UnLock()
+		{
+			m_mutex.unlock();
+		}
+
+		bool CFileStorage::TryLock()
+		{
+			return 	m_mutex.try_lock();
+		}
 	}
 }

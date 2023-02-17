@@ -31,7 +31,10 @@ namespace bptreedb
 			virtual void SetStoragePerformer(CommonLib::TPrefCounterPtr pStoragePerformer);
 			virtual int32_t GetStorageId() const;
 			virtual int64_t GetNewFilePageAddr(uint32_t nSize = 0);
-
+			virtual uint32_t GetPageSize() const;
+			virtual void Lock();
+			virtual void UnLock();
+			virtual bool TryLock();
 		private:
 
 			void _ReadData(int64_t nAddr, byte_t* pData);

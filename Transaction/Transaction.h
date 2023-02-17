@@ -17,7 +17,7 @@ namespace bptreedb
 			ITransactionPage() {}
 			virtual ~ITransactionPage() {}
 
-			virtual uint32_t GetStorageId() const = 0;
+			virtual int32_t GetStorageId() const = 0;
 			virtual uint32_t GetObjectID() const = 0;
 			virtual util::CUInt128 GetTransactionLSN() const = 0;
 			virtual uint64_t GetDate() const = 0;
@@ -35,12 +35,13 @@ namespace bptreedb
 			virtual void Rollback() = 0;
 			virtual util::CUInt128 GetTransactionLSN() const = 0;
 
-			virtual ITransactionPagePtr ReadPage(uint32_t nStorageI, int64_t nAddr, uint32_t nSize) = 0;
-			virtual void ReadPage(ITransactionPagePtr ptrPage, uint32_t nStorageId, int64_t nAddr) = 0;
-			virtual void SavePage(ITransactionPagePtr ptrPage) = 0;
-			virtual void DropPage(ITransactionPagePtr ptrPage) = 0;
-			virtual int64_t GetNewFilePageAddr(uint32_t nStorageId, uint32_t nSize) = 0;
-			virtual ITransactionPagePtr CreateNewPage(uint32_t nStorageId, int64_t nAddr, uint32_t nSize) = 0;
+			virtual uint32_t GetPageSize() const = 0;
+			virtual storage::IFilePagePtr ReadPage(int32_t nStorageId, int64_t nAddr) = 0;
+			virtual void ReadPage(storage::IFilePagePtr ptrPage, int32_t nStorageId, int64_t nAddr) = 0;
+			virtual void SavePage(storage::IFilePagePtr ptrPage) = 0;
+			virtual void DropPage(storage::IFilePagePtr ptrPage) = 0;
+			virtual int64_t GetNewFilePageAddr(int32_t nStorageId) = 0;
+			virtual  storage::IFilePagePtr CreateNewPage(int32_t nStorageId, int64_t nAddr) = 0;
 		};
 	}
 }

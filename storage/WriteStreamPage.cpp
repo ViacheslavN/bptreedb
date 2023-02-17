@@ -50,7 +50,6 @@ namespace bptreedb
 
 		void TWriteStreamPage::Close()
 		{
-
 			m_ptrStream->Seek(0, CommonLib::soFromBegin);
 			m_ptrStream->Write(m_nNextAddr);
 			m_ptrStream->Write(m_nPrevAddr);
@@ -97,7 +96,7 @@ namespace bptreedb
 			}
 			catch (std::exception& excSrc)
 			{
-				CommonLib::CExcBase::RegenExcT("WritePageStream: Filed write bytes, size %1 ", size, excSrc);
+				CommonLib::CExcBase::RegenExcT("WritePageStream: Failed write bytes, size %1 ", size, excSrc);
 				throw;
 			}
 

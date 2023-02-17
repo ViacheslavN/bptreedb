@@ -5,9 +5,21 @@ namespace bptreedb
 {
 	namespace storage
 	{
-		CPageMemoryBuffer::CPageMemoryBuffer(CommonLib::IAllocPtr ptrAlloc, uint32_t offset) : m_ptrAlloc(ptrAlloc), m_dataOffset(offset)
+
+		CPageMemoryBuffer::CPageMemoryBuffer(CommonLib::IAllocPtr ptrAlloc) : m_ptrAlloc(ptrAlloc), m_nSize(0), m_dataOffset(0)
 		{
-			
+
+		}
+
+		CPageMemoryBuffer::CPageMemoryBuffer(CommonLib::IAllocPtr ptrAlloc, const byte_t* pBuffer, uint32_t nSize, uint32_t offset) : m_ptrAlloc(ptrAlloc), m_dataOffset(offset)
+		{
+			Create(nSize);
+			memcpy(m_pBuffer, pBuffer, nSize);
+		}
+
+		CPageMemoryBuffer::CPageMemoryBuffer(CommonLib::IAllocPtr ptrAlloc, uint32_t nSize, uint32_t offset): m_ptrAlloc(ptrAlloc), m_dataOffset(offset)
+		{
+			Create(nSize);
 		}
 
 		CPageMemoryBuffer::~CPageMemoryBuffer()
@@ -27,7 +39,7 @@ namespace bptreedb
 			}
 		}
 
-		void CPageMemoryBuffer::Create(size_t nSize)
+		void CPageMemoryBuffer::Create(uint32_t nSize)
 		{
 			try
 			{
@@ -51,7 +63,7 @@ namespace bptreedb
 			}
 		}
 
-		void CPageMemoryBuffer::AttachBuffer(byte_t* pBuffer, size_t nSize, bool bCopy)
+		void CPageMemoryBuffer::AttachBuffer(byte_t* pBuffer, uint32_t nSize, bool bCopy)
 		{
 			try
 			{
@@ -146,10 +158,14 @@ namespace bptreedb
 			}
 		}
 
-		CommonLib::IMemStreamBufferPtr CPageMemoryBuffer::CreateBuffer()
+		CommonLib::IMemStreamBufferPtr CPageMemoryBuffer::CreateBuffer() const
 		{
 			return std::make_shared<CPageMemoryBuffer>(m_ptrAlloc, m_dataOffset);
 		}
 
+		CPageMemoryBufferPtr CPageMemoryBuffer::CopyBuffer() const
+		{
+			return std::make_shared<CPageMemoryBuffer>(m_ptrAlloc, GetFullData(), GetFullSize(), m_dataOffset);
+		}
 	}
 }
