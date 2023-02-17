@@ -113,7 +113,7 @@ namespace bptreedb
 			}
 			catch (std::exception& excSrc)
 			{
-				CommonLib::CExcBase::RegenExcT("Transaction2PL failed to read page, addr %1, size %2, storageId %3", nAddr, m_ptrLogStorage->GetPageSize(), nStorageId, excSrc);
+				CommonLib::CExcBase::RegenExcT("Transaction2PL failed to read page, addr {0}, size {1}, storageId {2}", nAddr, m_ptrLogStorage->GetPageSize(), nStorageId, excSrc);
 				throw;
 			}
 		}
@@ -141,7 +141,7 @@ namespace bptreedb
 			}
 			catch (std::exception& excSrc)
 			{
-				CommonLib::CExcBase::RegenExcT("Transaction2PL failed to read page, addr %1,  storageId %2", nAddr, nStorageId, excSrc);
+				CommonLib::CExcBase::RegenExcT("Transaction2PL failed to read page, addr {0},  storageId {1}", nAddr, nStorageId, excSrc);
 				throw;
 			}
 		}
@@ -341,7 +341,7 @@ namespace bptreedb
 			{
 				//Saving all pages
 				StartCommit();
-	
+				std::vector<storage::IFilePagePtr> cachePages;
 				for (TMapPageAddrbyStorage::iterator it = m_PagesAddr.begin(); it != m_PagesAddr.end(); ++it)
 				{
 					TMapPageAddr& mapPageAddr = it->second;
@@ -351,7 +351,7 @@ namespace bptreedb
 						vecAddrsInLog.push_back(addr_it->second);
 					}
 
-					CommitToStorage(vecAddrsInLog, it->first);
+					CommitToStorage(vecAddrsInLog, it->first, cachePages);
 				}
 	
 			}

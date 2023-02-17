@@ -24,7 +24,7 @@ namespace bptreedb
 			}
 			catch (std::exception& excSrc)
 			{
-				CommonLib::CExcBase::RegenExcT("Failed open WriteStreamPage addr: %1", nPageAddr, excSrc);
+				CommonLib::CExcBase::RegenExcT("Failed open WriteStreamPage addr: {0}", nPageAddr, excSrc);
 				throw;
 			}
 
@@ -96,7 +96,7 @@ namespace bptreedb
 			}
 			catch (std::exception& excSrc)
 			{
-				CommonLib::CExcBase::RegenExcT("WritePageStream: Failed write bytes, size %1 ", size, excSrc);
+				CommonLib::CExcBase::RegenExcT("WritePageStream: Failed write bytes, size {0} ", size, excSrc);
 				throw;
 			}
 
@@ -139,7 +139,7 @@ namespace bptreedb
 					int64_t nPrev = ptrStream->ReadInt64();
 
 					if (nPrev != m_nPrevAddr)
-						throw CommonLib::CExcBase("WriteStreamPage: Failed open page addr: %1  prev: %2, page prev: %3", nPageAddr, m_nPrevAddr, nPrev);
+						throw CommonLib::CExcBase("WriteStreamPage: Failed open page addr: {0}  prev: {1}, page prev: {2}", nPageAddr, m_nPrevAddr, nPrev);
 
 					m_nPrevAddr = nPrev;
 
@@ -150,7 +150,7 @@ namespace bptreedb
 			}
 			catch (std::exception& excSrc)
 			{
-				CommonLib::CExcBase::RegenExcT("WriteStreamPage: Failed open page addr: %1", nPageAddr, excSrc);
+				CommonLib::CExcBase::RegenExcT("WriteStreamPage: Failed open page addr: {0}", nPageAddr, excSrc);
 				throw;
 			}
 

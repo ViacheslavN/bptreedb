@@ -65,7 +65,7 @@ void TestRead(const astr& fileName, int pageSize, int cacheSize, int storageid, 
 		{
 			int64_t val =  stream.ReadInt64();
 			if (val != i)
-				throw CommonLib::CExcBase("val: %1, i: %2", val, i);
+				throw CommonLib::CExcBase("val: {0}, i: {1}", val, i);
 		}
 
 	}

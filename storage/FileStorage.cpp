@@ -21,7 +21,7 @@ namespace bptreedb
 			try
 			{
 				if ((nMinPageSize % MIN_PAGE_SIZE) != 0)
-					throw CommonLib::CExcBase("Wrong page size: %1", nMinPageSize);
+					throw CommonLib::CExcBase("Wrong page size: {0}", nMinPageSize);
 
 				m_offset = offset;
 				CommonLib::file::enOpenFileMode nOpenMode = bCreate ? CommonLib::file::ofmCreateAlways : CommonLib::file::ofmOpenExisting;
@@ -36,7 +36,7 @@ namespace bptreedb
 			}
 			catch (std::exception& excSrc)
 			{
-				CommonLib::CExcBase::RegenExcT("Error open storage path: %1, create: %2", pszNameUtf8, bCreate ? 1 : 0, excSrc);
+				CommonLib::CExcBase::RegenExcT("Error open storage path: {0}, create: {1}", pszNameUtf8, bCreate ? 1 : 0, excSrc);
 				throw;
 			}
 		}
@@ -64,7 +64,7 @@ namespace bptreedb
 			try
 			{
 				if ((nSize % m_minPageSize) != 0)
-					throw CommonLib::CExcBase("Wrong size: %1", nSize);
+					throw CommonLib::CExcBase("Wrong size: {0}", nSize);
 
 				std::lock_guard<std::recursive_mutex> locker(m_mutex);
 				{
@@ -84,7 +84,7 @@ namespace bptreedb
 			}
 			catch (std::exception& excSrc)
 			{
-				CommonLib::CExcBase::RegenExcT("Failed to read data, addr: %1, size: %2 ", nAddr, nSize, excSrc);
+				CommonLib::CExcBase::RegenExcT("Failed to read data, addr: {0}, size: {1} ", nAddr, nSize, excSrc);
 				throw;
 			}
 		}
@@ -94,7 +94,7 @@ namespace bptreedb
 			CommonLib::CPrefCounterHolder holder(m_ptrStoragePerformer, eReadData, m_minPageSize);
 
 			if (nAddr >= m_lastAddr)
-				throw CommonLib::CExcBase("Failed to read data, outrange addr %1, lastAddr: %2", nAddr, m_lastAddr);
+				throw CommonLib::CExcBase("Failed to read data, outrange addr {0}, lastAddr: {1}", nAddr, m_lastAddr);
 
 
 			TCacheFilePagePtr ptrPage = m_pageCache.GetElem(nAddr);
@@ -108,7 +108,7 @@ namespace bptreedb
 			uint32_t nWCnt = (uint32_t)m_file.Read(pData, m_minPageSize);
 
 			if (nWCnt != m_minPageSize)
-				throw CommonLib::CExcBase("Can't read the requested size, page size: %1, returned size: %2", m_minPageSize, nWCnt);
+				throw CommonLib::CExcBase("Can't read the requested size, page size: {0}, returned size: {1}", m_minPageSize, nWCnt);
 
 			if (m_ptrStorageCipher.get())
 			{
@@ -142,7 +142,7 @@ namespace bptreedb
 			try
 			{
 				if ((nSize % m_minPageSize) != 0)
-					throw CommonLib::CExcBase("Wrong size: %1", nSize);
+					throw CommonLib::CExcBase("Wrong size: {0}", nSize);
 
 				std::lock_guard<std::recursive_mutex> locker(m_mutex);
 				{
@@ -162,7 +162,7 @@ namespace bptreedb
 			}
 			catch (std::exception& excSrc)
 			{
-				CommonLib::CExcBase::RegenExcT("Failed to write data, addr: %1, size %2", nAddr, nSize, excSrc);
+				CommonLib::CExcBase::RegenExcT("Failed to write data, addr: {0}, size {1}", nAddr, nSize, excSrc);
 				throw;
 			}
 		}
@@ -172,7 +172,7 @@ namespace bptreedb
 			try
 			{
 				if ((nSize % m_minPageSize) != 0)
-					throw CommonLib::CExcBase("Wrong size: %1", nSize);
+					throw CommonLib::CExcBase("Wrong size: {0}", nSize);
 
 				std::lock_guard<std::recursive_mutex> locker(m_mutex);
 				{
@@ -187,7 +187,7 @@ namespace bptreedb
 			}
 			catch (std::exception& excSrc)
 			{
-				CommonLib::CExcBase::RegenExcT("Failed to drop data, addr: %1, size %2", nAddr, nSize, excSrc);
+				CommonLib::CExcBase::RegenExcT("Failed to drop data, addr: {0}, size {1}", nAddr, nSize, excSrc);
 				throw;
 			}
 
@@ -196,7 +196,7 @@ namespace bptreedb
 		void CFileStorage::_WriteData(int64_t nAddr, const byte_t* pData)
 		{
 			if (nAddr >= m_lastAddr)
-				throw CommonLib::CExcBase("Failed to read data, outrange addr %1, lastAddr: %2", nAddr, m_lastAddr);
+				throw CommonLib::CExcBase("Failed to read data, outrange addr {0}, lastAddr: {1}", nAddr, m_lastAddr);
 
 			TCacheFilePagePtr ptrPage = m_pageCache.GetElem(nAddr);
 			if (ptrPage.get())
@@ -229,7 +229,7 @@ namespace bptreedb
 			}
 
 			if (nCnt != m_minPageSize)
-				throw CommonLib::CExcBase(L"Can't write page, page size: %1, written bytes %2", m_minPageSize, nCnt);		
+				throw CommonLib::CExcBase(L"Can't write page, page size: {0}, written bytes {1}", m_minPageSize, nCnt);		
 		}
 
 		void  CFileStorage::_DeleteData(int64_t nAddr)
@@ -281,7 +281,7 @@ namespace bptreedb
 					nSize = m_minPageSize;
 
 				if ((nSize % m_minPageSize) != 0)
-					throw CommonLib::CExcBase("Wrong page size: %1", nSize);
+					throw CommonLib::CExcBase("Wrong page size: {0}", nSize);
 
 				uint32_t nCount = nSize / m_minPageSize;
 

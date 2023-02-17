@@ -89,7 +89,7 @@ namespace bptreedb
 				}
 				catch (std::exception& excSrc)
 				{
-					CommonLib::CExcBase::RegenExcT("Failed to save file page addr: %1", nAddr, excSrc);
+					CommonLib::CExcBase::RegenExcT("Failed to save file page addr: {0}", nAddr, excSrc);
 					throw;
 				}
 			}
@@ -108,7 +108,7 @@ namespace bptreedb
 				}
 				catch (std::exception& excSrc)
 				{
-					CommonLib::CExcBase::RegenExcT("Failed to read file page addr: %1", nAddr, excSrc);
+					CommonLib::CExcBase::RegenExcT("Failed to read file page addr: {0}", nAddr, excSrc);
 					throw;
 				}
 			}
@@ -126,7 +126,7 @@ namespace bptreedb
 			void CheckCRCAndThrow() const
 			{
 				if (!CheckCRC())
-					throw CommonLib::CExcBase("Wrong crc for page addr %1", m_nAddr);
+					throw CommonLib::CExcBase("Wrong crc for page addr {0}", m_nAddr);
 			}
 
 			uint32_t GetPageSize() const

@@ -26,7 +26,7 @@ namespace bptreedb
 			}
 			catch (CommonLib::CExcBase& excSrc)
 			{
-				excSrc.AddMsgT("Failed open ReadStreamPage addr: %1", nPageAddr);
+				excSrc.AddMsgT("Failed open ReadStreamPage addr: {0}", nPageAddr);
 				throw;
 			}
 
@@ -118,7 +118,7 @@ namespace bptreedb
 			}
 			catch (std::exception& excSrc)
 			{
-				CommonLib::CExcBase::RegenExcT("ReadStreamPage: Failed read  size: %1", size, excSrc);
+				CommonLib::CExcBase::RegenExcT("ReadStreamPage: Failed read  size: {0}", size, excSrc);
 				throw;
 			}
 
@@ -139,7 +139,7 @@ namespace bptreedb
 			}
 			catch (std::exception& excSrc)
 			{
-				CommonLib::CExcBase::RegenExcT("ReadStreamPage: Failed openpage addr: %1", nPageAddr, excSrc);
+				CommonLib::CExcBase::RegenExcT("ReadStreamPage: Failed openpage addr: {0}", nPageAddr, excSrc);
 			}
 		}
  

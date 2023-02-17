@@ -53,7 +53,7 @@ namespace bptreedb
 			void StartCommit();
 			void SaveUndoPageAddrs();
 			void SaveChangedPageAddrs();
-			void CommitToStorage(std::vector<int64_t>& addrs, int64_t nStorageId);
+			void CommitToStorage(std::vector<int64_t>& addrs, int64_t nStorageId, std::vector<storage::IFilePagePtr>& cachePages);
 
 			util::CUInt128 m_Lsn;
 			util::CUInt128 m_PrevLsn;

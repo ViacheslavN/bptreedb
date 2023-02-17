@@ -22,7 +22,7 @@ namespace bptreedb
 			}
 			catch (std::exception& excSrc)
 			{
-				CommonLib::CExcBase::RegenExcT("Failed to read file page addr: %1", nAddr, excSrc);
+				CommonLib::CExcBase::RegenExcT("Failed to read file page addr: {0}", nAddr, excSrc);
 				throw;
 			}
 		}

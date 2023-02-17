@@ -113,7 +113,7 @@ namespace bptreedb
 			{
 
 				if (m_CacheMap.find(key) != m_CacheMap.end())
-					throw CommonLib::CExcBase("CacheRU_2Q:  element with key %1 exists", key);
+					throw CommonLib::CExcBase("CacheRU_2Q:  element with key {0} exists", key);
 
 				TListIterator it;
 				if (bAddBack)
