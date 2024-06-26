@@ -39,6 +39,9 @@
     <ClInclude Include="TransactionFilePager.h">
       <Filter>TransactionPage</Filter>
     </ClInclude>
+    <ClInclude Include="2PL\PageCopier.h">
+      <Filter>2PL</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Transaction.cpp">
@@ -55,6 +58,9 @@
     </ClCompile>
     <ClCompile Include="TransactionFilePager.cpp">
       <Filter>TransactionPage</Filter>
+    </ClCompile>
+    <ClCompile Include="2PL\PageCopier.cpp">
+      <Filter>2PL</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

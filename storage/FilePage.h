@@ -103,7 +103,6 @@ namespace bptreedb
 
 					ptrPageIO->ReadData(nAddr, m_ptrBuffer->GetFullData(), m_ptrBuffer->GetFullSize());
 					CheckCRCAndThrow();
-					SetAddr(nAddr);
 					ReadAdditionalData();
 				}
 				catch (std::exception& excSrc)

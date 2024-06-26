@@ -56,7 +56,6 @@ namespace bptreedb
 			//Transaction header
 			util::CUInt128 m_nLSN;
 			int32_t m_StorageId{ -1 };
-			int64_t m_nAddr{ -1 };
 			uint64_t m_nDate{ 0 };
 			int32_t m_nUserId{ -1 };
 

@@ -137,7 +137,6 @@ namespace bptreedb
 					ptrPage->Read(m_ptrLogStorage, nAddrInLog);
 					ptrPage->SetAddr(nAddr);
 				}
-
 			}
 			catch (std::exception& excSrc)
 			{
@@ -297,13 +296,11 @@ namespace bptreedb
 					stream.Write(it->first); //Storage Id
 					TMapPageAddr& mapPageAddr = it->second;
 
-					stream.Write((uint32_t)mapPageAddr.size());
+					stream.Write((uint32_t)mapPageAddr.size());// pages
 
 					for (TMapPageAddr::iterator addr_it = mapPageAddr.begin(); addr_it != mapPageAddr.end(); ++addr_it)
 					{
-						stream.Write(addr_it->first); //Page Addr 
 						stream.Write(addr_it->second); //Add in log
-
 					}
 				}
 
@@ -367,10 +364,27 @@ namespace bptreedb
 			try
 			{
 				const uint32_t _pageCacheSize = 1000;
-
 				storage::IStoragePtr ptrStorage = m_ptrStoragesHolder->GetStorageThrowIfNull(nStorageId);
 
+				std::sort(addrs.begin(), addrs.end());
 
+				uint32_t nPages = 0;
+
+				for (size_t i = 0, sz = addrs.size(); i < sz; ++i)
+				{
+
+					storage::IFilePagePtr ptrPage = std::make_shared<CTransactionPage>(m_ptrAlloc, m_ptrLogStorage->GetPageSize(), addrs[i], nStorageId, m_Lsn, m_UserId);
+					ptrPage->Read(m_ptrLogStorage);
+
+					if (nPages == _pageCacheSize)
+					{
+
+					}
+
+
+
+
+				}
 
 
 
