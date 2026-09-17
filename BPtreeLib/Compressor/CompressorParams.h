@@ -1,0 +1,124 @@
+
+#pragma once
+
+#include "../../../CommonLib/CommonLib.h"
+#include "../../../CommonLib/stream/MemoryStream.h"
+#include "../../../CommonLib/stream/FixedMemoryStream.h"
+
+namespace bptreedb
+{
+	enum ECompressNodeType
+	{
+		eInnerNode,
+		eLeafNode
+
+	};
+
+	enum ECompressParams
+	{
+		eInnerKey,
+		eInnerValue,
+		eLeafKey,
+		eLeafValue
+
+	};
+
+
+
+
+	class CompressorParams
+	{
+	public:
+		CompressorParams();
+		virtual ~CompressorParams();
+		virtual void Load(CommonLib::IMemoryReadStream *pStream);
+		virtual void Save(CommonLib::IMemoryWriteStream *pStream);
+
+		int32_t GetIntParam(const std::string& name, int32_t defValue) const;
+		double GetDoubleParam(const std::string& name, double defValue) const;
+
+		void SetIntParam(const std::string& name, int32_t value);
+		void SetDoubleParam(const std::string& name, double value);
+
+
+	protected:
+
+		template <class Type>
+		Type GetParam(const std::string& name, const std::map<std::string, Type>& mapParams, const Type& defValue) const
+		{
+			auto it = mapParams.find(name);
+			if (it != mapParams.end())
+				return it->second;
+
+			return defValue;
+		}
+
+		template <class Type>
+		void SaveParams(const std::map<std::string, Type>& mapParams, CommonLib::IMemoryWriteStream *pStream)
+		{
+			pStream->Write(uint32_t(mapParams.size()));
+			auto it = mapParams.begin();
+			auto end = mapParams.end();
+			for (; it != end; ++it)
+			{
+				pStream->Write(it->first);
+				pStream->Write(it->second);
+			}
+		}
+
+		template <class Type>
+		void LoadParams(std::map<std::string, Type>& mapParams, CommonLib::IMemoryReadStream *pStream)
+		{
+			uint32_t size = pStream->ReadIntu32();
+
+			for (uint32_t i = 0; i < size; ++i)
+			{
+				std::string name;
+				Type value;
+
+				pStream->Read(name);
+				pStream->Read(value);
+
+				mapParams.insert(std::make_pair(name, value));
+			}
+
+		}
+
+
+	protected:
+		//To do: XML probability is better choice
+		typedef std::map<std::string, int32_t> TMapIntParams;
+		typedef std::map<std::string, double> TMapDoubleParams;
+		TMapIntParams m_IntParams;
+		TMapDoubleParams m_DoubleParams;
+
+	};
+
+	typedef std::shared_ptr<CompressorParams> TCompressorParamsPtr;
+
+	class CompressorParamsBase
+	{
+	public:
+		CompressorParamsBase();
+		virtual ~CompressorParamsBase();
+		virtual void Load(CommonLib::IMemoryReadStream *pStream);
+		virtual void Save(CommonLib::IMemoryWriteStream *pStream);
+
+		TCompressorParamsPtr GetCompressParams(ECompressParams eId);
+		void AddCompressParams(TCompressorParamsPtr ptrParams, ECompressParams eId);
+
+
+	protected:
+
+		typedef std::map<ECompressParams, TCompressorParamsPtr> TMapParams;
+		TMapParams m_params;
+
+	};
+
+	typedef std::shared_ptr<CompressorParamsBase> TCompressorParamsBasePtr;
+ 
+
+}
+
+ 
+
