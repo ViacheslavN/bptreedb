@@ -2,7 +2,6 @@
 #include "../CommonLib/filesystem/filesystem.h"
 #include "FilePage.h"
 #include "Storage.h"
-#include "../UtilsLib/CacheLRU_2Q.h"
 
 
 namespace bptreedb
@@ -18,7 +17,7 @@ namespace bptreedb
 			CFileStorage& operator = (const CFileStorage&&);
 
 		public:
-			CFileStorage(CommonLib::IAllocPtr ptrAlloc, int32_t storageId, int32_t nCacheSize, IStorageCipherPtr ptrCipher);
+			CFileStorage(CommonLib::IAllocPtr ptrAlloc, int32_t storageId, IStorageCipherPtr ptrCipher);
 			virtual ~CFileStorage();
 
 			virtual void Open(const char* pszNameUtf8, bool bCreate, uint64_t offset, uint32_t nMinPageSize = 8192);
@@ -45,7 +44,6 @@ namespace bptreedb
 
 			CommonLib::IAllocPtr m_ptrAlloc;
 
-			int32_t m_cacheSize{ 256*1024 };
 			int32_t m_storage_id{ -1 };
 			uint32_t m_minPageSize{ MIN_PAGE_SIZE };
 			int64_t m_lastAddr{ 0 };
@@ -58,42 +56,6 @@ namespace bptreedb
 			TBufferForChiper m_bufForChiper;
 			CommonLib::TPrefCounterPtr m_ptrStoragePerformer;
 			mutable std::recursive_mutex m_mutex;
-
-
-			enum EFilePageState
-			{
-				CLEAN,
-				DIRTY
-			};
-
-			struct SCacheFilePage
-			{
-				SCacheFilePage(int64_t	_nAddr, const byte_t *pByte, size_t size) : nAddr(_nAddr)
-				{
-					pageData.resize(size);
-					memcpy(pageData.data(), pByte, pageData.size());			 
-				}
-
-				int64_t	nAddr;
-				EFilePageState pageState{ CLEAN };
-				std::vector<byte_t> pageData;
-
-				void CopyTo(byte_t* pData) const
-				{
-					memcpy(pData, pageData.data(), pageData.size());
-				}
-
-				void CopyFrom(const byte_t* pData)
-				{
-					memcpy(pageData.data(), pData, pageData.size());
-					pageState = DIRTY;
-				}
-
-			};
-
-			typedef std::shared_ptr<SCacheFilePage> TCacheFilePagePtr;
-
-			utils::TCacheLRU_2Q<int64_t, TCacheFilePagePtr> m_pageCache;
 		};
 
 

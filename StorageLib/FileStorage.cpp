@@ -5,8 +5,8 @@ namespace bptreedb
 {
 	namespace storage
 	{
-		CFileStorage::CFileStorage(CommonLib::IAllocPtr ptrAlloc, int32_t storageId, int32_t cacheSize, IStorageCipherPtr ptrCipher) : m_ptrAlloc(ptrAlloc),
-			m_storage_id(storageId), m_cacheSize(cacheSize), m_ptrStorageCipher(ptrCipher)
+		CFileStorage::CFileStorage(CommonLib::IAllocPtr ptrAlloc, int32_t storageId, IStorageCipherPtr ptrCipher) : m_ptrAlloc(ptrAlloc),
+			m_storage_id(storageId), m_ptrStorageCipher(ptrCipher)
 		{
 
 		}
@@ -43,7 +43,7 @@ namespace bptreedb
 
 		void CFileStorage::Open(const wchar_t* pszName, bool bCreate, uint64_t offset, uint32_t nMinPageSize)
 		{
-			Open(CommonLib::StringEncoding::str_w2utf8_safe(pszName).c_str(), bCreate, nMinPageSize);
+			Open(CommonLib::StringEncoding::str_w2utf8_safe(pszName).c_str(), bCreate, offset, nMinPageSize);
 		}
 
 		void CFileStorage::Close()
@@ -77,7 +77,7 @@ namespace bptreedb
 					{
 						_ReadData(nStartAddr, pStartData);
 
-						nStartAddr += m_minPageSize;
+						++nStartAddr;
 						pStartData += m_minPageSize;
 					}
 				}
@@ -97,13 +97,6 @@ namespace bptreedb
 				throw CommonLib::CExcBase("Failed to read data, outrange addr {0}, lastAddr: {1}", nAddr, m_lastAddr);
 
 
-			TCacheFilePagePtr ptrPage = m_pageCache.GetElem(nAddr);
-			if (ptrPage.get())
-			{
-				ptrPage->CopyTo(pData);
-				return;
-			}
-
 			m_file.SetFilePos64(m_offset + (nAddr * m_minPageSize), CommonLib::soFromBegin);
 			uint32_t nWCnt = (uint32_t)m_file.Read(pData, m_minPageSize);
 
@@ -115,26 +108,6 @@ namespace bptreedb
 				CommonLib::CPrefCounterHolder holder(m_ptrStoragePerformer, eDecryptData, m_minPageSize);
 				m_ptrStorageCipher->Decrypt(nAddr, pData, m_minPageSize);
 			}
-
-			if (m_pageCache.Size() == m_cacheSize)
-			{
-				TCacheFilePagePtr ptrPage = m_pageCache.RemoveBack();
-				if (ptrPage->pageState == DIRTY)
-				{
-					_WriteData(ptrPage->nAddr, ptrPage->pageData.data());
-				}
-
-				ptrPage->CopyFrom(pData);
-				ptrPage->nAddr = nAddr;
-				ptrPage->pageState = CLEAN;
-				m_pageCache.AddElem(ptrPage->nAddr, ptrPage);
-			}
-			else
-			{
-				TCacheFilePagePtr ptrPage = std::make_shared<SCacheFilePage>(nAddr, pData, m_minPageSize);
-				m_pageCache.AddElem(nAddr, ptrPage);
-			}
-
 		}
 
 		void CFileStorage::WriteData(int64_t nAddr, const byte_t* pData, uint32_t nSize)
@@ -155,7 +128,7 @@ namespace bptreedb
 					{
 						_WriteData(nStartAddr, pStartData);
 
-						nStartAddr += m_minPageSize;
+						++nStartAddr;
 						pStartData += m_minPageSize;
 					}
 				}
@@ -181,7 +154,7 @@ namespace bptreedb
 					for (int32_t i = 0; i < nPageCnt; ++i)
 					{
 						_DeleteData(nStartAddr);
-						nStartAddr += m_minPageSize;
+						++nStartAddr;
 					}
 				}
 			}
@@ -196,14 +169,7 @@ namespace bptreedb
 		void CFileStorage::_WriteData(int64_t nAddr, const byte_t* pData)
 		{
 			if (nAddr >= m_lastAddr)
-				throw CommonLib::CExcBase("Failed to read data, outrange addr {0}, lastAddr: {1}", nAddr, m_lastAddr);
-
-			TCacheFilePagePtr ptrPage = m_pageCache.GetElem(nAddr);
-			if (ptrPage.get())
-			{
-				ptrPage->CopyFrom(pData);
-				return;
-			}
+				throw CommonLib::CExcBase("Failed to write data, outrange addr {0}, lastAddr: {1}", nAddr, m_lastAddr);
 
 			int64_t nFileAddr = nAddr * m_minPageSize;
 			m_file.SetFilePos64(m_offset + nFileAddr, CommonLib::soFromBegin);
@@ -241,17 +207,6 @@ namespace bptreedb
 		{
 			try
 			{
-				auto it = m_pageCache.Begin();
-				while (!it.IsNull())
-				{
-					if(it.Object()->pageState == CLEAN)
-						continue;
-
-					WriteData(it.Key(), it.Object()->pageData.data(), (uint32_t)it.Object()->pageData.size());
-
-					it.Next();
-				}
-
 				m_file.Flush();
 			}
 			catch (std::exception& excSrc)

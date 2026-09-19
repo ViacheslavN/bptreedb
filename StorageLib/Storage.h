@@ -24,6 +24,7 @@ namespace bptreedb
 			virtual IFilePagePtr ReadPage(int64_t nAddr) = 0;
 			virtual void ReadPage(IFilePagePtr ptrPage, int64_t nAddr) = 0;
 			virtual void SavePage(IFilePagePtr ptrPage) = 0;
+			virtual void Flush() = 0;
 		};
 
 		class IFilePage
