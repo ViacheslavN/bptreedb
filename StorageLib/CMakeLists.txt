@@ -4,6 +4,7 @@ project(StorageLib)
 
 set(SOURCE_FILES
      FilePage.cpp
+     FilePager.cpp
      FileStorage.cpp
      PageMemoryBuffer.cpp
      ReadStreamPage.cpp
