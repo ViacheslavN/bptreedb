@@ -12,6 +12,11 @@ namespace CommonLib
 		typedef TBaseBitMemryStream<IWriteBitStreamBase> TBase;
 		CFxBitWriteStream();
 		~CFxBitWriteStream();
+
+		// keep the byte_t / multi-bit overloads of the base visible
+		using IWriteBitStreamBase::WriteBit;
+		using IWriteBitStreamBase::WriteBitSafe;
+
 		virtual void WriteBit(bool bBit);
 		virtual bool WriteBitSafe(bool bBit);
 	private:

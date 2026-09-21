@@ -203,12 +203,13 @@ namespace StringEncoding
 			return;
 		}
 #ifdef  _WIN32
-		int  utf8_len = ::WideCharToMultiByte(CP_UTF8, 0, unicode.c_str(), (int)unicode.length() + 1, 0, 0, 0, 0);
+		// convert exactly length() characters: including the terminator would put a NUL into the std::string
+		int  utf8_len = ::WideCharToMultiByte(CP_UTF8, 0, unicode.c_str(), (int)unicode.length(), 0, 0, 0, 0);
 		if (utf8_len <= 0)
 			throw CWinExc("error convert unicode to utf8", GetLastError());
 			 
 		utf8.resize(utf8_len);
-		int res = WideCharToMultiByte(CP_UTF8, 0, unicode.c_str(), (int)unicode.length() + 1, &utf8[0], (int)utf8.length(), 0, 0);
+		int res = WideCharToMultiByte(CP_UTF8, 0, unicode.c_str(), (int)unicode.length(), &utf8[0], (int)utf8.length(), 0, 0);
 		if (res <= 0)
 			throw CWinExc("error convert unicode to utf8", GetLastError());
 #else
@@ -242,12 +243,13 @@ namespace StringEncoding
 			return;
 		}
 #ifdef  _WIN32
-		int unicode_len = MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), (int)utf8.length() + 1, 0, 0);
+		// convert exactly length() bytes: including the terminator would put a NUL into the std::wstring
+		int unicode_len = MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), (int)utf8.length(), 0, 0);
 		if (unicode_len <= 0)
 			throw CWinExc("error convert utf8 to unicode. Failed to get buffer size, Source string: {0}", utf8, GetLastError());
 
 		unicode.resize(unicode_len);
-		int res = MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), (int)utf8.length() + 1, &unicode[0], (int)unicode.length());
+		int res = MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), (int)utf8.length(), &unicode[0], (int)unicode.length());
 		if (res == 0)
 			throw CWinExc("error convert utf8 to unicode, str {0}", utf8, GetLastError());
 #else
@@ -338,7 +340,7 @@ namespace StringEncoding
 
 #endif
 
-		stra = mb_str_buf[0];
+		stra = &mb_str_buf[0]; // buffer is NUL-terminated (allocated with one extra zero)
 	}
 
 

@@ -12,6 +12,21 @@ namespace CommonLib
 
 	}
 
+	void WriteBitStream::Create(size_t nSize)
+	{
+		try
+		{
+			TBase::Create(nSize);
+			// bits are OR-ed into the buffer, so it has to start out zeroed
+			memset(Buffer(), 0, Size());
+			m_nCurrBit = 0;
+		}
+		catch (std::exception& exc)
+		{
+			CExcBase::RegenExc("WriteBitStream Create", exc);
+		}
+	}
+
 	void  WriteBitStream::Resize(uint32_t nSize)
 	{
 		try
@@ -33,7 +48,8 @@ namespace CommonLib
 
 				if (Buffer())
 				{
-					memcpy(pBuffer->GetData(), Buffer(), this->m_nPos);
+					// keep the completed bytes AND the byte currently being filled
+					memcpy(pBuffer->GetData(), Buffer(), std::min<size_t>(Size(), this->m_nPos + 1));
 				}
 
 				m_ptrBuffer = pBuffer;
@@ -50,10 +66,17 @@ namespace CommonLib
 	{
 		try
 		{
+			if (Size() == 0)
+				Resize(1); // nothing allocated yet: start with a zeroed byte
+
+			if (m_nPos >= Size())
+				throw CExcBase("WriteBitStream: position is out of range");
+
 			if (m_nCurrBit > m_nBitBase)
 			{
-				m_nPos++;
-				if (m_nPos == Size())
+				// the current byte is full: make sure the next one exists BEFORE
+				// advancing, so a failed write leaves the stream state untouched
+				if (m_nPos + 1 >= Size())
 				{
 					if (m_ptrBuffer->IsAttachedBuffer())
 						throw CExcBase("Stream is attached");
@@ -65,16 +88,15 @@ namespace CommonLib
  
 					if (Buffer())
 					{
-						memcpy(pBuffer->GetData(), Buffer(), m_nPos);
+						memcpy(pBuffer->GetData(), Buffer(), m_nPos + 1);
 					}
 
 					m_ptrBuffer = pBuffer;
-
 				}
 
-				byte_t *pData = Buffer();
+				m_nPos++;
 				m_nCurrBit = 0;
-				pData[m_nPos] = 0;
+				Buffer()[m_nPos] = 0;
 			}
 
 			byte_t *pData = Buffer();
@@ -86,6 +108,19 @@ namespace CommonLib
 		catch (std::exception& exc)
 		{
 			CExcBase::RegenExc("WriteBitStream WriteBit", exc);
+		}
+	}
+
+	bool WriteBitStream::WriteBitSafe(bool bBit)
+	{
+		try
+		{
+			WriteBit(bBit);
+			return true;
+		}
+		catch (...)
+		{
+			return false;
 		}
 	}
 }

@@ -8,3 +8,8 @@ ENDIF()
 add_subdirectory(TestStr)
 add_subdirectory(TestVariant)
 add_subdirectory(TestBrowsinghistory)
+
+option(COMMONLIB_BUILD_CATCH_TESTS "Build CommonLib Catch2 tests" ON)
+if (COMMONLIB_BUILD_CATCH_TESTS)
+    add_subdirectory(Catch)
+endif()

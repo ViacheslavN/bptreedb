@@ -42,9 +42,11 @@ namespace CommonLib
 			if ((this->m_nPos + size) > Size())
 				throw CExcBase(L"CFxMemoryWriteStream: out of range pos: {0}, read size: {1}", m_nPos, size);
 
-			byte_t *pBuffer = Buffer();
-			for (size_t i = 0; i < size; m_nPos++, i++)
-				pBuffer[m_nPos + size - i - 1] = buffer[i];
+			byte_t *pBuffer = Buffer() + m_nPos;
+			for (size_t i = 0; i < size; i++)
+				pBuffer[size - i - 1] = buffer[i];
+
+			m_nPos += size;
 		}
 
 		return size;

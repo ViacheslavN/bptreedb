@@ -3,6 +3,7 @@
 #include "StringEncoding.h"
 #include "../exception/exc_base.h"
 #include <string.h>
+#include <cinttypes>
 
 namespace CommonLib
 {
@@ -191,7 +192,7 @@ namespace CommonLib
 #ifdef _WIN32
 		sprintf_s(buf, sizeof(buf), "%0*I64d", nZero, val);
 #else
-		snprintf(buf, sizeof(buf), "%0*lld", nZero, val);
+		snprintf(buf, sizeof(buf), "%0*" PRId64, (int)nZero, val);
 #endif
 		return buf;
 	}
@@ -202,7 +203,7 @@ namespace CommonLib
 #ifdef _WIN32
 		sprintf_s(buf, sizeof(buf), "%I64d", val);
 #else
-		snprintf(buf, sizeof(buf), "%I64d", val);
+		snprintf(buf, sizeof(buf), "%" PRId64, val);
 #endif
 		return buf;
 	}
@@ -213,7 +214,7 @@ namespace CommonLib
 #ifdef _WIN32
 		sprintf_s(buf, sizeof(buf), "%I64u", val);
 #else
-		snprintf(buf, sizeof(buf), "%I64du", val);
+		snprintf(buf, sizeof(buf), "%" PRIu64, val);
 #endif
 		return buf;
 	}
@@ -224,7 +225,7 @@ namespace CommonLib
 #ifdef _WIN32
 		sprintf_s(buf, sizeof(buf), "%0*I64u", nZero, val);
 #else
-		snprintf(buf, sizeof(buf), "%0*llu", val);
+		snprintf(buf, sizeof(buf), "%0*" PRIu64, (int)nZero, val);
 #endif
 		return buf;
 	}

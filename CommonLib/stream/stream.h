@@ -219,7 +219,8 @@ public:
 class IMemoryReadStream : public IReadStream, public IMemoryStream
 {
 public:
-	virtual std::streamsize ReadSafe(byte_t* pBuffer, size_t bufLen);
+	using IReadStream::ReadSafe; // keep the typed ReadSafe(T&) overloads visible
+	virtual std::streamsize ReadSafe(byte_t* pBuffer, uint32_t bufLen) override;
 
 	IMemoryReadStream() {}
 	virtual ~IMemoryReadStream() {}

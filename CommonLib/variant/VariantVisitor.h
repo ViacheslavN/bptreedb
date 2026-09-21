@@ -89,6 +89,9 @@ namespace CommonLib
         virtual void Visit(const Data::CBlobPtr& val);
         virtual void Visit(const IGeoShapePtr& val);
         virtual void Visit(const CGuid& val);
+
+        // Text produced by the last Visit() call.
+        const std::string& GetString() const { return m_val; }
     private:
         std::string m_val;
 
