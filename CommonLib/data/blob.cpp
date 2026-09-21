@@ -195,7 +195,7 @@ namespace CommonLib {
             if(Empty())
                 return -1;
 
-            size_t minsize = min(Size(), _size);
+            size_t minsize = std::min<size_t>(Size(), _size); // portable: no reliance on the windows.h min macro
 
             int n = memcmp(m_pBuffer, buffer, minsize);
             if(n != 0 || Size() == _size)

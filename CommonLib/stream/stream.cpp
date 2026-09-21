@@ -87,7 +87,7 @@ namespace CommonLib
 
 	void IWriteStream::Write(const wchar_t* pszStr)
 	{
-		Write((byte_t*)pszStr, 2 * (uint32_t)wcslen(pszStr));
+		Write((byte_t*)pszStr, sizeof(wchar_t) * (uint32_t)wcslen(pszStr));
 	}
 
 	std::streamsize IWriteStream::WriteDataSafe(const byte_t* pBuffer, size_t bufLen)
@@ -171,10 +171,13 @@ namespace CommonLib
 	{
 		uint32_t length = (uint32_t)str.length();
 		
-		if (WriteTSafe(length))
+		if (!WriteTSafe(length))
 			return false;
 
-		return WriteSafe((byte_t*)str.c_str(), length) != 0;
+		if (length == 0)
+			return true;
+
+		return WriteSafe((byte_t*)str.c_str(), length);
 
 	}
 
@@ -182,11 +185,13 @@ namespace CommonLib
 	{
 		uint32_t length = (uint32_t)str.length();
 
-	
-		if (WriteTSafe(length))
-		 return false;
+		if (!WriteTSafe(length))
+			return false;
 
-		return WriteSafe((byte_t*)str.c_str(), sizeof(wchar_t) * length) != 0;
+		if (length == 0)
+			return true;
+
+		return WriteSafe((byte_t*)str.c_str(), sizeof(wchar_t) * length);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -279,21 +284,17 @@ namespace CommonLib
 	void IReadStream::Read(std::string& str)
 	{
 		uint32_t nLen = ReadIntu32();
+		str.resize(nLen);
 		if (nLen != 0)
-		{
-			str.resize(nLen);
 			Read((byte_t*)str.data(), sizeof(char)*nLen);
-		}
 	}
 
 	void IReadStream::Read(std::wstring& str)
 	{
 		uint32_t nLen = ReadIntu32();
+		str.resize(nLen);
 		if (nLen != 0)
-		{
-			str.resize(nLen);
 			Read((byte_t*)str.data(), sizeof(wchar_t)*nLen);
-		}
 	}
 
 	std::streamsize IReadStream::ReadSafe(byte_t* pBuffer, uint32_t bufLen)
@@ -301,9 +302,9 @@ namespace CommonLib
 		try
 		{
 			if (IStream::IsBigEndian())
-				return ReadInverse((byte_t*)&pBuffer, bufLen);
+				return ReadInverse(pBuffer, bufLen);
 	
-			return ReadBytes((byte_t*)&pBuffer, bufLen);
+			return ReadBytes(pBuffer, bufLen);
 		}
 		catch (...)
 		{
@@ -372,12 +373,12 @@ namespace CommonLib
 		if (!ReadSafe(nLen))
 			return false;
 
+		str.resize(nLen);
+
 		if (nLen == 0)
 			return true;
 
-		str.resize(nLen);
-
-		return ReadSafe((byte_t*)&str[0], sizeof(char)*nLen);
+		return ReadSafe((byte_t*)&str[0], sizeof(char)*nLen) != 0;
 	}
 
 	bool IReadStream::ReadSafe(std::wstring& str)
@@ -386,12 +387,12 @@ namespace CommonLib
 		if (!ReadSafe(nLen))
 			return false;
 
+		str.resize(nLen);
+
 		if (nLen == 0)
 			return true;
 
-		str.resize(nLen);
-
-		return ReadSafe((byte_t*)&str[0], sizeof(wchar_t)*nLen);
+		return ReadSafe((byte_t*)&str[0], sizeof(wchar_t)*nLen) != 0;
 	}
 
 	bool IReadStream::ReadBool()
@@ -472,7 +473,7 @@ namespace CommonLib
 
 	///////////////////////////////////////////////////////////////////////////////////
 
-	std::streamsize IMemoryReadStream::ReadSafe( byte_t* pBuffer, size_t bufLen)
+	std::streamsize IMemoryReadStream::ReadSafe(byte_t* pBuffer, uint32_t bufLen)
 	{
 
 		try
@@ -480,7 +481,7 @@ namespace CommonLib
 			if (!IsEnoughSpace(bufLen))
 				return 0;
 
-			return IReadStream::ReadSafe(pBuffer, (uint32_t)bufLen);
+			return IReadStream::ReadSafe(pBuffer, bufLen);
 		}
 		catch (...)
 		{

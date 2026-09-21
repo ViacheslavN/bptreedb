@@ -111,7 +111,8 @@ namespace CommonLib
 			{
 				int nRet = lseek(m_FileHandle, nPos, offset == soFromBegin ? SEEK_SET : offset == soFromCurrent ? SEEK_CUR
 					: SEEK_END);
-				throw CPosixExc(errno, "Filed to set file pos: {0}, offset: {1}", nPos, offset);
+				if (nRet == -1)
+					throw CPosixExc(errno, "Filed to set file pos: {0}, offset: {1}", nPos, offset);
 			}
 
 			uint64_t CFilePosix::GetFilePos() const

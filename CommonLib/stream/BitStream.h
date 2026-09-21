@@ -135,9 +135,16 @@ namespace CommonLib
 
 		}
 
-		virtual void Seek(uint32_t position, enSeekOffset offset)
+		// Seeking lands on a byte boundary: the bit cursor restarts at bit 0.
+		virtual void Seek(size_t position, enSeekOffset offset) override
 		{
-			Seek(position, offset);
+			TBase::Seek(position, offset);
+			m_nCurrBit = 0;
+		}
+
+		virtual void Reset() override
+		{
+			TBase::Reset();
 			m_nCurrBit = 0;
 		}
 

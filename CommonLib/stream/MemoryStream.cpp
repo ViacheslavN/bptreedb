@@ -39,10 +39,11 @@ namespace CommonLib
 		try
 		{
 			ResizeWithCapacity(size);
-			byte_t *pBuffer = Buffer();
-			for (size_t i = 0; i < size; m_nPos++, i++)
-				pBuffer[m_nPos + size - i - 1] = buffer[i];
+			byte_t *pBuffer = Buffer() + m_nPos;
+			for (size_t i = 0; i < size; i++)
+				pBuffer[size - i - 1] = buffer[i];
 
+			m_nPos += size;
 			return size;
 		}
 		catch (CExcBase& exc)
@@ -56,11 +57,11 @@ namespace CommonLib
 	{
 		try
 		{
+			if (Size() >= nSize)
+				return;
+
 			if (m_ptrBuffer->IsAttachedBuffer())
 				throw CExcBase("Buffer is attached");
-
-			if (Size() > nSize)
-				return;
 		 
 			IMemStreamBufferPtr pBuffer = m_ptrBuffer->CreateBuffer();
 			pBuffer->Create((uint32_t)nSize);
@@ -88,15 +89,16 @@ namespace CommonLib
 
 		try
 		{
-			if (m_ptrBuffer->IsAttachedBuffer())
-				throw CExcBase("Buffer is attached");
-
 			size_t newSize = Size();
 			while (m_nPos + nSize > newSize)
 				newSize = size_t(newSize * 1.5) + 1;
 
 			if (newSize > Size())
 			{
+				// only growing is impossible on an attached buffer; writes that fit are fine
+				if (m_ptrBuffer->IsAttachedBuffer())
+					throw CExcBase("Buffer is attached");
+
 				IMemStreamBufferPtr pBuffer = m_ptrBuffer->CreateBuffer();
 				pBuffer->Create((uint32_t)newSize);
 
@@ -140,11 +142,11 @@ namespace CommonLib
 		if ((this->m_nPos + size) > Size())
 			throw CExcBase(L"ReadMemoryStream: out of range pos: {0}, read size: {1}", m_nPos, size);
 
-		byte_t *pData = Buffer();
-		for (size_t i = 0; i < size; m_nPos++, i++)
-			buffer[i] = pData[m_nPos + size - i - 1];
+		const byte_t *pData = Buffer() + this->m_nPos;
+		for (size_t i = 0; i < size; i++)
+			buffer[i] = pData[size - i - 1];
 
-		this->m_nPos += size;	 
+		this->m_nPos += size;
 
 		return size;
 	}
