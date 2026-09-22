@@ -22,6 +22,7 @@ add_subdirectory(CommonLib)
 add_subdirectory(StorageLib)
 add_subdirectory(UtilsLib)
 add_subdirectory(BPtreeLib)
+add_subdirectory(SpatialLib)
 
 add_subdirectory(Tests)
 
