@@ -53,6 +53,117 @@ std::vector<ZOrder> CreateRandomRects(size_t count, Type worldMax, Type maxSize,
     return vecRect;
 }
 
+template<class ZOrder, class TRect, class Type>
+bool IsOverlap(const ZOrder& zVal, TRect& extent);
+
+// Rects that heavily intersect each other: clusters piled on the same spots, nested
+// rects, and long bands crossing the world. Coordinates are kept even so that, with odd
+// query bounds, no rect merely touches the window border.
+template<class ZOrder, class Type>
+std::vector<ZOrder> CreateIntersectingRects(size_t count, Type worldMax, Type maxSize, uint32_t seed)
+{
+    std::mt19937_64 rng(seed);
+    std::vector<ZOrder> vecRect;
+    vecRect.reserve(count);
+
+    const Type band = Type(maxSize / 8) + 2;
+
+    // a handful of cluster centres that the rects pile onto
+    std::vector<Type> centresX, centresY;
+    for (size_t i = 0; i < 24; ++i)
+    {
+        centresX.push_back(Type(rng() % worldMax));
+        centresY.push_back(Type(rng() % worldMax));
+    }
+
+    while (vecRect.size() < count)
+    {
+        const size_t kind = vecRect.size() % 8;
+        Type x, y, w, h;
+
+        if (kind < 4)
+        {
+            // clustered: several rects around the same centre, so they overlap each other
+            const size_t c = rng() % centresX.size();
+            const Type spread = Type(maxSize / 2) + 2;
+            x = Type((centresX[c] + rng() % spread) % (worldMax - maxSize - 1));
+            y = Type((centresY[c] + rng() % spread) % (worldMax - maxSize - 1));
+            w = Type(rng() % maxSize) + 2;
+            h = Type(rng() % maxSize) + 2;
+        }
+        else if (kind == 4)
+        {
+            // nested: a big rect with smaller ones inside it
+            const size_t c = rng() % centresX.size();
+            const Type r = Type(rng() % maxSize) + 2;
+            x = Type(centresX[c] % (worldMax - maxSize - 1));
+            y = Type(centresY[c] % (worldMax - maxSize - 1));
+            w = r;
+            h = r;
+        }
+        else if (kind == 5)
+        {
+            // a long horizontal band
+            x = Type(rng() % (worldMax / 2));
+            y = Type(rng() % (worldMax - band - 1));
+            w = Type(worldMax / 2 - 2);
+            h = band;
+        }
+        else if (kind == 6)
+        {
+            // a long vertical band
+            x = Type(rng() % (worldMax - band - 1));
+            y = Type(rng() % (worldMax / 2));
+            w = band;
+            h = Type(worldMax / 2 - 2);
+        }
+        else
+        {
+            // scattered small rects
+            x = Type(rng() % (worldMax - maxSize - 1));
+            y = Type(rng() % (worldMax - maxSize - 1));
+            w = Type(rng() % (maxSize / 4)) + 2;
+            h = Type(rng() % (maxSize / 4)) + 2;
+        }
+
+        // even coordinates, and never past the world edge
+        x = Type(x & ~Type(1));
+        y = Type(y & ~Type(1));
+        Type xMax = Type(x + (w & ~Type(1)));
+        Type yMax = Type(y + (h & ~Type(1)));
+        if (xMax > worldMax) xMax = Type(worldMax & ~Type(1));
+        if (yMax > worldMax) yMax = Type(worldMax & ~Type(1));
+
+        vecRect.push_back(ZOrder(x, y, xMax, yMax));
+    }
+
+    std::sort(vecRect.begin(), vecRect.end());
+    return vecRect;
+}
+
+// Average number of other rects each rect intersects, sampled.
+template<class ZOrder, class TRect, class Type>
+double AverageMutualIntersections(std::vector<ZOrder>& vecRect, size_t sample)
+{
+    size_t hits = 0, tried = 0;
+    for (size_t i = 0; i < vecRect.size() && tried < sample; i += 1 + vecRect.size() / (sample + 1), ++tried)
+    {
+        Type xMin, yMin, xMax, yMax;
+        vecRect[i].getXY(xMin, yMin, xMax, yMax);
+        TRect a;
+        a.set(xMin, yMin, xMax, yMax);
+
+        for (size_t j = 0; j < vecRect.size(); ++j)
+        {
+            if (i == j)
+                continue;
+            if (IsOverlap<ZOrder, TRect, Type>(vecRect[j], a))
+                ++hits;
+        }
+    }
+    return tried ? double(hits) / double(tried) : 0.0;
+}
+
 // ---------------------------------------------------------------------------
 // Query key ranges
 // ---------------------------------------------------------------------------
@@ -315,6 +426,15 @@ void RunForType(const std::string& name, Type worldMax, Type step, Type size, Ty
     std::vector<ZOrder> random = CreateRandomRects<ZOrder, Type>(grid.size(), worldMax, size, 1234);
     std::cout << "\nrandom rects: " << random.size() << "\n";
     RunQuery<ZOrder, TRect, Type>(name + " random, centre window", random, extent, worldMax, worldMax);
+
+    // rects that overlap each other: clusters, nested rects and long bands
+    std::vector<ZOrder> crossing = CreateIntersectingRects<ZOrder, Type>(grid.size(), worldMax, size, 4321);
+    std::cout << "\nintersecting rects: " << crossing.size()
+        << "  (each intersects " << std::fixed << std::setprecision(1)
+        << AverageMutualIntersections<ZOrder, TRect, Type>(crossing, 100)
+        << " others on average)\n";
+    RunQuery<ZOrder, TRect, Type>(name + " intersecting, centre window", crossing, extent, worldMax, worldMax);
+    RunQuery<ZOrder, TRect, Type>(name + " intersecting, corner window", crossing, corner, worldMax, worldMax);
 }
 
 int main()

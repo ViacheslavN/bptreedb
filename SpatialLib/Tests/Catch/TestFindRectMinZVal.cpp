@@ -170,6 +170,101 @@ TEST_CASE("FindRectMinZVal returns false outside the key range", "[spatial][zrec
 	}
 }
 
+// zMax is the last key of the box: a scan that walks to it must be told "no next key"
+// rather than have an exception thrown at it.
+TEST_CASE("FindRectMinZVal returns false at zMax instead of throwing", "[spatial][zrect][findmin]")
+{
+	SECTION("ZOrderRect2DU16")
+	{
+		const ZOrderRect2DU16 zMin(10, 10, 20, 20);
+		const ZOrderRect2DU16 zMax(30, 30, 40, 40);
+		ZOrderRect2DU16 res(uint64_t(7));
+
+		REQUIRE_NOTHROW(FindRectMinZVal(zMax, zMin, zMax, res));
+		REQUIRE_FALSE(FindRectMinZVal(zMax, zMin, zMax, res));
+		REQUIRE(res.m_nZValue == 7ull); // output untouched
+
+		// a single-key box: zMin == zMax, so there is never a next key
+		REQUIRE_FALSE(FindRectMinZVal(zMin, zMin, zMin, res));
+		REQUIRE_NOTHROW(FindRectMinZVal(zMin, zMin, zMin, res));
+
+		// many random boxes: walking onto zMax must never throw
+		for (int i = 0; i < 2000; ++i)
+		{
+			uint16_t lo[4], hi[4];
+			for (int k = 0; k < 4; ++k)
+			{
+				lo[k] = uint16_t(RandomValue<uint16_t>() & 0x3F);
+				hi[k] = uint16_t(RandomValue<uint16_t>() & 0x3F);
+				if (lo[k] > hi[k])
+					std::swap(lo[k], hi[k]);
+			}
+			const ZOrderRect2DU16 a(lo[0], lo[1], lo[2], lo[3]);
+			const ZOrderRect2DU16 b(hi[0], hi[1], hi[2], hi[3]);
+			ZOrderRect2DU16 out;
+			REQUIRE_NOTHROW(FindRectMinZVal(b, a, b, out));
+			REQUIRE_FALSE(FindRectMinZVal(b, a, b, out));
+		}
+	}
+
+	SECTION("ZOrderRect2DU32")
+	{
+		const ZOrderRect2DU32 zMin(10, 10, 20, 20);
+		const ZOrderRect2DU32 zMax(30, 30, 40, 40);
+		ZOrderRect2DU32 res;
+		REQUIRE_NOTHROW(FindRectMinZVal(zMax, zMin, zMax, res));
+		REQUIRE_FALSE(FindRectMinZVal(zMax, zMin, zMax, res));
+		REQUIRE_FALSE(FindRectMinZVal(zMin, zMin, zMin, res));
+	}
+
+	SECTION("ZOrderRect2DU64")
+	{
+		const ZOrderRect2DU64 zMin(10, 10, 20, 20);
+		const ZOrderRect2DU64 zMax(30, 30, 40, 40);
+		ZOrderRect2DU64 res;
+		REQUIRE_NOTHROW(FindRectMinZVal(zMax, zMin, zMax, res));
+		REQUIRE_FALSE(FindRectMinZVal(zMax, zMin, zMax, res));
+		REQUIRE_FALSE(FindRectMinZVal(zMin, zMin, zMin, res));
+	}
+}
+
+// A scan that walks to the end of the box needs no guard of its own any more.
+TEST_CASE("A scan can walk onto zMax without guarding the call", "[spatial][zrect][findmin]")
+{
+	const uint16_t worldMax = 64;
+	const TRect2Du16 query(9, 9, 33, 33);
+	const ZOrderRect2DU16 zKeyMin(0, 0, query.m_minX, query.m_minY);
+	const ZOrderRect2DU16 zKeyMax(query.m_maxX, query.m_maxY, worldMax, worldMax);
+
+	std::vector<ZOrderRect2DU16> keys;
+	for (uint16_t x = 0; x + 4 <= worldMax; x = uint16_t(x + 4))
+		for (uint16_t y = 0; y + 4 <= worldMax; y = uint16_t(y + 4))
+			keys.push_back(ZOrderRect2DU16(x, y, uint16_t(x + 4), uint16_t(y + 4)));
+	keys.push_back(zKeyMax); // the very last key of the box, and not a rect that overlaps
+	std::sort(keys.begin(), keys.end(), ZRect16Comp());
+
+	size_t found = 0, seeks = 0;
+	auto it = std::lower_bound(keys.begin(), keys.end(), zKeyMin, ZRect16Comp());
+	while (it != keys.end() && !(zKeyMax < *it))
+	{
+		if (it->IsInRect(query))
+		{
+			++found;
+			++it;
+			continue;
+		}
+
+		ZOrderRect2DU16 next;
+		if (!FindRectMinZVal(*it, zKeyMin, zKeyMax, next)) // no guard needed here
+			break;
+
+		++seeks;
+		it = std::lower_bound(keys.begin(), keys.end(), next, ZRect16Comp());
+	}
+	REQUIRE(found > 0);
+	REQUIRE(seeks > 0);
+}
+
 TEST_CASE("FindRectMinZVal result re-enters the query box", "[spatial][zrect][findmin]")
 {
 	// A window query over stored rects: "which rects overlap (10,10)-(20,20)?" becomes

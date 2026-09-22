@@ -299,17 +299,23 @@ namespace bptreedb {
 			}
 		};
 
+// Finds the next Z value inside the query box, for a zVal that has left it (BIGMIN).
+//   zMin / zMax : corners of the query box in the 4D space (xMin, yMin, xMax, yMax)
+//   zVal        : current Z value, expected to lie OUTSIDE the box, zMin <= zVal < zMax
+//   zRes        : receives the smallest Z value > zVal that lies inside the box
+// Returns false when zVal is below zMin, or is not below zMax: zMax is the last value of
+// the box, so nothing inside it can follow.
 template<class TZVal>
 bool FindRectMinZVal(const TZVal& zVal,
 	const TZVal& zMin, const TZVal& zMax, TZVal& zRes)
 		{
-			if(zVal < zMin || zVal > zMax)
+			if(zVal < zMin || !(zVal < zMax))
 			{
 				return false;
 			}
 
 
-			short nBits = zRes.getBits();
+			short nBits = zMin.getBits();
 
 			TZVal left = zMin;
 			TZVal right = zMax;
@@ -327,7 +333,7 @@ bool FindRectMinZVal(const TZVal& zVal,
 				{
 
 					nBits--;
-					if(nBits < 0)
+					if(nBits < 0) // corners converged: unreachable while zMin < zVal < zMax
 					{
 						throw CommonLib::CExcBase("FindRectMinZVal: znBits < 0");
 					}
